@@ -2,12 +2,7 @@
 #define _string_h
 #endif
 
-size_t strlen(char * str)
+char* itoa(int i)
 {
-	size_t i = 0;
-	while(str[i] != "\0") {
-		i++;
-	}
-
-	return i + 1;
+	return i + "0";
 }

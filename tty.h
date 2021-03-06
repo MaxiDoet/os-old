@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "string.h"
 
 uint16_t* vga_mem;
 size_t tty_column;
@@ -32,11 +33,22 @@ enum vga_color {
         VGA_COLOR_WHITE = 15
 };
 
+size_t tty_fg_color;
+size_t tty_bg_color;
+
 void tty_init()
 {
         vga_mem=(uint16_t*) 0xb8000;
         tty_column=0;
 	tty_row=0;
+	tty_fg_color=VGA_COLOR_WHITE;
+	tty_bg_color=VGA_COLOR_BLACK;
+}
+
+void tty_setcolor(enum vga_color fg, enum vga_color bg)
+{
+	tty_fg_color=fg;
+	tty_bg_color=bg;
 }
 
 void tty_putat(size_t x, size_t y, enum vga_color fg, enum vga_color bg, char c)
@@ -53,5 +65,43 @@ void tty_put(enum vga_color fg, enum vga_color bg, char c)
 		if(++tty_row == VGA_HEIGHT) {
 			tty_row=0;
 		}
+	}
+}
+
+void tty_clear()
+{
+        int x=0;
+        int y=0;
+
+       	while (y != VGA_HEIGHT) {
+		while(x != VGA_WIDTH) {
+			tty_putat(x, y, tty_fg_color, tty_bg_color, ' ');
+			x++;
+		}
+		x=0;
+		y++;
+	}
+}
+
+void tty_printf(char* str)
+{
+	int i=0;
+	while (str[i] != 0) {
+
+		if(str[i] == '\n') {
+			// Newline
+			tty_row++;
+			tty_column=0;
+
+			if (str[++i] != 0) {
+				continue;
+			} else {
+				break;
+			}
+		}
+
+		tty_put(tty_fg_color, tty_bg_color, str[i]);
+
+		i++;
 	}
 }
