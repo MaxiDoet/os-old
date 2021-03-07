@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "string.h"
+#include "asm.h"
 
 uint16_t* vga_mem;
 
@@ -51,10 +52,23 @@ void tty_setcolor(enum vga_color fg, enum vga_color bg)
 	tty_bg_color=bg;
 }
 
-void tty_setcursor(size_t column, size_t row)
+void tty_enablecursor(uint8_t cursor_start, uint8_t cursor_end)
 {
-	tty_column=column;
-	tty_row=row;
+	outb_p(0x3D4, 0x0A);
+	outb_p(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+
+	outb_p(0x3D4, 0x0B);
+	outb_p(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
+}
+
+void tty_updatecursor(int x, int y)
+{
+	uint16_t pos = y * VGA_WIDTH + x;
+
+	outb_p(0x3D4, 0x0F);
+	outb_p(0x3D5, (uint8_t) (pos & 0xFF));
+	outb_p(0x3D4, 0x0E);
+	outb_p(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 }
 
 void tty_putat(size_t x, size_t y, enum vga_color fg, enum vga_color bg, char c)

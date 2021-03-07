@@ -34,6 +34,9 @@ void kernel_main(void) {
 	//gui_draw_filled_box(5, 5, 20, 5, VGA_COLOR_PURPLE);
 	//gui_draw_filled_box(5, 12, 10, 5, VGA_COLOR_RED);
 
+	tty_enablecursor(1, 4);
+	tty_updatecursor(2, 4);
+
 	print_shell_prefix();
 
 	char* input_buffer;
