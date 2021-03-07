@@ -6,6 +6,12 @@
 #include "time.h"
 #include "gui.h"
 #include "print.h"
+#include "keyboard.h"
+
+void print_shell_prefix()
+{
+	prints("> ");
+}
 
 void kernel_main(void) {
 	// Init kernel time
@@ -24,6 +30,25 @@ void kernel_main(void) {
 	tty_clear();
 
 	prints("Welcome!\n");
+
+	//gui_draw_filled_box(5, 5, 20, 5, VGA_COLOR_PURPLE);
+	//gui_draw_filled_box(5, 12, 10, 5, VGA_COLOR_RED);
+
+	print_shell_prefix();
+
+	char* input_buffer;
+	char* key;
+
+	while (1) {
+		key = keyboard_input();
+
+		if(key=="enter") {
+			prints("\n");
+			print_shell_prefix();
+		} else {
+			prints(key);
+		}
+	}
 
 	//tty_put(VGA_COLOR_GREEN, VGA_COLOR_BLACK, '0'+kernel_time.sec);
 
