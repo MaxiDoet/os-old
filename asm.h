@@ -1,23 +1,39 @@
 #ifndef _asm_h
 #define _asm_h
+
+#define outb(value,port) \
+__asm__ ("outb %%al,%%dx"::"a" (value),"d" (port))
+
+
+#define inb(port) ({ \
+unsigned char _v; \
+__asm__ volatile ("inb %%dx,%%al":"=a" (_v):"d" (port)); \
+_v; \
+})
+
+#define outb_p(value,port) \
+__asm__ ("outb %%al,%%dx\n" \
+		"\tjmp 1f\n" \
+		"1:\tjmp 1f\n" \
+		"1:"::"a" (value),"d" (port))
+
+#define inb_p(port) ({ \
+unsigned char _v; \
+__asm__ volatile ("inb %%dx,%%al\n" \
+	"\tjmp 1f\n" \
+	"1:\tjmp 1f\n" \
+	"1:":"=a" (_v):"d" (port)); \
+_v; \
+})
+
+void disable_ints()
+{
+	asm("cli");
+}
+
+void enable_ints()
+{
+	asm("sti");
+}
+
 #endif
-
-static inline void outb(uint16_t port, uint8_t val)
-{
-    asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );
-    /* There's an outb %al, $imm8  encoding, for compile-time constant port numbers that fit in 8b.  (N constraint).
-     * Wider immediate constants would be truncated at assemble-time (e.g. "i" constraint).
-     * The  outb  %al, %dx  encoding is the only option for all other cases.
-     * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
-}
-
-static inline uint8_t inb(uint16_t port)
-{
-    uint8_t ret;
-    asm volatile ( "inb %1, %0"
-                   : "=a"(ret)
-                   : "Nd"(port) );
-    return ret;
-}
-
-
