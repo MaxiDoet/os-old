@@ -39,7 +39,7 @@ size_t tty_bg_color;
 
 void tty_init()
 {
-        vga_mem=(uint16_t*) 0xb8000; // The video memory location
+        vga_mem=(uint16_t*) 0xB8000; // The video memory location
         tty_column=0;
 	tty_row=0;
 	tty_fg_color=VGA_COLOR_WHITE; // Standard console colors

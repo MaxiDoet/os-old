@@ -26,17 +26,41 @@ void kernel_main(void) {
 
 	tty_init();
 
+	/*
 	tty_setcolor(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
 	tty_clear();
 
 	prints("Welcome!\n");
+	*/
 
-	//gui_draw_filled_box(5, 5, 20, 5, VGA_COLOR_PURPLE);
-	//gui_draw_filled_box(5, 12, 10, 5, VGA_COLOR_RED);
+	//Fill screen with grey
+	tty_setcolor(VGA_COLOR_WHITE, VGA_COLOR_DARKGRAY);
+	tty_clear();
 
-	tty_enablecursor(1, 4);
-	tty_updatecursor(2, 4);
+	//Draw window frame
+	gui_draw_filled_box(10, 3, 60, 19, VGA_COLOR_GRAY);
 
+	//Print window 'title'
+	tty_column=37;
+	tty_row=3;
+	tty_setcolor(VGA_COLOR_WHITE, VGA_COLOR_GRAY);
+	prints("Terminal");
+
+	//Print icons
+	tty_column=62;
+	tty_row=3;
+	prints("-");
+
+	tty_column+=2;
+	tty_row=3;
+	prints("=");
+
+	tty_column+=2;
+	tty_row=3;
+	prints("x");
+
+	tty_column=12;
+	tty_row=5;
 	print_shell_prefix();
 
 	char* input_buffer;
@@ -47,15 +71,24 @@ void kernel_main(void) {
 
 		if(key=="enter") {
 			prints("\n");
+			tty_setcolor(VGA_COLOR_DARKGRAY, VGA_COLOR_DARKGRAY);
+			prints("          ");
+			tty_setcolor(VGA_COLOR_WHITE, VGA_COLOR_GRAY);
+			prints("  ");
 			print_shell_prefix();
+
+			if(input_buffer == "rer") {
+				prints("It works!");
+			}
 		} else {
 			prints(key);
+			strcat(input_buffer, key);
 		}
 	}
 
-	//tty_put(VGA_COLOR_GREEN, VGA_COLOR_BLACK, '0'+kernel_time.sec);
-
 	/*
+	tty_put(VGA_COLOR_GREEN, VGA_COLOR_BLACK, '0'+kernel_time.sec);
+
 	int i=0;
 	enum vga_color colors[] = {VGA_COLOR_RED, VGA_COLOR_GREEN, VGA_COLOR_BLUE};
 	// A little 'render' loop
