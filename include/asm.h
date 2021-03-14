@@ -1,39 +1,20 @@
 #ifndef _asm_h
 #define _asm_h
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#define outb(value,port) \
-__asm__ ("outb %%al,%%dx"::"a" (value),"d" (port))
 
-
-#define inb(port) ({ \
-unsigned char _v; \
-__asm__ volatile ("inb %%dx,%%al":"=a" (_v):"d" (port)); \
-_v; \
-})
-
-#define outb_p(value,port) \
-__asm__ ("outb %%al,%%dx\n" \
-		"\tjmp 1f\n" \
-		"1:\tjmp 1f\n" \
-		"1:"::"a" (value),"d" (port))
-
-#define inb_p(port) ({ \
-unsigned char _v; \
-__asm__ volatile ("inb %%dx,%%al\n" \
-	"\tjmp 1f\n" \
-	"1:\tjmp 1f\n" \
-	"1:":"=a" (_v):"d" (port)); \
-_v; \
-})
-
-void disable_ints()
+void outb(uint16_t port, uint8_t data)
 {
-	asm("cli");
+	__asm__ volatile("outb %0, %1" : : "a" (data), "Nd" (port));
 }
 
-void enable_ints()
+uint8_t inb(uint16_t port)
 {
-	asm("sti");
+	uint8_t result;
+	__asm__ volatile("inb %1, %0" : "=a" (result) : "Nd" (port));
+	return result;
 }
 
 #endif

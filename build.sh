@@ -2,12 +2,14 @@ GCCPARAMS="-m32 -Iinclude -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -
 ASPARAMS="--32"
 LDPARAMS="-melf_i386"
 
-as $ASPARAMS boot.s -o boot.o
+# Build bootloader
+as $ASPARAMS boot/boot.s -o boot/boot.o
 
-gcc $GCCPARAMS -c kernel.c -o kernel.o
-#gcc $GCCPARAMS -c tty.c -o tty.o
+gcc $GCCPARAMS -c drivers/vga.c -o drivers/vga.o
+gcc $GCCPARAMS -c lib/print.c -o lib/print.o
+gcc $GCCPARAMS -c init/main.c -o init/main.o
 
-ld $LDPARAMS -T linker.ld -o myos.bin boot.o kernel.o
+ld $LDPARAMS -T linker.ld -o myos.bin boot/boot.o init/main.o drivers/vga.o lib/print.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin
