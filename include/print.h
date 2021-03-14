@@ -2,6 +2,9 @@
 #define _print_h
 
 void puts(char c);
-void printf(char* str);
+void prints(char* str);
+void printi(int val);
+void printd(int val, int base);
+void printb(uint8_t b);
 
 #endif

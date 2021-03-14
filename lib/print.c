@@ -15,7 +15,7 @@ void puts(char c) {
 	}
 }
 
-void printf(char* str)
+void prints(char* str)
 {
 	int i=0;
 	while (str[i]!=0) {
@@ -35,4 +35,36 @@ void printf(char* str)
 
 		i++;
 	}
+}
+
+void printi(int val)
+{
+	int base=10;
+        static char buf[32] = {0};
+
+        int i = 30;
+
+        for(; val && i ; --i, val /= base)
+
+                buf[i] = "0123456789abcdef"[val % base];
+
+        prints (&buf[i+1]);
+}
+
+void printd(int val, int base)
+{
+        static char buf[32] = {0};
+
+        int i = 30;
+
+        for(; val && i ; --i, val /= base)
+
+                buf[i] = "0123456789abcdef"[val % base];
+
+        prints(&buf[i+1]);
+}
+
+void printb(uint8_t b)
+{
+	printd(b, 2);
 }
