@@ -16,3 +16,8 @@ void cmos_write(uint8_t offset,uint8_t val) {
   outb(CMOS_PORT_ADDRESS, (tmp & 0x80) | (offset & 0x7F));
   outb(CMOS_PORT_DATA,val);
 }
+
+uint8_t cmos_rtc_decode(uint8_t bcd)
+{
+	return (bcd & 0xF) + ((bcd / 16) * 10);
+}

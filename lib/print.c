@@ -68,3 +68,19 @@ void printb(uint8_t b)
 {
 	printd(b, 2);
 }
+
+void printh8(uint8_t key)
+{
+    	char* out = "00";
+    	char* hex = "0123456789ABCDEF";
+    	out[0] = hex[(key >> 4) & 0xF];
+    	out[1] = hex[key & 0xF];
+    	prints(out);
+}
+
+void printh16(uint16_t key)
+{
+	printh8((key >> 8) & 0xFF);
+   	printh8( key & 0xFF);
+}
+

@@ -1,4 +1,4 @@
-GCCPARAMS="-m32 -Iinclude -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings"
+GCCPARAMS="-m32 -Iinclude -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings"
 ASPARAMS="--32"
 LDPARAMS="-melf_i386"
 
@@ -8,14 +8,18 @@ as $ASPARAMS boot/boot.s -o boot/boot.o
 # Build drivers
 gcc $GCCPARAMS -c drivers/vga.c -o drivers/vga.o
 gcc $GCCPARAMS -c drivers/cmos.c -o drivers/cmos.o
+gcc $GCCPARAMS -c drivers/pci.c -o drivers/pci.o
 
 # Build libs
 gcc $GCCPARAMS -c lib/print.c -o lib/print.o
 
+# Build kernel
+gcc $GCCPARAMS -c kernel/asm.c -o kernel/asm.o
 
 gcc $GCCPARAMS -c init/main.c -o init/main.o
 
-ld $LDPARAMS -T linker.ld -o myos.bin boot/boot.o init/main.o drivers/vga.o drivers/cmos.o lib/print.o
+# Linking
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/asm.o boot/boot.o init/main.o drivers/vga.o drivers/cmos.o drivers/pci.o lib/print.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin
