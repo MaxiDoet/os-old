@@ -67,11 +67,61 @@ void kernel_main(void) {
 			printh16(vendorId);
 			prints(" DeviceID: ");
 			printh16(deviceId);
+			prints("\n  ");
+			/*
 			prints(" Class: ");
 			printh8(classCode);
 			prints(" Subclass: ");
 			printh8(subclass);
-			prints("\n");
+			*/
+
+			// Identify devices
+
+			switch(vendorId) {
+
+				case 0x1FA4:
+					switch(deviceId) {
+						// Virtio Filesystem
+						case 0x1049:
+							prints("Virtio Filesystem");
+							break;
+
+						default:
+							prints("Unknown Device");
+					}
+					break;
+
+				case 0x10EC:
+					switch(deviceId) {
+						case 0x8029:
+							prints("RTL-8029");
+							break;
+						default:
+							prints("Unknown Device");
+					}
+					break;
+
+				case 0x8086:
+					switch(deviceId) {
+						case 0x7010:
+							prints("82371SB PIIX3 IDE [Natoma/Triton II]");
+							break;
+						case 0x7000:
+							prints("82371SB PIIX3 ISA [Natoma/Triton II]");
+							break;
+						case 0x1237:
+							prints("440FX - 82441FX PMC [Natoma] Chipset");
+							break;
+						default:
+							prints("Unknown Device");
+					}
+					break;
+
+				default:
+					prints("Unknown Device");
+			}
+
+			prints("\n\n");
 		}
 	}
 }
