@@ -122,6 +122,27 @@ void kernel_main(void) {
 			}
 
 			prints("\n\n");
+
+			// Do some test
+			int n = 100000;
+			int i = 3, count, c;
+
+  			for (count = 2; count <= n;)
+  			{
+    				for (c = 2; c <= i - 1; c++)
+    				{
+      					if (i%c == 0)
+						break;
+    				}
+    				if (c == i)
+    				{
+					prints("Found prime number: ");
+      					printi(i);
+					prints("\n");
+      					count++;
+    				}
+    				i++;
+  			}
 		}
 	}
 }

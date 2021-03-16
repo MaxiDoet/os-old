@@ -20,18 +20,26 @@ void prints(char* str)
 	int i=0;
 	while (str[i]!=0) {
 
-		if (str[i]=='\n') {
-			vga_x=0;
-			vga_y++;
-
-			if (str[++i] != 0) {
-				continue;
-			} else {
+		switch(str[i]) {
+			case '\n':
+				vga_x=0;
+				vga_y++;
 				break;
-			}
+			default:
+				vga_text_put(vga_text_fg_color, vga_text_bg_color, vga_x, vga_y, str[i]);
+				vga_x++;
 		}
 
-		puts(str[i]);
+		if (vga_x >= vga_width) {
+			vga_x=0;
+			vga_y++;
+		}
+
+		if (vga_y >= vga_height) {
+			vga_clear(vga_text_bg_color);
+			vga_x=0;
+			vga_y=0;
+		}
 
 		i++;
 	}
