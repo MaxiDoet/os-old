@@ -6,6 +6,7 @@
 #include "../include/print.h"
 #include "../include/cmos.h"
 #include "../include/pci.h"
+#include "../include/serial.h"
 
 void kernel_main(void) {
 
@@ -123,7 +124,20 @@ void kernel_main(void) {
 
 			prints("\n\n");
 
-			// Do some test
+			prints("Serial: COM1\n");
+
+			serial_write('H');
+			serial_write('e');
+			serial_write('l');
+			serial_write('l');
+                        serial_write('o');
+
+			while(1) {
+				printc((char)serial_read());
+			}
+
+			/*
+			// Prime number test
 			int n = 100000;
 			int i = 3, count, c;
 
@@ -143,6 +157,7 @@ void kernel_main(void) {
     				}
     				i++;
   			}
+			*/
 		}
 	}
 }

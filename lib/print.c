@@ -4,14 +4,27 @@
 #include "../include/print.h"
 #include "../include/vga.h"
 
-void puts(char c) {
-	vga_text_put(vga_text_fg_color, vga_text_bg_color, vga_x, vga_y, c);
+void printc(char c)
+{
+	switch(c) {
+		case '\n':
+                	vga_x=0;
+                        vga_y++;
+                        break;
+               default:
+			vga_text_put(vga_text_fg_color, vga_text_bg_color, vga_x, vga_y, c);
+                        vga_x++;
+	}
 
-	if (++vga_x == vga_width) {
+        if (vga_x >= vga_width) {
+       		vga_x=0;
+		vga_y++;
+	}
+
+	if (vga_y >= vga_height) {
+		vga_clear(vga_text_bg_color);
 		vga_x=0;
-		if (++vga_y == vga_height) {
-			vga_y=0;
-		}
+		vga_y=0;
 	}
 }
 
@@ -19,28 +32,7 @@ void prints(char* str)
 {
 	int i=0;
 	while (str[i]!=0) {
-
-		switch(str[i]) {
-			case '\n':
-				vga_x=0;
-				vga_y++;
-				break;
-			default:
-				vga_text_put(vga_text_fg_color, vga_text_bg_color, vga_x, vga_y, str[i]);
-				vga_x++;
-		}
-
-		if (vga_x >= vga_width) {
-			vga_x=0;
-			vga_y++;
-		}
-
-		if (vga_y >= vga_height) {
-			vga_clear(vga_text_bg_color);
-			vga_x=0;
-			vga_y=0;
-		}
-
+		printc(str[i]);
 		i++;
 	}
 }

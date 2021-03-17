@@ -1,7 +1,7 @@
 #ifndef _print_h
 #define _print_h
 
-void puts(char c);
+void printc(char c);
 void prints(char* str);
 void printi(int val);
 void printd(int val, int base);
