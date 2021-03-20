@@ -49,32 +49,103 @@ void kernel_main(void) {
 
 	int bus, slot;
 	for (bus=0; bus < 256; bus++) {
-		for (slot=0; slot <= 32; slot++) {
-			uint16_t vendorId = pci_read_word(bus, slot, 0, 0x00);
-			uint16_t deviceId = pci_read_word(bus, slot, 0, 0x02);
-			uint8_t classCode = pci_read_word(bus, slot, 0, 0x0B);
-			uint8_t subclass = pci_read_word(bus, slot, 0, 0x0A);
+		for (slot=0; slot < 32; slot++) {
+			uint16_t vendorId = pci_get_vendor_id(bus, slot, 0);
+			uint16_t deviceId = pci_get_device_id(bus, slot, 0);
+			uint8_t classCode = pci_get_class_code(bus, slot, 0);
+			uint8_t subclass = pci_get_subclass(bus, slot, 0);
 
 			if (vendorId == 0xFFFF || vendorId == 0x00FF) {
 				continue;
 			}
 
-			prints(" PCI Device: ");
-			prints("Bus: ");
-			printi(bus);
-			prints(" Slot: ");
-			printi(slot);
+			switch(classCode) {
+				case 0x00:
+					prints(" Unclassified PCI Device ");
+					break;
+				case 0x01:
+					prints(" Mass Storage Controller ");
+					break;
+				case 0x02:
+					prints(" Network Controller ");
+					break;
+				case 0x03:
+					prints(" Display Controller ");
+					break;
+				case 0x04:
+					prints(" Multimedia Controller ");
+					break;
+				case 0x05:
+					prints(" Memory Controller ");
+					break;
+				case 0x06:
+					prints(" Bridge Device ");
+					break;
+				case 0x07:
+					prints(" Simple Communication Controller ");
+					break;
+				case 0x08:
+					prints(" Base System Peripheral ");
+					break;
+				case 0x09:
+					prints(" Input Device Controller ");
+					break;
+				case 0x0A:
+					prints(" Docking Station ");
+					break;
+				case 0x0B:
+					prints(" Processor ");
+					break;
+				case 0x0C:
+					prints(" Serial Bus Controller ");
+					break;
+				case 0x0D:
+					prints(" Wireless Controller ");
+					break;
+				case 0x0E:
+					prints(" Intelligent Controller ");
+					break;
+				case 0x0F:
+					prints(" Satellite Communication Controller ");
+					break;
+				case 0x10:
+					prints(" Encryption Controller ");
+					break;
+				case 0x11:
+					prints(" Signal Processing Controller ");
+					break;
+				case 0x12:
+					prints(" Processing Accelerator ");
+					break;
+				case 0x13:
+					prints(" Non-Essential Instrumentation ");
+					break;
+				case 0x14:
+					prints(" Reserved ");
+					break;
+				case 0x40:
+					prints(" Co-Processor ");
+					break;
+				case 0x41:
+					prints(" Reserved ");
+					break;
+				case 0xFF:
+					prints(" Unassigned Class ");
+					break;
+				default:
+					prints(" Unassigned Class ");
+					break;
+			}
+
 			prints(" VendorID: ");
 			printh16(vendorId);
 			prints(" DeviceID: ");
 			printh16(deviceId);
-			prints("\n  ");
-			/*
 			prints(" Class: ");
 			printh8(classCode);
 			prints(" Subclass: ");
 			printh8(subclass);
-			*/
+			prints(" \n");
 
 			// Identify devices
 
@@ -84,56 +155,45 @@ void kernel_main(void) {
 					switch(deviceId) {
 						// Virtio Filesystem
 						case 0x1049:
-							prints("Virtio Filesystem");
+							prints("Virtio Filesystem\n");
 							break;
 
 						default:
-							prints("Unknown Device");
+							prints("Unknown Device\n");
 					}
 					break;
 
 				case 0x10EC:
 					switch(deviceId) {
 						case 0x8029:
-							prints("RTL-8029");
+							prints("RTL-8029\n");
 							break;
 						default:
-							prints("Unknown Device");
+							prints("Unknown Device\n");
 					}
 					break;
 
 				case 0x8086:
 					switch(deviceId) {
 						case 0x7010:
-							prints("82371SB PIIX3 IDE [Natoma/Triton II]");
+							prints("82371SB PIIX3 IDE [Natoma/Triton II]\n");
 							break;
 						case 0x7000:
-							prints("82371SB PIIX3 ISA [Natoma/Triton II]");
+							prints("82371SB PIIX3 ISA [Natoma/Triton II]\n");
 							break;
 						case 0x1237:
-							prints("440FX - 82441FX PMC [Natoma] Chipset");
+							prints("440FX - 82441FX PMC [Natoma] Chipset\n");
+							break;
+						case 0x100E:
+							prints("82540EM Gigabit Ethernet Controller\n");
 							break;
 						default:
-							prints("Unknown Device");
+							prints("Unknown Device\n");
 					}
 					break;
 
 				default:
-					prints("Unknown Device");
-			}
-
-			prints("\n\n");
-
-			prints("Serial: COM1\n");
-
-			serial_write('H');
-			serial_write('e');
-			serial_write('l');
-			serial_write('l');
-                        serial_write('o');
-
-			while(1) {
-				printc((char)serial_read());
+					prints("Unknown Device\n");
 			}
 
 			/*
