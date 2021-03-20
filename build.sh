@@ -11,17 +11,22 @@ gcc $GCCPARAMS -c drivers/cmos.c -o drivers/cmos.o
 gcc $GCCPARAMS -c drivers/pci.c -o drivers/pci.o
 gcc $GCCPARAMS -c drivers/serial.c -o drivers/serial.o
 gcc $GCCPARAMS -c drivers/bga.c -o drivers/bga.o
+gcc $GCCPARAMS -c drivers/keyboard.c -o drivers/keyboard.o
 
 # Build libs
 gcc $GCCPARAMS -c lib/print.c -o lib/print.o
+gcc $GCCPARAMS -c lib/string.c -o lib/string.o
 
 # Build kernel
 gcc $GCCPARAMS -c kernel/asm.c -o kernel/asm.o
 
 gcc $GCCPARAMS -c init/main.c -o init/main.o
 
+# Build programs
+gcc $GCCPARAMS -c bin/shell.c -o bin/shell.o
+
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/asm.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o lib/print.o
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/asm.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o lib/print.o lib/string.o bin/shell.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin

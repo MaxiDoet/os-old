@@ -11,6 +11,8 @@ void printc(char c)
                 	vgacon_x=0;
                         vgacon_y++;
                         break;
+		case '\0':
+			break;
                default:
 			vgacon_text_put(vgacon_text_fg_color, vgacon_text_bg_color, vgacon_x, vgacon_y, c);
                         vgacon_x++;
@@ -25,6 +27,21 @@ void printc(char c)
 		vgacon_clear(vgacon_text_bg_color);
 		vgacon_x=0;
 		vgacon_y=0;
+	}
+}
+
+void erase(int num) {
+	for (int i=0; i<num; i++) {
+		if (vgacon_x == 0 && vgacon_y == 0) {
+			return;
+		} else if (vgacon_x == 0) {
+			vgacon_x = vgacon_width - 1;
+			vgacon_y--;
+		} else {
+			vgacon_x--;
+		}
+
+		vgacon_text_put(vgacon_text_fg_color, vgacon_text_bg_color, vgacon_x, vgacon_y, ' ');
 	}
 }
 

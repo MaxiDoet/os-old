@@ -10,6 +10,7 @@
 #include "../include/serial.h"
 #include "../include/bga.h"
 #include "../include/asm.h"
+#include "../bin/shell.h"
 
 void kernel_main(void) {
 
@@ -207,12 +208,7 @@ void kernel_main(void) {
 					prints("Unknown Device\n");
 			}
 
-			          uint16_t tmp;
-  tmp = 0;
-  outb(0x3D4,14);
-  outb(0x3D5,tmp >> 8);
-  outb(0x3D4,15);
-  outb(0x3D5,tmp);
+			shell_main();
 
 			/*
 			// Prime number test

@@ -2,6 +2,7 @@
 #define _print_h
 
 void printc(char c);
+void erase(int num);
 void prints(char* str);
 void printi(int val);
 void printd(int val, int base);
