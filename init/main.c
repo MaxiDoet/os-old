@@ -7,6 +7,7 @@
 #include "../include/cmos.h"
 #include "../include/pci.h"
 #include "../include/serial.h"
+#include "../include/bga.h"
 
 void kernel_main(void) {
 
@@ -192,9 +193,21 @@ void kernel_main(void) {
 					}
 					break;
 
+				case 0x1013:
+                                        switch(deviceId) {
+                                                case 0x00b8:
+                                                        prints("Cirrus Logic GD5446\n");
+                                                        break;
+                                                default:
+                                                  	prints("Unknown Device\n");
+                                        }
+                                        break;
+
 				default:
 					prints("Unknown Device\n");
 			}
+
+			bga_set_video_mode(800, 600, VBE_DISPI_BPP_24);
 
 			/*
 			// Prime number test
