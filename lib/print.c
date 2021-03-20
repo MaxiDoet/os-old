@@ -2,29 +2,29 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../include/print.h"
-#include "../include/vga.h"
+#include "../include/vgacon.h"
 
 void printc(char c)
 {
 	switch(c) {
 		case '\n':
-                	vga_x=0;
-                        vga_y++;
+                	vgacon_x=0;
+                        vgacon_y++;
                         break;
                default:
-			vga_text_put(vga_text_fg_color, vga_text_bg_color, vga_x, vga_y, c);
-                        vga_x++;
+			vgacon_text_put(vgacon_text_fg_color, vgacon_text_bg_color, vgacon_x, vgacon_y, c);
+                        vgacon_x++;
 	}
 
-        if (vga_x >= vga_width) {
-       		vga_x=0;
-		vga_y++;
+        if (vgacon_x >= vgacon_width) {
+       		vgacon_x=0;
+		vgacon_y++;
 	}
 
-	if (vga_y >= vga_height) {
-		vga_clear(vga_text_bg_color);
-		vga_x=0;
-		vga_y=0;
+	if (vgacon_y >= vgacon_height) {
+		vgacon_clear(vgacon_text_bg_color);
+		vgacon_x=0;
+		vgacon_y=0;
 	}
 }
 

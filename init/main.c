@@ -2,22 +2,22 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/vga.h"
+#include "../include/vgacon.h"
+#include "../include/vga-color.h"
 #include "../include/print.h"
 #include "../include/cmos.h"
 #include "../include/pci.h"
 #include "../include/serial.h"
 #include "../include/bga.h"
+#include "../include/asm.h"
 
 void kernel_main(void) {
 
-	vga_init(VGA_TEXT_MODE);
+	vgacon_init();
 
-	vga_clear(VGA_TEXT_COLOR_BLACK);
+	vgacon_clear(VGA_COLOR_BLACK);
 
-	vga_set_color(VGA_TEXT_COLOR_GREEN, VGA_TEXT_COLOR_BLACK);
-
-	prints("Welcome\n\n");
+	vgacon_set_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
 
 	// CMOS Dump
 	prints("CMOS Dump:\n");
@@ -207,7 +207,12 @@ void kernel_main(void) {
 					prints("Unknown Device\n");
 			}
 
-			bga_set_video_mode(800, 600, VBE_DISPI_BPP_24);
+			          uint16_t tmp;
+  tmp = 0;
+  outb(0x3D4,14);
+  outb(0x3D5,tmp >> 8);
+  outb(0x3D4,15);
+  outb(0x3D5,tmp);
 
 			/*
 			// Prime number test
