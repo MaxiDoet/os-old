@@ -211,7 +211,8 @@ char* shell_read_str() {
 				reading=0;
 				break;
                 	case SCANCODE_BACKSPACE:
-                        	erase(1);
+				erase(1);
+                        	buffer[--i] = ' ';
                         	break;
                 	default:
                         	printc('\0');

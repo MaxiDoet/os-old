@@ -6,8 +6,11 @@
 #include "../include/vga-color.h"
 #include "../include/print.h"
 #include "../bin/shell.h"
+#include "../include/gdt.h"
 
 void kernel_main(void) {
+
+	gdt_setup();
 
 	vgacon_init();
 
