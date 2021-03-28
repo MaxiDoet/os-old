@@ -472,6 +472,20 @@ void shell_cmd_panic()
 	for(;;);
 }
 
+void shell_cmd_test() {
+	vgacon_clear(VGA_COLOR_BLACK);
+
+	enum vga_color colors[] = {VGA_COLOR_RED, VGA_COLOR_GREEN, VGA_COLOR_YELLOW, VGA_COLOR_PURPLE, VGA_COLOR_BLUE, VGA_COLOR_WHITE};
+
+	int i=0;
+	while(1) {
+		if(i==5) i=0;
+		vgacon_set_color(colors[i], VGA_COLOR_BLACK);
+		prints("#");
+		i++;
+	}
+}
+
 void shell_print_prefix()
 {
 	prints("> ");
@@ -491,6 +505,8 @@ void shell_handle_cmd(char* cmd)
 		shell_cmd_panic();
 	} else if(strcmp("serial", cmd)) {
 		shell_cmd_serial();
+	} else if(strcmp("test", cmd)) {
+		shell_cmd_test();
 	} else {
 		prints("Invalid command!\n");
 	}

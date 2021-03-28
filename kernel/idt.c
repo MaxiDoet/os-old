@@ -1,175 +1,230 @@
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "../include/idt.h"
 
+void idt_set_entry(unsigned int pos, uint32_t base,
+   uint16_t selector, uint8_t type_attributes)
+{
+    idt[pos].base_lower = base & 0xffff;
+    idt[pos].selector = selector;
+    idt[pos].unused = 0x0;
+    idt[pos].type_attributes = type_attributes;
+    idt[pos].base_higher = (base >> 16) & 0xffff;
+}
 
-void idt_init(void) {
-        extern int load_idt();
-        extern int irq0();
-        extern int irq1();
-        extern int irq2();
-        extern int irq3();
-        extern int irq4();
-        extern int irq5();
-        extern int irq6();
-        extern int irq7();
-        extern int irq8();
-        extern int irq9();
-        extern int irq10();
-        extern int irq11();
-        extern int irq12();
-        extern int irq13();
-        extern int irq14();
-        extern int irq15();
- 
-	unsigned long irq0_address;
-        unsigned long irq1_address;
-        unsigned long irq2_address;
-        unsigned long irq3_address;          
-        unsigned long irq4_address; 
-        unsigned long irq5_address;
-        unsigned long irq6_address;
-        unsigned long irq7_address;
-        unsigned long irq8_address;
-        unsigned long irq9_address;          
-        unsigned long irq10_address;
-        unsigned long irq11_address;
-        unsigned long irq12_address;
-        unsigned long irq13_address;
-        unsigned long irq14_address;          
-        unsigned long irq15_address;         
-	unsigned long idt_address;
-	unsigned long idt_ptr[2];
- 
-        /* remapping the PIC */
-	outb(0x20, 0x11);
-        outb(0xA0, 0x11);
-        outb(0x21, 0x20);
-        outb(0xA1, 40);
-        outb(0x21, 0x04);
-        outb(0xA1, 0x02);
-        outb(0x21, 0x01);
-        outb(0xA1, 0x01);
-        outb(0x21, 0x0);
-        outb(0xA1, 0x0);
- 
-	irq0_address = (unsigned long)irq0; 
-	IDT[32].offset_lowerbits = irq0_address & 0xffff;
-	IDT[32].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[32].zero = 0;
-	IDT[32].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[32].offset_higherbits = (irq0_address & 0xffff0000) >> 16;
- 
-	irq1_address = (unsigned long)irq1; 
-	IDT[33].offset_lowerbits = irq1_address & 0xffff;
-	IDT[33].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[33].zero = 0;
-	IDT[33].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[33].offset_higherbits = (irq1_address & 0xffff0000) >> 16;
- 
-	irq2_address = (unsigned long)irq2; 
-	IDT[34].offset_lowerbits = irq2_address & 0xffff;
-	IDT[34].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[34].zero = 0;
-	IDT[34].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[34].offset_higherbits = (irq2_address & 0xffff0000) >> 16;
- 
-	irq3_address = (unsigned long)irq3; 
-	IDT[35].offset_lowerbits = irq3_address & 0xffff;
-	IDT[35].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[35].zero = 0;
-	IDT[35].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[35].offset_higherbits = (irq3_address & 0xffff0000) >> 16;
- 
-	irq4_address = (unsigned long)irq4; 
-	IDT[36].offset_lowerbits = irq4_address & 0xffff;
-	IDT[36].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[36].zero = 0;
-	IDT[36].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[36].offset_higherbits = (irq4_address & 0xffff0000) >> 16;
- 
-	irq5_address = (unsigned long)irq5; 
-	IDT[37].offset_lowerbits = irq5_address & 0xffff;
-	IDT[37].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[37].zero = 0;
-	IDT[37].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[37].offset_higherbits = (irq5_address & 0xffff0000) >> 16;
- 
-	irq6_address = (unsigned long)irq6; 
-	IDT[38].offset_lowerbits = irq6_address & 0xffff;
-	IDT[38].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[38].zero = 0;
-	IDT[38].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[38].offset_higherbits = (irq6_address & 0xffff0000) >> 16;
- 
-	irq7_address = (unsigned long)irq7; 
-	IDT[39].offset_lowerbits = irq7_address & 0xffff;
-	IDT[39].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[39].zero = 0;
-	IDT[39].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[39].offset_higherbits = (irq7_address & 0xffff0000) >> 16;
- 
-	irq8_address = (unsigned long)irq8; 
-	IDT[40].offset_lowerbits = irq8_address & 0xffff;
-	IDT[40].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[40].zero = 0;
-	IDT[40].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[40].offset_higherbits = (irq8_address & 0xffff0000) >> 16;
- 
-	irq9_address = (unsigned long)irq9; 
-	IDT[41].offset_lowerbits = irq9_address & 0xffff;
-	IDT[41].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[41].zero = 0;
-	IDT[41].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[41].offset_higherbits = (irq9_address & 0xffff0000) >> 16;
- 
-	irq10_address = (unsigned long)irq10; 
-	IDT[42].offset_lowerbits = irq10_address & 0xffff;
-	IDT[42].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[42].zero = 0;
-	IDT[42].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[42].offset_higherbits = (irq10_address & 0xffff0000) >> 16;
- 
-	irq11_address = (unsigned long)irq11; 
-	IDT[43].offset_lowerbits = irq11_address & 0xffff;
-	IDT[43].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[43].zero = 0;
-	IDT[43].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[43].offset_higherbits = (irq11_address & 0xffff0000) >> 16;
- 
-	irq12_address = (unsigned long)irq12; 
-	IDT[44].offset_lowerbits = irq12_address & 0xffff;
-	IDT[44].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[44].zero = 0;
-	IDT[44].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[44].offset_higherbits = (irq12_address & 0xffff0000) >> 16;
- 
-	irq13_address = (unsigned long)irq13; 
-	IDT[45].offset_lowerbits = irq13_address & 0xffff;
-	IDT[45].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[45].zero = 0;
-	IDT[45].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[45].offset_higherbits = (irq13_address & 0xffff0000) >> 16;
- 
-	irq14_address = (unsigned long)irq14; 
-	IDT[46].offset_lowerbits = irq14_address & 0xffff;
-	IDT[46].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[46].zero = 0;
-	IDT[46].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[46].offset_higherbits = (irq14_address & 0xffff0000) >> 16;
- 
-        irq15_address = (unsigned long)irq15; 
-	IDT[47].offset_lowerbits = irq15_address & 0xffff;
-	IDT[47].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
-	IDT[47].zero = 0;
-	IDT[47].type_attr = 0x8e; /* INTERRUPT_GATE */
-	IDT[47].offset_higherbits = (irq15_address & 0xffff0000) >> 16;
- 
-	/* fill the IDT descriptor */
-	idt_address = (unsigned long)IDT ;
-	idt_ptr[0] = (sizeof (struct IDT_entry) * 256) + ((idt_address & 0xffff) << 16);
-	idt_ptr[1] = idt_address >> 16 ;
- 
- 
- 
-	load_idt(idt_ptr);
- 
+extern void int_handler_0();
+extern void int_handler_1();
+extern void int_handler_2();
+extern void int_handler_3();
+extern void int_handler_4();
+extern void int_handler_5();
+extern void int_handler_6();
+extern void int_handler_7();
+extern void int_handler_8();
+extern void int_handler_9();
+extern void int_handler_10();
+extern void int_handler_11();
+extern void int_handler_12();
+extern void int_handler_13();
+extern void int_handler_14();
+extern void int_handler_15();
+extern void int_handler_16();
+extern void int_handler_17();
+extern void int_handler_18();
+extern void int_handler_19();
+extern void int_handler_20();
+extern void int_handler_21();
+extern void int_handler_22();
+extern void int_handler_23();
+extern void int_handler_24();
+extern void int_handler_25();
+extern void int_handler_26();
+extern void int_handler_27();
+extern void int_handler_28();
+extern void int_handler_29();
+extern void int_handler_30();
+extern void int_handler_31();
+extern void int_handler_32();
+extern void int_handler_33();
+extern void int_handler_34();
+extern void int_handler_35();
+extern void int_handler_36();
+extern void int_handler_37();
+extern void int_handler_38();
+extern void int_handler_39();
+extern void int_handler_40();
+extern void int_handler_41();
+extern void int_handler_42();
+extern void int_handler_43();
+extern void int_handler_44();
+extern void int_handler_45();
+extern void int_handler_46();
+extern void int_handler_47();
+extern void int_handler_48();
+extern void int_handler_49();
+extern void int_handler_50();
+extern void int_handler_51();
+extern void int_handler_52();
+extern void int_handler_53();
+extern void int_handler_54();
+extern void int_handler_55();
+extern void int_handler_56();
+extern void int_handler_57();
+extern void int_handler_58();
+extern void int_handler_59();
+extern void int_handler_60();
+extern void int_handler_61();
+extern void int_handler_62();
+extern void int_handler_63();
+extern void int_handler_64();
+extern void int_handler_65();
+extern void int_handler_66();
+extern void int_handler_67();
+extern void int_handler_68();
+extern void int_handler_69();
+extern void int_handler_70();
+extern void int_handler_71();
+extern void int_handler_72();
+extern void int_handler_73();
+extern void int_handler_74();
+extern void int_handler_75();
+extern void int_handler_76();
+extern void int_handler_77();
+extern void int_handler_78();
+extern void int_handler_79();
+extern void int_handler_80();
+extern void int_handler_81();
+extern void int_handler_82();
+extern void int_handler_83();
+extern void int_handler_84();
+extern void int_handler_85();
+extern void int_handler_86();
+extern void int_handler_87();
+extern void int_handler_88();
+extern void int_handler_89();
+extern void int_handler_90();
+extern void int_handler_91();
+extern void int_handler_92();
+extern void int_handler_93();
+extern void int_handler_94();
+extern void int_handler_95();
+extern void int_handler_96();
+extern void int_handler_97();
+extern void int_handler_98();
+extern void int_handler_99();
+
+void idt_setup()
+{
+    idt_desc.limit = IDT_ENTRIES * sizeof(struct idt_entry) - 1;
+    idt_desc.base = (uint32_t) (uintptr_t) idt;
+
+    idt_set_entry(0, (uint32_t)(uintptr_t)&int_handler_0, 0x8, 0x8e);
+    idt_set_entry(1, (uint32_t)(uintptr_t)&int_handler_1, 0x8, 0x8e);
+    idt_set_entry(2, (uint32_t)(uintptr_t)&int_handler_2, 0x8, 0x8e);
+    idt_set_entry(3, (uint32_t)(uintptr_t)&int_handler_3, 0x8, 0x8e);
+    idt_set_entry(4, (uint32_t)(uintptr_t)&int_handler_4, 0x8, 0x8e);
+    idt_set_entry(5, (uint32_t)(uintptr_t)&int_handler_5, 0x8, 0x8e);
+    idt_set_entry(6, (uint32_t)(uintptr_t)&int_handler_6, 0x8, 0x8e);
+    idt_set_entry(7, (uint32_t)(uintptr_t)&int_handler_7, 0x8, 0x8e);
+    idt_set_entry(8, (uint32_t)(uintptr_t)&int_handler_8, 0x8, 0x8e);
+    idt_set_entry(9, (uint32_t)(uintptr_t)&int_handler_9, 0x8, 0x8e);
+    idt_set_entry(10, (uint32_t)(uintptr_t)&int_handler_10, 0x8, 0x8e);
+    idt_set_entry(11, (uint32_t)(uintptr_t)&int_handler_11, 0x8, 0x8e);
+    idt_set_entry(12, (uint32_t)(uintptr_t)&int_handler_12, 0x8, 0x8e);
+    idt_set_entry(13, (uint32_t)(uintptr_t)&int_handler_13, 0x8, 0x8e);
+    idt_set_entry(14, (uint32_t)(uintptr_t)&int_handler_14, 0x8, 0x8e);
+    idt_set_entry(15, (uint32_t)(uintptr_t)&int_handler_15, 0x8, 0x8e);
+    idt_set_entry(16, (uint32_t)(uintptr_t)&int_handler_16, 0x8, 0x8e);
+    idt_set_entry(17, (uint32_t)(uintptr_t)&int_handler_17, 0x8, 0x8e);
+    idt_set_entry(18, (uint32_t)(uintptr_t)&int_handler_18, 0x8, 0x8e);
+    idt_set_entry(19, (uint32_t)(uintptr_t)&int_handler_19, 0x8, 0x8e);
+    idt_set_entry(20, (uint32_t)(uintptr_t)&int_handler_20, 0x8, 0x8e);
+    idt_set_entry(21, (uint32_t)(uintptr_t)&int_handler_21, 0x8, 0x8e);
+    idt_set_entry(22, (uint32_t)(uintptr_t)&int_handler_22, 0x8, 0x8e);
+    idt_set_entry(23, (uint32_t)(uintptr_t)&int_handler_23, 0x8, 0x8e);
+    idt_set_entry(24, (uint32_t)(uintptr_t)&int_handler_24, 0x8, 0x8e);
+    idt_set_entry(25, (uint32_t)(uintptr_t)&int_handler_25, 0x8, 0x8e);
+    idt_set_entry(26, (uint32_t)(uintptr_t)&int_handler_26, 0x8, 0x8e);
+    idt_set_entry(27, (uint32_t)(uintptr_t)&int_handler_27, 0x8, 0x8e);
+    idt_set_entry(28, (uint32_t)(uintptr_t)&int_handler_28, 0x8, 0x8e);
+    idt_set_entry(29, (uint32_t)(uintptr_t)&int_handler_29, 0x8, 0x8e);
+    idt_set_entry(30, (uint32_t)(uintptr_t)&int_handler_30, 0x8, 0x8e);
+    idt_set_entry(31, (uint32_t)(uintptr_t)&int_handler_31, 0x8, 0x8e);
+    idt_set_entry(32, (uint32_t)(uintptr_t)&int_handler_32, 0x8, 0x8e);
+    idt_set_entry(33, (uint32_t)(uintptr_t)&int_handler_33, 0x8, 0x8e);
+    idt_set_entry(34, (uint32_t)(uintptr_t)&int_handler_34, 0x8, 0x8e);
+    idt_set_entry(35, (uint32_t)(uintptr_t)&int_handler_35, 0x8, 0x8e);
+    idt_set_entry(36, (uint32_t)(uintptr_t)&int_handler_36, 0x8, 0x8e);
+    idt_set_entry(37, (uint32_t)(uintptr_t)&int_handler_37, 0x8, 0x8e);
+    idt_set_entry(38, (uint32_t)(uintptr_t)&int_handler_38, 0x8, 0x8e);
+    idt_set_entry(39, (uint32_t)(uintptr_t)&int_handler_39, 0x8, 0x8e);
+    idt_set_entry(40, (uint32_t)(uintptr_t)&int_handler_40, 0x8, 0x8e);
+    idt_set_entry(41, (uint32_t)(uintptr_t)&int_handler_41, 0x8, 0x8e);
+    idt_set_entry(42, (uint32_t)(uintptr_t)&int_handler_42, 0x8, 0x8e);
+    idt_set_entry(43, (uint32_t)(uintptr_t)&int_handler_43, 0x8, 0x8e);
+    idt_set_entry(44, (uint32_t)(uintptr_t)&int_handler_44, 0x8, 0x8e);
+    idt_set_entry(45, (uint32_t)(uintptr_t)&int_handler_45, 0x8, 0x8e);
+    idt_set_entry(46, (uint32_t)(uintptr_t)&int_handler_46, 0x8, 0x8e);
+    idt_set_entry(47, (uint32_t)(uintptr_t)&int_handler_47, 0x8, 0x8e);
+    idt_set_entry(48, (uint32_t)(uintptr_t)&int_handler_48, 0x8, 0x8e);
+    idt_set_entry(49, (uint32_t)(uintptr_t)&int_handler_49, 0x8, 0x8e);
+    idt_set_entry(50, (uint32_t)(uintptr_t)&int_handler_50, 0x8, 0x8e);
+    idt_set_entry(51, (uint32_t)(uintptr_t)&int_handler_51, 0x8, 0x8e);
+    idt_set_entry(52, (uint32_t)(uintptr_t)&int_handler_52, 0x8, 0x8e);
+    idt_set_entry(53, (uint32_t)(uintptr_t)&int_handler_53, 0x8, 0x8e);
+    idt_set_entry(54, (uint32_t)(uintptr_t)&int_handler_54, 0x8, 0x8e);
+    idt_set_entry(55, (uint32_t)(uintptr_t)&int_handler_55, 0x8, 0x8e);
+    idt_set_entry(56, (uint32_t)(uintptr_t)&int_handler_56, 0x8, 0x8e);
+    idt_set_entry(57, (uint32_t)(uintptr_t)&int_handler_57, 0x8, 0x8e);
+    idt_set_entry(58, (uint32_t)(uintptr_t)&int_handler_58, 0x8, 0x8e);
+    idt_set_entry(59, (uint32_t)(uintptr_t)&int_handler_59, 0x8, 0x8e);
+    idt_set_entry(60, (uint32_t)(uintptr_t)&int_handler_60, 0x8, 0x8e);
+    idt_set_entry(61, (uint32_t)(uintptr_t)&int_handler_61, 0x8, 0x8e);
+    idt_set_entry(62, (uint32_t)(uintptr_t)&int_handler_62, 0x8, 0x8e);
+    idt_set_entry(63, (uint32_t)(uintptr_t)&int_handler_63, 0x8, 0x8e);
+    idt_set_entry(64, (uint32_t)(uintptr_t)&int_handler_64, 0x8, 0x8e);
+    idt_set_entry(65, (uint32_t)(uintptr_t)&int_handler_65, 0x8, 0x8e);
+    idt_set_entry(66, (uint32_t)(uintptr_t)&int_handler_66, 0x8, 0x8e);
+    idt_set_entry(67, (uint32_t)(uintptr_t)&int_handler_67, 0x8, 0x8e);
+    idt_set_entry(68, (uint32_t)(uintptr_t)&int_handler_68, 0x8, 0x8e);
+    idt_set_entry(69, (uint32_t)(uintptr_t)&int_handler_69, 0x8, 0x8e);
+    idt_set_entry(70, (uint32_t)(uintptr_t)&int_handler_70, 0x8, 0x8e);
+    idt_set_entry(71, (uint32_t)(uintptr_t)&int_handler_71, 0x8, 0x8e);
+    idt_set_entry(72, (uint32_t)(uintptr_t)&int_handler_72, 0x8, 0x8e);
+    idt_set_entry(73, (uint32_t)(uintptr_t)&int_handler_73, 0x8, 0x8e);
+    idt_set_entry(74, (uint32_t)(uintptr_t)&int_handler_74, 0x8, 0x8e);
+    idt_set_entry(75, (uint32_t)(uintptr_t)&int_handler_75, 0x8, 0x8e);
+    idt_set_entry(76, (uint32_t)(uintptr_t)&int_handler_76, 0x8, 0x8e);
+    idt_set_entry(77, (uint32_t)(uintptr_t)&int_handler_77, 0x8, 0x8e);
+    idt_set_entry(78, (uint32_t)(uintptr_t)&int_handler_78, 0x8, 0x8e);
+    idt_set_entry(79, (uint32_t)(uintptr_t)&int_handler_79, 0x8, 0x8e);
+    idt_set_entry(80, (uint32_t)(uintptr_t)&int_handler_80, 0x8, 0x8e);
+    idt_set_entry(81, (uint32_t)(uintptr_t)&int_handler_81, 0x8, 0x8e);
+    idt_set_entry(82, (uint32_t)(uintptr_t)&int_handler_82, 0x8, 0x8e);
+    idt_set_entry(83, (uint32_t)(uintptr_t)&int_handler_83, 0x8, 0x8e);
+    idt_set_entry(84, (uint32_t)(uintptr_t)&int_handler_84, 0x8, 0x8e);
+    idt_set_entry(85, (uint32_t)(uintptr_t)&int_handler_85, 0x8, 0x8e);
+    idt_set_entry(86, (uint32_t)(uintptr_t)&int_handler_86, 0x8, 0x8e);
+    idt_set_entry(87, (uint32_t)(uintptr_t)&int_handler_87, 0x8, 0x8e);
+    idt_set_entry(88, (uint32_t)(uintptr_t)&int_handler_88, 0x8, 0x8e);
+    idt_set_entry(89, (uint32_t)(uintptr_t)&int_handler_89, 0x8, 0x8e);
+    idt_set_entry(90, (uint32_t)(uintptr_t)&int_handler_90, 0x8, 0x8e);
+    idt_set_entry(91, (uint32_t)(uintptr_t)&int_handler_91, 0x8, 0x8e);
+    idt_set_entry(92, (uint32_t)(uintptr_t)&int_handler_92, 0x8, 0x8e);
+    idt_set_entry(93, (uint32_t)(uintptr_t)&int_handler_93, 0x8, 0x8e);
+    idt_set_entry(94, (uint32_t)(uintptr_t)&int_handler_94, 0x8, 0x8e);
+    idt_set_entry(95, (uint32_t)(uintptr_t)&int_handler_95, 0x8, 0x8e);
+    idt_set_entry(96, (uint32_t)(uintptr_t)&int_handler_96, 0x8, 0x8e);
+    idt_set_entry(97, (uint32_t)(uintptr_t)&int_handler_97, 0x8, 0x8e);
+    idt_set_entry(98, (uint32_t)(uintptr_t)&int_handler_98, 0x8, 0x8e);
+    for (int i = 99; i < IDT_ENTRIES; i++) {
+        idt_set_entry(i, (uint32_t)(uintptr_t)&int_handler_99,
+            0x8, 0x8e);
+    }
+
+    asm volatile("lidt %0" :: "m"(idt_desc));
+    asm volatile("xchg %bx, %bx");
+    asm volatile("sti");
 }

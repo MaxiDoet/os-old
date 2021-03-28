@@ -1,16 +1,26 @@
 #ifndef _idt_h
 #define _idt_h
 
-struct IDT_entry{
-	unsigned short int offset_lowerbits;
-	unsigned short int selector;
-	unsigned char zero;
-	unsigned char type_attr;
-	unsigned short int offset_higherbits;
-};
+#include <stdint.h>
 
-struct IDT_entry IDT[256];
+#define IDT_ENTRIES 256
 
-void idt_init(void)
+struct idt_entry {
+    uint16_t base_lower;
+    uint16_t selector;
+    uint8_t unused;
+    uint8_t type_attributes;
+    uint16_t base_higher;
+} __attribute__((packed));
+
+struct idt_description {
+    uint16_t limit;
+    uint32_t base;
+} __attribute__((packed));
+
+struct idt_description idt_desc;
+struct idt_entry idt[IDT_ENTRIES];
+
+void idt_setup();
 
 #endif

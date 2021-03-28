@@ -2,6 +2,7 @@ section .text
 extern gdt_desc
 global gdt_install
 gdt_install:
+    cli
     lgdt [gdt_desc]
     jmp 08h:reload_cs
 reload_cs:

@@ -10,10 +10,12 @@ stack_bottom:
 stack_top:
 
 section .text
+
 extern kernel_main
+
 global _start
 _start:
-    mov esp, stack_top
+    cli
     call kernel_main
 
     cli

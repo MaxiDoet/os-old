@@ -20,6 +20,8 @@ gcc $GCCPARAMS -c lib/string.c -o lib/string.o
 # Build kernel
 gcc $GCCPARAMS -c kernel/asm.c -o kernel/asm.o
 gcc $GCCPARAMS -c kernel/gdt.c -o kernel/gdt.o
+gcc $GCCPARAMS -c kernel/idt.c -o kernel/idt.o
+nasm $ASPARAMS kernel/idt.asm -o kernel/idt_asm.o
 nasm $ASPARAMS kernel/gdt.asm -o kernel/gdt_asm.o
 
 gcc $GCCPARAMS -c init/main.c -o init/main.o
@@ -28,7 +30,7 @@ gcc $GCCPARAMS -c init/main.c -o init/main.o
 gcc $GCCPARAMS -c bin/shell.c -o bin/shell.o
 
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/asm.o kernel/gdt.o kernel/gdt_asm.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o lib/print.o lib/string.o bin/shell.o
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/asm.o kernel/gdt.o kernel/idt.o kernel/gdt_asm.o kernel/idt_asm.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o lib/print.o lib/string.o bin/shell.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin
