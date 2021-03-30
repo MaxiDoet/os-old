@@ -24,7 +24,7 @@ void kernel_main(void)
 	prints("gdt init end\n");
 
 	prints("idt init start\n");
-	//idt_setup();
+	idt_setup();
 	prints("idt init end\n");
 
 	shell_main();

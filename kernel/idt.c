@@ -3,6 +3,9 @@
 #include <stdint.h>
 
 #include "../include/idt.h"
+#include "../include/print.h"
+#include "../include/asm.h"
+#include "../include/pic.h"
 
 void idt_set_entry(unsigned int pos, uint32_t base,
    uint16_t selector, uint8_t type_attributes)
@@ -117,24 +120,24 @@ extern void int_handler_99();
 
 void idt_setup()
 {
-    idt_desc.limit = IDT_ENTRIES * sizeof(struct idt_entry) - 1;
-    idt_desc.base = (uint32_t) (uintptr_t) idt;
+	idt_desc.limit = IDT_ENTRIES * sizeof(struct idt_entry) - 1;
+	idt_desc.base = (uint32_t) (uintptr_t) idt;
 
-    idt_set_entry(0, (uint32_t)(uintptr_t)&int_handler_0, 0x8, 0x8e);
-    idt_set_entry(1, (uint32_t)(uintptr_t)&int_handler_1, 0x8, 0x8e);
-    idt_set_entry(2, (uint32_t)(uintptr_t)&int_handler_2, 0x8, 0x8e);
-    idt_set_entry(3, (uint32_t)(uintptr_t)&int_handler_3, 0x8, 0x8e);
-    idt_set_entry(4, (uint32_t)(uintptr_t)&int_handler_4, 0x8, 0x8e);
-    idt_set_entry(5, (uint32_t)(uintptr_t)&int_handler_5, 0x8, 0x8e);
-    idt_set_entry(6, (uint32_t)(uintptr_t)&int_handler_6, 0x8, 0x8e);
-    idt_set_entry(7, (uint32_t)(uintptr_t)&int_handler_7, 0x8, 0x8e);
-    idt_set_entry(8, (uint32_t)(uintptr_t)&int_handler_8, 0x8, 0x8e);
-    idt_set_entry(9, (uint32_t)(uintptr_t)&int_handler_9, 0x8, 0x8e);
-    idt_set_entry(10, (uint32_t)(uintptr_t)&int_handler_10, 0x8, 0x8e);
-    idt_set_entry(11, (uint32_t)(uintptr_t)&int_handler_11, 0x8, 0x8e);
-    idt_set_entry(12, (uint32_t)(uintptr_t)&int_handler_12, 0x8, 0x8e);
-    idt_set_entry(13, (uint32_t)(uintptr_t)&int_handler_13, 0x8, 0x8e);
-    idt_set_entry(14, (uint32_t)(uintptr_t)&int_handler_14, 0x8, 0x8e);
+	idt_set_entry(0, (uint32_t)(uintptr_t)&int_handler_0, 0x8, 0x8e);
+	idt_set_entry(1, (uint32_t)(uintptr_t)&int_handler_1, 0x8, 0x8e);
+	idt_set_entry(2, (uint32_t)(uintptr_t)&int_handler_2, 0x8, 0x8e);
+	idt_set_entry(3, (uint32_t)(uintptr_t)&int_handler_3, 0x8, 0x8e);
+	idt_set_entry(4, (uint32_t)(uintptr_t)&int_handler_4, 0x8, 0x8e);
+	idt_set_entry(5, (uint32_t)(uintptr_t)&int_handler_5, 0x8, 0x8e);
+	idt_set_entry(6, (uint32_t)(uintptr_t)&int_handler_6, 0x8, 0x8e);
+	idt_set_entry(7, (uint32_t)(uintptr_t)&int_handler_7, 0x8, 0x8e);
+	idt_set_entry(8, (uint32_t)(uintptr_t)&int_handler_8, 0x8, 0x8e);
+	idt_set_entry(9, (uint32_t)(uintptr_t)&int_handler_9, 0x8, 0x8e);
+	idt_set_entry(10, (uint32_t)(uintptr_t)&int_handler_10, 0x8, 0x8e);
+	idt_set_entry(11, (uint32_t)(uintptr_t)&int_handler_11, 0x8, 0x8e);
+	idt_set_entry(12, (uint32_t)(uintptr_t)&int_handler_12, 0x8, 0x8e);
+	idt_set_entry(13, (uint32_t)(uintptr_t)&int_handler_13, 0x8, 0x8e);
+	idt_set_entry(14, (uint32_t)(uintptr_t)&int_handler_14, 0x8, 0x8e);
     idt_set_entry(15, (uint32_t)(uintptr_t)&int_handler_15, 0x8, 0x8e);
     idt_set_entry(16, (uint32_t)(uintptr_t)&int_handler_16, 0x8, 0x8e);
     idt_set_entry(17, (uint32_t)(uintptr_t)&int_handler_17, 0x8, 0x8e);
@@ -224,7 +227,27 @@ void idt_setup()
             0x8, 0x8e);
     }
 
+	// Master
+	outb(PIC_MASTER_COMMAND_PORT, 0x11);
+
+	outb(PIC_MASTER_DATA_PORT, 0x20); // IRQ0
+	outb(PIC_MASTER_DATA_PORT, 0x04); // IRQ2
+	outb(PIC_MASTER_DATA_PORT, 0x01);
+
+	// Slave
+	outb(PIC_SLAVE_COMMAND_PORT, 0x11);
+
+	outb(PIC_SLAVE_DATA_PORT, 0x28); // IRQ8
+	outb(PIC_SLAVE_DATA_PORT, 0x04); // IRQ2
+	outb(PIC_SLAVE_DATA_PORT, 0x01);
+
+	// Demask
+	outb(PIC_MASTER_DATA_PORT, 0x0);
+	outb(PIC_SLAVE_DATA_PORT, 0x0);
+
     asm volatile("lidt %0" :: "m"(idt_desc));
     asm volatile("xchg %bx, %bx");
+    prints("Before sti");
     asm volatile("sti");
+    prints("After sti");
 }
