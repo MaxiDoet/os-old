@@ -21,16 +21,17 @@ gcc $GCCPARAMS -c lib/string.c -o lib/string.o
 gcc $GCCPARAMS -c kernel/asm.c -o kernel/asm.o
 gcc $GCCPARAMS -c kernel/gdt.c -o kernel/gdt.o
 gcc $GCCPARAMS -c kernel/idt.c -o kernel/idt.o
+gcc $GCCPARAMS -c kernel/panic.c -o kernel/panic.o
 nasm $ASPARAMS kernel/idt.asm -o kernel/idt_asm.o
 nasm $ASPARAMS kernel/gdt.asm -o kernel/gdt_asm.o
 
 gcc $GCCPARAMS -c init/main.c -o init/main.o
 
 # Build programs
-gcc $GCCPARAMS -c bin/shell.c -o bin/shell.o
+gcc $GCCPARAMS -c bin/shell/shell.c -o bin/shell/shell.o
 
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/asm.o kernel/gdt.o kernel/idt.o kernel/gdt_asm.o kernel/idt_asm.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o lib/print.o lib/string.o bin/shell.o
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/asm.o kernel/gdt.o kernel/idt.o kernel/gdt_asm.o kernel/idt_asm.o kernel/panic.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o lib/print.o lib/string.o bin/shell/shell.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin

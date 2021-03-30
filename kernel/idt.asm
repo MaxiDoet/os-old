@@ -2,11 +2,11 @@ section .data
 int_counter db 0
 
 section .text
+extern kpanic
+
 global int_handler_0
 int_handler_0:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'0 '
+call kpanic
 hlt
 
 global int_handler_1
@@ -236,7 +236,7 @@ inc al
 mov byte [gs:int_counter], al
 mov bl, 18
 div bl
-mov byte [gs:0xB8000], al
+;mov byte [gs:0xB8000], al
 mov al, 0x20
 out 0x20, al
 iret
@@ -244,10 +244,10 @@ iret
 extern keyboard_irq_handler
 global int_handler_33
 int_handler_33:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 3 '
-call keyboard_irq_handler
+;mov ax, 0x10
+;mov gs, ax
+;mov dword [gs:0xB8000],'3 3 '
+;call keyboard_irq_handler
 mov al, 0x20
 out 0x20, al
 iret

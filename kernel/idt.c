@@ -247,7 +247,5 @@ void idt_setup()
 
     asm volatile("lidt %0" :: "m"(idt_desc));
     asm volatile("xchg %bx, %bx");
-    prints("Before sti");
     asm volatile("sti");
-    prints("After sti");
 }

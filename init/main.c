@@ -5,7 +5,7 @@
 #include "../include/vgacon.h"
 #include "../include/vga-color.h"
 #include "../include/print.h"
-#include "../bin/shell.h"
+#include "../bin/shell/shell.h"
 #include "../include/gdt.h"
 #include "../include/idt.h"
 
@@ -19,13 +19,10 @@ void kernel_main(void)
 
 	prints("Welcome!\n\n");
 
-	prints("gdt init start\n");
+	prints("gdt init\n");
 	gdt_setup();
-	prints("gdt init end\n");
-
-	prints("idt init start\n");
+	prints("idt init\n");
 	idt_setup();
-	prints("idt init end\n");
 
 	shell_main();
 }
