@@ -1,8 +1,17 @@
 section .multiboot
-align 4
-    dd 1BADB002h
-    dd 0003h ; set align boot modules to page boundaries, supply memory map
-    dd -(1BADB002h + 0003h)
+    dd 0x1badb002
+    dd 7
+    dd -(0x1badb002 + 7)
+    dd 0
+    dd 0
+    dd 0
+    dd 0
+    dd 0
+    dd 0
+    dd 800
+    dd 600
+    dd 16
+    ;space 4 * 13
 
 section .bootstrap_stack nobits
 stack_bottom:
@@ -16,6 +25,9 @@ extern kernel_main
 global _start
 _start:
     cli
+
+    ; Pass the multiboot info to the kernel
+    push ebx
     call kernel_main
 
     cli
