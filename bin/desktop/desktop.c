@@ -60,5 +60,5 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 	//drawrect(fb, mbi, 0, 0, mbi->framebuffer_width, mbi->framebuffer_height, DESKTOP_BACKGROUND);
 
 	//drawchar(fb, mbi, 10, 10, font8x8_b, 0xfffff);
-	drawimage(fb, mbi, 0, 0, 610, 367, image);
+	drawimage(fb, mbi, 0, 0, 800, 600, image);
 }

@@ -50,12 +50,14 @@ void kmain(unsigned long magic, unsigned long addr)
 
 	kdebug(debug_port, "\r\n");
 
-	// VBE Info
-	//kdebug(debug_port, "\r\n");
-
 	multiboot_uint32_t color;
 	unsigned i;
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
+
+	kdebug(debug_port, "GDT init\r\n");
+	gdt_setup();
+	kdebug(debug_port, "IDT init\r\n");
+	idt_setup();
 
 	desktop_init(fb, mbi);
 
