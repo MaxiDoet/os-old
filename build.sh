@@ -31,9 +31,10 @@ gcc $GCCPARAMS -c init/main.c -o init/main.o
 
 # Build programs
 #gcc $GCCPARAMS -c bin/shell/shell.c -o bin/shell/shell.o
+gcc $GCCPARAMS -c bin/desktop/desktop.c -o bin/desktop/desktop.o
 
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/gdt_asm.o kernel/idt_asm.o kernel/panic.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o lib/print.o lib/string.o lib/convert.o #bin/shell/shell.o
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/gdt_asm.o kernel/idt_asm.o kernel/panic.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o lib/print.o lib/string.o lib/convert.o bin/desktop/desktop.o #bin/shell/shell.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin

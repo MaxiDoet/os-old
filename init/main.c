@@ -9,29 +9,14 @@
 #include "../include/drivers/vga-color.h"
 #include "../include/lib/print.h"
 #include "../include/lib/convert.h"
-#include "../bin/shell/shell.h"
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/idt.h"
 #include "../include/kernel/multiboot.h"
 
+#include "../bin/shell/shell.h"
+#include "../bin/desktop/desktop.h"
+
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
-
-void putpixel(void *fb, multiboot_info_t *mbi, int x, int y, int color)
-{
-	multiboot_uint16_t *pixel = fb + mbi->framebuffer_pitch * y + 2 * x;
-        *pixel = color;
-}
-
-void drawrect(void *fb, multiboot_info_t *mbi, int x, int y, int w, int h, int color)
-{
-	int i,j;
-
-	for (i=0; i < h; i++) {
-		for (j=0; j < w; j++) {
-			putpixel(fb, mbi, x+j, y+i, color);
-		}
-	}
-}
 
 void kmain(unsigned long magic, unsigned long addr)
 {
@@ -72,9 +57,7 @@ void kmain(unsigned long magic, unsigned long addr)
 	unsigned i;
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
-	// A little desktop
-
-	drawrect(fb, mbi, 20, 50, 200, 50, 0xffffff);
+	desktop_init(fb, mbi);
 
 	/*
 	vgacon_init();
@@ -92,8 +75,6 @@ void kmain(unsigned long magic, unsigned long addr)
 
 	shell_main();
 	*/
-
-	//putpixel(fb, 1, 1, 0x7800);
 }
 
 void keyboard_irq_handler()
