@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "../include/kernel/panic.h"
+#include "../include/kernel/kernel.h"
 #include "../include/lib/print.h"
 #include "../include/drivers/vgacon.h"
 #include "../include/drivers/vga-color.h"

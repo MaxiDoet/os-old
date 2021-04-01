@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../bin/shell/shell.h"
-#include "../include/kernel/panic.h"
+#include "../include/kernel/kernel.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/lib/print.h"
 #include "../include/lib/string.h"

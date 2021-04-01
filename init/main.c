@@ -2,9 +2,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../config.h"
+#include "../include/kernel/kernel.h"
+#include "../include/drivers/serial.h"
 #include "../include/drivers/vgacon.h"
 #include "../include/drivers/vga-color.h"
 #include "../include/lib/print.h"
+#include "../include/lib/convert.h"
 #include "../bin/shell/shell.h"
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/idt.h"
@@ -12,96 +16,65 @@
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
-void kernel_main(unsigned long addr)
+void putpixel(void *fb, multiboot_info_t *mbi, int x, int y, int color)
+{
+	multiboot_uint16_t *pixel = fb + mbi->framebuffer_pitch * y + 2 * x;
+        *pixel = color;
+}
+
+void drawrect(void *fb, multiboot_info_t *mbi, int x, int y, int w, int h, int color)
+{
+	int i,j;
+
+	for (i=0; i < h; i++) {
+		for (j=0; j < w; j++) {
+			putpixel(fb, mbi, x+j, y+i, color);
+		}
+	}
+}
+
+void kmain(unsigned long magic, unsigned long addr)
 {
 	multiboot_info_t *mbi;
 	mbi = (multiboot_info_t *) addr;
 
-	if (CHECK_FLAG (mbi->flags, 12))
-    	{
-      		multiboot_uint32_t color;
-      unsigned i;
-      void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
+	int debug_port;
 
-      switch (mbi->framebuffer_type)
-        {
-        case MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED:
-          {
-            unsigned best_distance, distance;
-            struct multiboot_color *palette;
-            
-            palette = (struct multiboot_color *) mbi->framebuffer_palette_addr;
+	// Init serial debug
+	#ifdef DEBUG_COM1
+		debug_port = 0x3F8;
+	#elif DEBUG_COM2
+		debug_port = 0x2F8;
+	#elif DEBUG_COM3
+		debug_port = 0x3E8;
+	#elif DEBUG_COM4
+		debug_port = 0x2E8;
+	#else
+		debug_port = 0x3F8;
+	#endif
 
-            color = 0;
-            best_distance = 4*256*256;
-            
-            for (i = 0; i < mbi->framebuffer_palette_num_colors; i++)
-              {
-                distance = (0xff - palette[i].blue) * (0xff - palette[i].blue)
-                  + palette[i].red * palette[i].red
-                  + palette[i].green * palette[i].green;
-                if (distance < best_distance)
-                  {
-                    color = i;
-                    best_distance = distance;
-                  }
-              }
-          }
-          break;
+	serial_init(debug_port);
 
-        case MULTIBOOT_FRAMEBUFFER_TYPE_RGB:
-          color = ((1 << mbi->framebuffer_blue_mask_size) - 1) 
-            << mbi->framebuffer_blue_field_position;
-          break;
+	kdebug(debug_port, "Multiboot Magic: ");
 
-        case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:
-          color = '\\' | 0x0100;
-          break;
+	if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
+		kdebug(debug_port, "Correct!");
+	} else {
+		kdebug(debug_port, "Not correct!");
+	}
 
-        default:
-          color = 0xffffffff;
-          break;
-        }
+	kdebug(debug_port, "\r\n");
 
-      	for (i = 0; i < mbi->framebuffer_width
-             && i < mbi->framebuffer_height; i++)
-        {
-          switch (mbi->framebuffer_bpp)
-            {
-            case 8:
-              {
-                multiboot_uint8_t *pixel = fb + mbi->framebuffer_pitch * i + i;
-                *pixel = color;
-              }
-              break;
-            case 15:
-            case 16:
-              {
-                multiboot_uint16_t *pixel
-                  = fb + mbi->framebuffer_pitch * i + 2 * i;
-                *pixel = color;
-              }
-              break;
-            case 24:
-              {
-                multiboot_uint32_t *pixel
-                  = fb + mbi->framebuffer_pitch * i + 3 * i;
-                *pixel = (color & 0xffffff) | (*pixel & 0xff000000);
-              }
-              break;
+	// VBE Info
+	//kdebug(debug_port, "\r\n");
 
-            case 32:
-              {
-                multiboot_uint32_t *pixel
-                  = fb + mbi->framebuffer_pitch * i + 4 * i;
-                *pixel = color;
-              }
-              break;
-            }
-        }
-    }
+	multiboot_uint32_t color;
+	unsigned i;
+	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
-	//unsigned char *fb = (unsigned char*)(addr + 88);
+	// A little desktop
+
+	drawrect(fb, mbi, 20, 50, 200, 50, 0xffffff);
 
 	/*
 	vgacon_init();

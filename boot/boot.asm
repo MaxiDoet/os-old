@@ -20,15 +20,19 @@ stack_top:
 
 section .text
 
-extern kernel_main
+extern kmain
 
 global _start
 _start:
     cli
 
+
     ; Pass the multiboot info to the kernel
     push ebx
-    call kernel_main
+    ; Pass the magic value
+    push eax
+
+    call kmain
 
     cli
     hlt
