@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "../include/gdt.h"
+#include "../include/kernel/gdt.h"
 
 extern void gdt_install();
 

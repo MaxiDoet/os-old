@@ -2,9 +2,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/keyboard.h"
-#include "../include/asm.h"
-#include "../include/print.h"
+#include "../include/drivers/keyboard.h"
+#include "../include/kernel/asm.h"
+#include "../include/lib/print.h"
 
 uint8_t keyboard_read()
 {

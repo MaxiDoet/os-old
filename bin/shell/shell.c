@@ -3,15 +3,15 @@
 #include <stdint.h>
 
 #include "../bin/shell/shell.h"
-#include "../include/panic.h"
-#include "../include/keyboard.h"
-#include "../include/print.h"
-#include "../include/string.h"
-#include "../include/pci.h"
-#include "../include/cmos.h"
-#include "../include/vga-color.h"
-#include "../include/vgacon.h"
-#include "../include/serial.h"
+#include "../include/kernel/panic.h"
+#include "../include/drivers/keyboard.h"
+#include "../include/lib/print.h"
+#include "../include/lib/string.h"
+#include "../include/drivers/pci.h"
+#include "../include/drivers/cmos.h"
+#include "../include/drivers/vga-color.h"
+#include "../include/drivers/vgacon.h"
+#include "../include/drivers/serial.h"
 #include "./strings.h"
 
 char* shell_read_str() {

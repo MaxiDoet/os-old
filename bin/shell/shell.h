@@ -1,7 +1,7 @@
 #ifndef _shell_h
 #define _shell_h
 
-#include "../include/scancodes.h"
+#include "../include/drivers/scancodes.h"
 
 //char* help_text = "Help:\n pciscan\n";
 

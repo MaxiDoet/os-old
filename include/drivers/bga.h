@@ -1,0 +1,30 @@
+#ifndef _bga_h
+#define _bga_h
+
+#define VBE_DISPI_IOPORT_INDEX 0x01CE
+#define VBE_DISPI_IOPORT_DATA 0x01CF
+
+#define VBE_DISPI_INDEX_ID 0x01CE
+#define VBE_DISPI_INDEX_XRES 0x01CF
+#define VBE_DISPI_INDEX_YRES 0x01D0
+#define VBE_DISPI_INDEX_BPP 0x01D1
+#define VBE_DISPI_INDEX_ENABLE 0x01D2
+#define VBE_DISPI_INDEX_BANK 0x01D3
+#define VBE_DISPI_INDEX_VIRT_WIDTH 0x01D4
+#define VBE_DISPI_INDEX_VIRT_HEIGHT 0x01D5
+#define VBE_DISPI_INDEX_X_OFFSET 0x01D6
+#define VBE_DISPI_INDEX_Y_OFFSET 0x01D7
+
+#define VBE_DISPI_DISABLED 0x00
+#define VBE_DISPI_ENABLED 0x01
+
+#define VBE_DISPI_BPP_4 0x04
+#define VBE_DISPI_BPP_8 0x08
+#define VBE_DISPI_BPP_15 0x0F
+#define VBE_DISPI_BPP_16 0x10
+#define VBE_DISPI_BPP_24 0x18
+#define VBE_DISPI_BPP_32 0x20
+
+void bga_set_video_mode(int width, int height, int depth);
+
+#endif

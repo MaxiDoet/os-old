@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "../include/print.h"
-#include "../include/vgacon.h"
+#include "../include/lib/print.h"
+#include "../include/drivers/vgacon.h"
 
 void printc(char c)
 {

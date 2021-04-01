@@ -1,10 +1,10 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "../include/panic.h"
-#include "../include/print.h"
-#include "../include/vgacon.h"
-#include "../include/vga-color.h"
-#include "../include/string.h"
+#include "../include/kernel/panic.h"
+#include "../include/lib/print.h"
+#include "../include/drivers/vgacon.h"
+#include "../include/drivers/vga-color.h"
+#include "../include/lib/string.h"
 
 void kpanic()
 {

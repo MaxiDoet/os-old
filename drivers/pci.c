@@ -2,8 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/pci.h"
-#include "../include/asm.h"
+#include "../include/drivers/pci.h"
+#include "../include/kernel/asm.h"
 
 uint32_t pci_read_config_dword(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset)
 {

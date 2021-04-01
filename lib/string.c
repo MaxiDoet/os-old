@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/string.h"
+#include "../include/lib/string.h"
 
 int strlen(char* str) {
 	int i=0;

@@ -2,10 +2,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/idt.h"
-#include "../include/print.h"
-#include "../include/asm.h"
-#include "../include/pic.h"
+#include "../include/kernel/idt.h"
+#include "../include/lib/print.h"
+#include "../include/kernel/asm.h"
+#include "../include/drivers/pic.h"
 
 void idt_set_entry(unsigned int pos, uint32_t base,
    uint16_t selector, uint8_t type_attributes)

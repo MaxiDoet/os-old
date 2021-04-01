@@ -2,8 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/cmos.h"
-#include "../include/asm.h"
+#include "../include/drivers/cmos.h"
+#include "../include/kernel/asm.h"
 
 uint8_t cmos_read(uint8_t offset) {
   uint8_t tmp = inb(CMOS_PORT_ADDRESS);

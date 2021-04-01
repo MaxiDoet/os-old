@@ -2,13 +2,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/vgacon.h"
-#include "../include/vga-color.h"
-#include "../include/print.h"
+#include "../include/drivers/vgacon.h"
+#include "../include/drivers/vga-color.h"
+#include "../include/lib/print.h"
 #include "../bin/shell/shell.h"
-#include "../include/gdt.h"
-#include "../include/idt.h"
-#include "../include/multiboot.h"
+#include "../include/kernel/gdt.h"
+#include "../include/kernel/idt.h"
+#include "../include/kernel/multiboot.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 

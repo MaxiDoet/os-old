@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "../include/vgacon.h"
-#include "../include/vga-color.h"
+#include "../include/drivers/vgacon.h"
+#include "../include/drivers/vga-color.h"
 
 void vgacon_init()
 {

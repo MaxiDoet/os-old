@@ -2,9 +2,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/serial.h"
+#include "../include/drivers/serial.h"
 
-#include "../include/asm.h"
+#include "../include/kernel/asm.h"
 
 void serial_init()
 {
