@@ -6,140 +6,122 @@ extern kpanic
 
 global int_handler_0
 int_handler_0:
+push 0x00
 call kpanic
 hlt
 
 global int_handler_1
 int_handler_1:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 '
+push 0x01
+call kpanic
 hlt
 
 global int_handler_2
 int_handler_2:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'2 '
+push 0x02
+call kpanic
 hlt
 
 global int_handler_3
 int_handler_3:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 '
+push 0x03
+call kpanic
 hlt
 
 global int_handler_4
 int_handler_4:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 '
+push 0x04
+call kpanic
 hlt
 
 global int_handler_5
 int_handler_5:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'5 '
+push 0x05
+call kpanic
 hlt
 
 global int_handler_6
 int_handler_6:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'6 '
+push 0x06
+call kpanic
 hlt
 
 global int_handler_7
 int_handler_7:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'7 '
+push 0x07
+call kpanic
 hlt
 
 global int_handler_8
 int_handler_8:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'8 '
+push 0x08
+call kpanic
 hlt
 
 global int_handler_9
 int_handler_9:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'9 '
+push 0x09
+call kpanic
 hlt
 
 global int_handler_10
 int_handler_10:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 0 '
+push 0x10
+call kpanic
 hlt
 
 global int_handler_11
 int_handler_11:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 1 '
+push 0x11
+call kpanic
 hlt
 
 global int_handler_12
 int_handler_12:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 2 '
+push 0x12
+call kpanic
 hlt
 
 global int_handler_13
 int_handler_13:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 3 '
+push 0x13
+call kpanic
 hlt
 
 global int_handler_14
 int_handler_14:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 4 '
+push 0x14
+call kpanic
 hlt
 
 global int_handler_15
 int_handler_15:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 5 '
+push 0x15
+call kpanic
 hlt
 
 global int_handler_16
 int_handler_16:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 6 '
+push 0x16
+call kpanic
 hlt
 
 global int_handler_17
 int_handler_17:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 7 '
+push 0x17
+call kpanic
 hlt
 
 global int_handler_18
 int_handler_18:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 8 '
+push 0x18
+call kpanic
 hlt
 
 global int_handler_19
 int_handler_19:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'1 9 '
+push 0x19
+call kpanic
 hlt
 
 global int_handler_20

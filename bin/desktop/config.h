@@ -1,3 +1,1 @@
 #define DESKTOP_BACKGROUND 0xC638
-
-

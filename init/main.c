@@ -12,6 +12,7 @@
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/idt.h"
 #include "../include/kernel/multiboot.h"
+#include "../include/kernel/kernel.h"
 
 #include "../bin/shell/shell.h"
 #include "../bin/desktop/desktop.h"
@@ -43,15 +44,11 @@ void kmain(unsigned long magic, unsigned long addr)
 	kdebug(debug_port, "Multiboot Magic: ");
 
 	if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
-		kdebug(debug_port, "Correct!");
+		kdebug(debug_port, "Correct!\r\n");
 	} else {
-		kdebug(debug_port, "Not correct!");
+		kdebug(debug_port, "Not correct!\r\n");
 	}
 
-	kdebug(debug_port, "\r\n");
-
-	multiboot_uint32_t color;
-	unsigned i;
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
 	kdebug(debug_port, "GDT init\r\n");
@@ -59,7 +56,9 @@ void kmain(unsigned long magic, unsigned long addr)
 	kdebug(debug_port, "IDT init\r\n");
 	idt_setup();
 
-	desktop_init(fb, mbi);
+	#ifdef DESKTOP
+		desktop_init(fb, mbi);
+	#endif
 
 	/*
 	vgacon_init();
