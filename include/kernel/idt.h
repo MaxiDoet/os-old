@@ -21,6 +21,7 @@ struct idt_description {
 struct idt_description idt_desc;
 struct idt_entry idt[IDT_ENTRIES];
 
-void idt_setup();
+void idt_set_gate(unsigned int pos, uint32_t base, uint16_t selector, uint8_t type_attributes);
+void idt_install();
 
 #endif

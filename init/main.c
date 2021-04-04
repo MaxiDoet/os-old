@@ -10,15 +10,37 @@
 #include "../include/lib/print.h"
 #include "../include/lib/convert.h"
 #include "../include/kernel/gdt.h"
+#include "../include/kernel/irq.h"
 #include "../include/kernel/idt.h"
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/pci.h"
+#include "../include/kernel/asm.h"
 
 #include "../bin/shell/shell.h"
 #include "../bin/desktop/desktop.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
+
+int timer_ticks=0;
+
+void timer_phase(int hz)
+{
+    int divisor = 1193180 / hz;       /* Calculate our divisor */
+    outb(0x43, 0x36);             /* Set our command byte 0x36 */
+    outb(0x40, divisor & 0xFF);   /* Set low byte of divisor */
+    outb(0x40, divisor >> 8);     /* Set high byte of divisor */
+}
+
+void timer_irq_handler() {
+	timer_ticks++;
+
+	kdebug(0x3F8, "Tick");
+
+	if(timer_ticks % 18 == 0) {
+		kdebug(0x3F8, "One second passed");
+	}
+}
 
 void kmain(unsigned long magic, unsigned long addr)
 {
@@ -55,7 +77,10 @@ void kmain(unsigned long magic, unsigned long addr)
 	kdebug(debug_port, "GDT init\r\n");
 	gdt_setup();
 	kdebug(debug_port, "IDT init\r\n");
-	idt_setup();
+	irq_install();
+
+	irq_install_handler(0, timer_irq_handler);
+	timer_phase(100);
 
 
 	/* Scan for pci devices and enable drivers */
@@ -223,6 +248,8 @@ void kmain(unsigned long magic, unsigned long addr)
 	kdebug(debug_port,  "|----------------------------------------|\n\r");
 
 	kdebug(debug_port, "Test:\r\nNumber: %d, Hex: %x", 24, 0x024a);
+
+	timer_phase(100);
 
 	#ifdef DESKTOP
 		desktop_init(fb, mbi);
