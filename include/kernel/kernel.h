@@ -3,6 +3,6 @@
 
 void kmain(unsigned long magic, unsigned long addr);
 void kpanic(int exception);
-void kdebug(int data_port, const char* format, ...);
+void kdebug(int data_port, char* format, ...);
 
 #endif
