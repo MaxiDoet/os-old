@@ -6,7 +6,7 @@
 #include "../bin/desktop/config.h"
 
 #include "../bin/desktop/image2.h"
-#include "../bin/desktop/font8x8.h"
+#include "../bin/desktop/font1.h"
 #include "../bin/desktop/cursor.h"
 
 void * memcpy(void* dst, const void* src, unsigned int cnt)
@@ -81,14 +81,14 @@ void drawimagebw(void *fb, multiboot_info_t *mbi, int x, int y, int w, int h, in
         }
 }
 
-void drawchar(void *fb, multiboot_info_t *mbi, int x, int y, int font_char[64], int color)
+void drawchar(void *fb, multiboot_info_t *mbi, int x, int y, int w, int h, int font_char[64], int color)
 {
 	int i,j;
 
-	for (i=0; i<8; i++) {
-		for (j=0; j<8; j++) {
+	for (i=0; i<h; i++) {
+		for (j=0; j<w; j++) {
 
-			if (font_char[i*8+j] == 1) {
+			if (font_char[i*w+j] == 1) {
 				putpixel(fb, mbi, x+j, y+i, color);
 			} else {
 				putpixel(fb, mbi, x+j, y+i, 0x0000);
@@ -96,6 +96,7 @@ void drawchar(void *fb, multiboot_info_t *mbi, int x, int y, int font_char[64], 
 		}
 	}
 }
+
 void desktop_init(void *fb, multiboot_info_t *mbi)
 {
 	// Background
@@ -109,18 +110,18 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 	memcpy(fb, bb, mbi->framebuffer_height * mbi->framebuffer_pitch + 2 * mbi->framebuffer_width);
 	*/
 
-	drawimage(fb, mbi, 50, 70, 610, 367, image);
-	/*
-        drawchar(fb, mbi, 10, 10, font8x8_A, 0xfffff);
-	drawchar(fb, mbi, 20, 10, font8x8_B, 0xfffff);
-	drawchar(fb, mbi, 30, 10, font8x8_C, 0xfffff);
-	drawchar(fb, mbi, 40, 10, font8x8_D, 0xfffff);
-	drawchar(fb, mbi, 50, 10, font8x8_E, 0xfffff);
-	drawchar(fb, mbi, 60, 10, font8x8_F, 0xfffff);
-	drawchar(fb, mbi, 70, 10, font8x8_G, 0xfffff);
-	drawchar(fb, mbi, 80, 10, font8x8_H, 0xfffff);
+	//drawimage(fb, mbi, 50, 100, 610, 367, image);
 
-	drawimagebw(fb, mbi, 500, 200, 64, 64, cursor, 0xfffff);
-	*/
+	drawchar(fb, mbi, 50, 50, 16, 32, ad_char_H, 0xF800);
+        drawchar(fb, mbi, 70, 50, 16, 32, ad_char_e, 0x07E7);
+        drawchar(fb, mbi, 90, 50, 16, 32, ad_char_l, 0x001F);
+        drawchar(fb, mbi, 110, 50, 16, 32, ad_char_l, 0xFFE0);
+        drawchar(fb, mbi, 130, 50, 16, 32, ad_char_o, 0x07FF);
+        //drawchar(fb, mbi, 100, 50, 32, char_ , 0xfffff);
+        drawchar(fb, mbi, 150, 50, 16, 32, ad_char_W, 0xF800);
+        drawchar(fb, mbi, 170, 50, 16, 32, ad_char_o, 0x07E7);
+        drawchar(fb, mbi, 190, 50, 16, 32, ad_char_r, 0x001F);
+        drawchar(fb, mbi, 210, 50, 16, 32, ad_char_l, 0xFFE0);
+        drawchar(fb, mbi, 230, 50, 16, 32, ad_char_d, 0x08FF);
 }
 

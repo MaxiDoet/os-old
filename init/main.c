@@ -15,6 +15,7 @@
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/pci.h"
+#include "../include/drivers/sb16.h"
 #include "../include/kernel/asm.h"
 
 #include "../bin/shell/shell.h"
@@ -79,9 +80,11 @@ void kmain(unsigned long magic, unsigned long addr)
 	kdebug(debug_port, "IDT init\r\n");
 	irq_install();
 
-	irq_install_handler(0, timer_irq_handler);
-	timer_phase(100);
+	//irq_install_handler(0, timer_irq_handler);
+	//timer_phase(100);
 
+	// Init soundblaster 16
+	sb16_init();
 
 	/* Scan for pci devices and enable drivers */
 	kdebug(debug_port, "PCI Scan\r\n");
