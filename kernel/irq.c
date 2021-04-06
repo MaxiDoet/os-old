@@ -1,6 +1,8 @@
 #include "../include/kernel/irq.h"
 #include "../include/kernel/idt.h"
 #include "../include/kernel/asm.h"
+#include "../include/kernel/kernel.h"
+#include "../config.h"
 
 /* IRQs */
 extern void int_handler_32();
@@ -74,6 +76,10 @@ void irq_install()
 /* This function gets called by a irq routine from assembler */
 void irq_handler(int irq)
 {
+	#ifdef DEBUG_IRQ_PRINT
+		kdebug("IRQ%d got fired!\r\n", irq);
+	#endif
+
 	void (*handler)();
 
 	/* Lets see if we have a routine for that */

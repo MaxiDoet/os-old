@@ -218,128 +218,118 @@ call irq_handler
 pop ebx
 iret
 
-extern keyboard_irq_handler
 global int_handler_33
 int_handler_33:
-;mov ax, 0x10
-;mov gs, ax
-;mov dword [gs:0xB8000],'3 3 '
-;call keyboard_irq_handler
-mov al, 0x20
-out 0x20, al
+push 1
+call irq_handler
+pop ebx
 iret
 
 global int_handler_34
 int_handler_34:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 4 '
-hlt
+push 2
+call irq_handler
+pop ebx
+iret
 
 global int_handler_35
 int_handler_35:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 5 '
-hlt
+push 3
+call irq_handler
+pop ebx
+iret
 
 global int_handler_36
 int_handler_36:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 6 '
-hlt
+push 4
+call irq_handler
+pop ebx
+iret
 
 global int_handler_37
 int_handler_37:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 7 '
-hlt
+push 5
+call irq_handler
+pop ebx
+iret
 
 global int_handler_38
 int_handler_38:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 8 '
-hlt
+push 6
+call irq_handler
+pop ebx
+iret
 
 global int_handler_39
 int_handler_39:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'3 9 '
-hlt
+push 7
+call irq_handler
+pop ebx
+iret
 
 global int_handler_40
 int_handler_40:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 0 '
-hlt
+push 8
+call irq_handler
+pop ebx
+iret
 
 global int_handler_41
 int_handler_41:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 1 '
-hlt
+push 9
+call irq_handler
+pop ebx
+iret
 
 global int_handler_42
 int_handler_42:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 2 '
-hlt
+push 10
+call irq_handler
+pop ebx
+iret
 
 global int_handler_43
 int_handler_43:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 3 '
-hlt
+push 11
+call irq_handler
+pop ebx
+iret
 
 global int_handler_44
 int_handler_44:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 4 '
-hlt
+push 12
+call irq_handler
+pop ebx
+iret
 
 global int_handler_45
 int_handler_45:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 5 '
-hlt
+push 13
+call irq_handler
+pop ebx
+iret
 
 global int_handler_46
 int_handler_46:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 6 '
-hlt
+push 14
+call irq_handler
+pop ebx
+iret
 
 global int_handler_47
 int_handler_47:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 7 '
-hlt
+push 15
+call irq_handler
+pop ebx
+iret
 
 global int_handler_48
 int_handler_48:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 8 '
-hlt
+iret
 
 global int_handler_49
 int_handler_49:
-mov ax, 0x10
-mov gs, ax
-mov dword [gs:0xB8000],'4 9 '
-hlt
+iret
 
 global int_handler_50
 int_handler_50:

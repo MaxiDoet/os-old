@@ -6,6 +6,7 @@
 #include "../include/lib/string.h"
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/serial.h"
+#include "../config.h"
 
 void puts(int data_port, char* str)
 {
@@ -16,7 +17,7 @@ void puts(int data_port, char* str)
 	}
 }
 
-void kdebug(int data_port, char* format, ...)
+void kdebug(char* format, ...)
 {
 
 	va_list args;
@@ -45,11 +46,11 @@ void kdebug(int data_port, char* format, ...)
                                         goto print_num;
 				case 's':
 					s = va_arg(args, char *);
-					puts(data_port, s);
+					puts(DEBUG_PORT, s);
 					break;
 				case 'c':
 					cc = va_arg(args, int);
-					puts(data_port, (char *)cc);
+					puts(DEBUG_PORT, (char *)cc);
 					break;
 				case 'x':
 					base=16;
@@ -66,10 +67,10 @@ void kdebug(int data_port, char* format, ...)
 
                                                 buf[j] = "0123456789abcdef"[n % base];
 
-					puts(data_port, &buf[j+1]);
+					puts(DEBUG_PORT, &buf[j+1]);
                         }
                 } else {
-                        serial_write(data_port, c);
+                        serial_write(DEBUG_PORT, c);
                 }
 
                 i++;

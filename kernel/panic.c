@@ -10,92 +10,77 @@ void kpanic(int exception)
 		0: Division by null
 	*/
 
-	int debug_port;
-
-        // Init serial debug
-  	#ifdef DEBUG_COM1
-                debug_port = 0x3F8;
-        #elif DEBUG_COM2
-                debug_port = 0x2F8;
-        #elif DEBUG_COM3
-                debug_port = 0x3E8;
-        #elif DEBUG_COM4
-                debug_port = 0x2E8;
-        #else
-                debug_port = 0x3F8;
-        #endif
-
-        serial_init(debug_port);
-	kdebug(debug_port, "Kernel Panic! ");
+        serial_init(DEBUG_PORT);
+	kdebug("Kernel Panic! ");
 
 	switch(exception) {
 		case 0x00:
-			kdebug(debug_port, "Division by Null");
+			kdebug("Division by Null");
 			break;
 		case 0x01:
-			kdebug(debug_port, "Debug");
+			kdebug("Debug");
 			break;
 		case 0x02:
-			kdebug(debug_port, "NMI");
+			kdebug("NMI");
 			break;
 		case 0x03:
-			kdebug(debug_port, "Breakpoint");
+			kdebug("Breakpoint");
 			break;
 		case 0x04:
-			kdebug(debug_port, "Overflow");
+			kdebug("Overflow");
 			break;
 		case 0x05:
-			kdebug(debug_port, "Bounds Check");
+			kdebug("Bounds Check");
 			break;
 		case 0x06:
-			kdebug(debug_port, "Invalid Opcode");
+			kdebug("Invalid Opcode");
 			break;
 		case 0x07:
-			kdebug(debug_port, "NPX Not Avaiable");
+			kdebug("NPX Not Avaiable");
 			break;
 		case 0x08:
-			kdebug(debug_port, "Double Fault");
+			kdebug("Double Fault");
 			break;
 		case 0x09:
-			kdebug(debug_port, "NPX Segment Overrun");
+			kdebug("NPX Segment Overrun");
 			break;
 		case 0x10:
-			kdebug(debug_port, "Invalid Task State Segment(TSS)");
+			kdebug("Invalid Task State Segment(TSS)");
 			break;
 		case 0x11:
-			kdebug(debug_port, "Segment Not Preset");
+			kdebug("Segment Not Preset");
 			break;
 		case 0x12:
-			kdebug(debug_port, "Stack Fault");
+			kdebug("Stack Fault");
 			break;
 		case 0x13:
-			kdebug(debug_port, "General Protection");
+			kdebug("General Protection");
 			break;
 		case 0x14:
-			kdebug(debug_port, "Page Fault");
+			kdebug("Page Fault");
 			break;
 		case 0x15:
 			// Note: Add some more details here
-			kdebug(debug_port, "Intel Reserved");
+			kdebug("Intel Reserved");
 			break;
 		case 0x16:
-			kdebug(debug_port, "Floating Point");
+			kdebug("Floating Point");
 			break;
 		case 0x17:
-			kdebug(debug_port, "Alignment Check");
+			kdebug("Alignment Check");
 			break;
 		case 0x18:
-			kdebug(debug_port, "Machine Check");
+			kdebug("Machine Check");
 			break;
 		case 0x19:
-			kdebug(debug_port, "SIMD Floating Point");
+			kdebug("SIMD Floating Point");
 			break;
 
 		case 0x32:
-			kdebug(debug_port, "Timer");
+			kdebug("Timer");
 			break;
 		default:
-			kdebug(debug_port, "Unknown Exception");
+			kdebug("Unknown Exception");
 			break;
 	}
 

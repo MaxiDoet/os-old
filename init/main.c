@@ -36,10 +36,10 @@ void timer_phase(int hz)
 void timer_irq_handler() {
 	timer_ticks++;
 
-	kdebug(0x3F8, "Tick");
+	kdebug("Tick");
 
 	if(timer_ticks % 18 == 0) {
-		kdebug(0x3F8, "One second passed");
+		kdebug("One second passed");
 	}
 }
 
@@ -51,46 +51,36 @@ void kmain(unsigned long magic, unsigned long addr)
 	int debug_port;
 
 	// Init serial debug
-	#ifdef DEBUG_COM1
-		debug_port = 0x3F8;
-	#elif DEBUG_COM2
-		debug_port = 0x2F8;
-	#elif DEBUG_COM3
-		debug_port = 0x3E8;
-	#elif DEBUG_COM4
-		debug_port = 0x2E8;
-	#else
-		debug_port = 0x3F8;
-	#endif
 
-	serial_init(debug_port);
+	serial_init(DEBUG_PORT);
 
-	kdebug(debug_port, "Multiboot Magic: ");
+	kdebug("Multiboot Magic: ");
 
 	if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
-		kdebug(debug_port, "Correct!\r\n");
+		kdebug("Correct!\r\n");
 	} else {
-		kdebug(debug_port, "Not correct!\r\n");
+		kdebug("Not correct!\r\n");
 	}
 
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
-	kdebug(debug_port, "GDT init\r\n");
+	kdebug("GDT init\r\n");
 	gdt_setup();
-	kdebug(debug_port, "IDT init\r\n");
+	kdebug("IDT init\r\n");
 	irq_install();
 
 	//irq_install_handler(0, timer_irq_handler);
 	//timer_phase(100);
 
-	// Init soundblaster 16
-	sb16_init();
+	if(sb16_probe() == 0) {
+		sb16_init();
+	}
 
 	/* Scan for pci devices and enable drivers */
-	kdebug(debug_port, "PCI Scan\r\n");
+	kdebug("PCI Scan\r\n");
 
-	kdebug(debug_port, "| VendorID | DeviceID | Class | Subclass |\n\r");
-	kdebug(debug_port, "|----------------------------------------|\n\r");
+	kdebug("| VendorID | DeviceID | Class | Subclass |\n\r");
+	kdebug("|----------------------------------------|\n\r");
 
 	int bus, slot;
 	for (bus=0; bus < 256; bus++) {
@@ -183,8 +173,8 @@ void kmain(unsigned long magic, unsigned long addr)
 					break;
 			}
 			*/
-			kdebug(debug_port,  "| %x ", vendorId);
-			kdebug(debug_port,  "      %x\r\n", deviceId);
+			kdebug("| %x ", vendorId);
+			kdebug("      %x\r\n", deviceId);
 
 			// Identify devices
 			/*
@@ -248,9 +238,9 @@ void kmain(unsigned long magic, unsigned long addr)
 		}
 	}
 
-	kdebug(debug_port,  "|----------------------------------------|\n\r");
+	kdebug("|----------------------------------------|\n\r");
 
-	kdebug(debug_port, "Test:\r\nNumber: %d, Hex: %x", 24, 0x024a);
+	kdebug("Test:\r\nNumber: %d, Hex: %x", 24, 0x024a);
 
 	timer_phase(100);
 

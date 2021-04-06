@@ -1,0 +1,8 @@
+### Dependencys
+
+git
+gcc
+nasm
+build-essential
+gcc-multilib
+xorriso
