@@ -16,32 +16,13 @@
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/pci.h"
 #include "../include/drivers/sb16.h"
+#include "../include/drivers/pit.h"
 #include "../include/kernel/asm.h"
 
 #include "../bin/shell/shell.h"
 #include "../bin/desktop/desktop.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
-
-int timer_ticks=0;
-
-void timer_phase(int hz)
-{
-    int divisor = 1193180 / hz;       /* Calculate our divisor */
-    outb(0x43, 0x36);             /* Set our command byte 0x36 */
-    outb(0x40, divisor & 0xFF);   /* Set low byte of divisor */
-    outb(0x40, divisor >> 8);     /* Set high byte of divisor */
-}
-
-void timer_irq_handler() {
-	timer_ticks++;
-
-	kdebug("Tick");
-
-	if(timer_ticks % 18 == 0) {
-		kdebug("One second passed");
-	}
-}
 
 void kmain(unsigned long magic, unsigned long addr)
 {
@@ -64,13 +45,16 @@ void kmain(unsigned long magic, unsigned long addr)
 
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
+	beep(1000);
+
+	kdebug("-------- Stage 1 --------\r\n");
+
 	kdebug("GDT init\r\n");
 	gdt_setup();
 	kdebug("IDT init\r\n");
 	irq_install();
 
-	//irq_install_handler(0, timer_irq_handler);
-	//timer_phase(100);
+	kdebug("-------- Stage 2 --------\r\n");
 
 	if(sb16_probe() == 0) {
 		sb16_init();
@@ -240,16 +224,7 @@ void kmain(unsigned long magic, unsigned long addr)
 
 	kdebug("|----------------------------------------|\n\r");
 
-	kdebug("Test:\r\nNumber: %d, Hex: %x", 24, 0x024a);
-
-	timer_phase(100);
-
 	#ifdef DESKTOP
 		desktop_init(fb, mbi);
 	#endif
-}
-
-void keyboard_irq_handler()
-{
-	prints("Keyboard IRQ");
 }
