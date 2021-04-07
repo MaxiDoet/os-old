@@ -45,14 +45,12 @@ void kmain(unsigned long magic, unsigned long addr)
 
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
-	beep(1000);
-
 	kdebug("-------- Stage 1 --------\r\n");
 
 	kdebug("GDT init\r\n");
 	gdt_setup();
 	kdebug("IDT init\r\n");
-	irq_install();
+	idt_install();
 
 	kdebug("-------- Stage 2 --------\r\n");
 

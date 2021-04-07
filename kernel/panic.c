@@ -75,10 +75,6 @@ void kpanic(int exception)
 		case 0x19:
 			kdebug("SIMD Floating Point");
 			break;
-
-		case 0x32:
-			kdebug("Timer");
-			break;
 		default:
 			kdebug("Unknown Exception");
 			break;

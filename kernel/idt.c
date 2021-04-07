@@ -6,6 +6,8 @@
 #include "../include/lib/print.h"
 #include "../include/kernel/asm.h"
 #include "../include/drivers/pic.h"
+#include "../include/kernel/irq.h"
+#include "../include/kernel/kernel.h"
 
 void idt_set_gate(unsigned int pos, uint32_t base,
    uint16_t selector, uint8_t type_attributes)
@@ -158,8 +160,6 @@ void idt_install()
 	idt_set_gate(29, (uint32_t)(uintptr_t)&int_handler_29, 0x8, 0x8e);
 	idt_set_gate(30, (uint32_t)(uintptr_t)&int_handler_30, 0x8, 0x8e);
 	idt_set_gate(31, (uint32_t)(uintptr_t)&int_handler_31, 0x8, 0x8e);
-
-	/*
 	idt_set_gate(32, (uint32_t)(uintptr_t)&int_handler_32, 0x8, 0x8e);
         idt_set_gate(33, (uint32_t)(uintptr_t)&int_handler_33, 0x8, 0x8e);
         idt_set_gate(34, (uint32_t)(uintptr_t)&int_handler_34, 0x8, 0x8e);
@@ -177,15 +177,13 @@ void idt_install()
         idt_set_gate(46, (uint32_t)(uintptr_t)&int_handler_46, 0x8, 0x8e);
         idt_set_gate(47, (uint32_t)(uintptr_t)&int_handler_47, 0x8, 0x8e);
 
-	*/
- 
 	idt_set_gate(48, (uint32_t)(uintptr_t)&int_handler_48, 0x8, 0x8e);
-    idt_set_gate(49, (uint32_t)(uintptr_t)&int_handler_49, 0x8, 0x8e);
-    idt_set_gate(50, (uint32_t)(uintptr_t)&int_handler_50, 0x8, 0x8e);
-    idt_set_gate(51, (uint32_t)(uintptr_t)&int_handler_51, 0x8, 0x8e);
-    idt_set_gate(52, (uint32_t)(uintptr_t)&int_handler_52, 0x8, 0x8e);
-    idt_set_gate(53, (uint32_t)(uintptr_t)&int_handler_53, 0x8, 0x8e);
-    idt_set_gate(54, (uint32_t)(uintptr_t)&int_handler_54, 0x8, 0x8e);
+    	idt_set_gate(49, (uint32_t)(uintptr_t)&int_handler_49, 0x8, 0x8e);
+    	idt_set_gate(50, (uint32_t)(uintptr_t)&int_handler_50, 0x8, 0x8e);
+	idt_set_gate(51, (uint32_t)(uintptr_t)&int_handler_51, 0x8, 0x8e);
+	idt_set_gate(52, (uint32_t)(uintptr_t)&int_handler_52, 0x8, 0x8e);
+	idt_set_gate(53, (uint32_t)(uintptr_t)&int_handler_53, 0x8, 0x8e);
+	idt_set_gate(54, (uint32_t)(uintptr_t)&int_handler_54, 0x8, 0x8e);
     idt_set_gate(55, (uint32_t)(uintptr_t)&int_handler_55, 0x8, 0x8e);
     idt_set_gate(56, (uint32_t)(uintptr_t)&int_handler_56, 0x8, 0x8e);
     idt_set_gate(57, (uint32_t)(uintptr_t)&int_handler_57, 0x8, 0x8e);
@@ -257,4 +255,16 @@ void idt_install()
     	asm volatile("lidt %0" :: "m"(idt_desc));
     	asm volatile("xchg %bx, %bx");
     	asm volatile("sti");
+}
+
+void int_handler(struct cpu_state* state)
+{
+	// Here we receive the cpu state
+	if (state->intr < 20) {
+		// Kernel Exception
+		kpanic(state->intr);
+	} else if (state->intr > 31){
+		// IRQ
+		irq_handler(state->intr - 31);
+	}
 }
