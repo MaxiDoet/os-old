@@ -30,10 +30,12 @@ typedef struct {
 	enum pci_bar_layout_type type;
 } pci_bar_descriptor;
 
-uint32_t pci_read_config_dword(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset);
-uint16_t pci_read_config_word(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset);
-pci_dev_descriptor pci_get_dev_descriptor(uint8_t bus, uint8_t device, uint8_t func);
-pci_bar_descriptor pci_get_bar_descriptor(uint8_t bus, uint8_t device, uint8_t func, int barNum);
+uint32_t pci_read_config_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset);
+uint16_t pci_read_config_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset);
+void pci_write_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint32_t value);
+void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint16_t value);
+pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func);
+pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum);
 void pci_probe();
 
 #endif

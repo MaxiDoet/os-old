@@ -4,8 +4,11 @@
 
 #include "../include/drivers/pci.h"
 #include "../include/kernel/asm.h"
+#include "../include/kernel/kernel.h"
 
-uint32_t pci_read_dword(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset)
+#include "../include/drivers/ac97.h"
+
+uint32_t pci_read_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset)
 {
         uint32_t address;
 	uint32_t tmp;
@@ -22,7 +25,7 @@ uint32_t pci_read_dword(uint8_t bus, uint8_t device, uint8_t func, uint8_t offse
         return tmp;
 }
 
-uint16_t pci_read_word(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset)
+uint16_t pci_read_word(uint16_t bus, uint16_t device, uint16_t func, uint16_t offset)
 {
 	uint32_t tmp;
 	tmp = pci_read_dword(bus, device, func, offset);
@@ -30,7 +33,37 @@ uint16_t pci_read_word(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset
 	return (tmp >> ((offset & 3) * 8)) & 0xffff;
 }
 
-pci_dev_descriptor pci_get_dev_descriptor(uint8_t bus, uint8_t device, uint8_t func)
+void pci_write_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint32_t value)
+{
+        uint32_t address;
+
+        uint32_t lbus = (uint32_t) bus;
+        uint32_t ldevice = (uint32_t) device;
+        uint32_t lfunc = (uint32_t) func;
+
+        address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
+
+        outl(PCI_CONFIG_ADDRESS, address); // Select address
+
+        outl(PCI_CONFIG_DATA, value);
+}
+
+void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint16_t value)
+{
+        uint32_t address;
+
+        uint32_t lbus = (uint32_t) bus;
+        uint32_t ldevice = (uint32_t) device;
+        uint32_t lfunc = (uint32_t) func;
+
+        address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
+
+        outl(PCI_CONFIG_ADDRESS, address); // Select address
+
+        outl(PCI_CONFIG_DATA, (uint16_t) value);
+}
+
+pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func)
 {
 	pci_dev_descriptor dev;
 
@@ -47,7 +80,7 @@ pci_dev_descriptor pci_get_dev_descriptor(uint8_t bus, uint8_t device, uint8_t f
 	return dev;
 }
 
-pci_bar_descriptor pci_get_bar_descriptor(uint8_t bus, uint8_t device, uint8_t func, int barNum) {
+pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum) {
 	pci_bar_descriptor bar;
 
 	uint32_t headertype = pci_read_dword(bus, device, func, 0x0E) & 0x7F;
@@ -94,6 +127,12 @@ void pci_probe()
 					if (bar.address && (bar.type == PCI_BAR_LAYOUT_IO)) {
 						dev.io_base = (uint32_t)bar.address;
 					}
+
+				}
+
+				if (dev.vendor_id == 0x8086 && (dev.device_id == 0x2415 || dev.device_id == 0x2425 || dev.device_id == 0x2445)) {
+						//pci_write_dword(busNum, deviceNum, functionNum, 0x04, pci_read_dword(busNum, deviceNum, functionNum, 0x04) | 5);
+						//ac97_init(0xC000, 0xC400);
 				}
 			}
 
