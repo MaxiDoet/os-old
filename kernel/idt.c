@@ -265,6 +265,6 @@ void int_handler(struct cpu_state* state)
 		kpanic(state->intr);
 	} else if (state->intr > 31){
 		// IRQ
-		irq_handler(state->intr - 31);
+		irq_handler(state->intr - 32);
 	}
 }

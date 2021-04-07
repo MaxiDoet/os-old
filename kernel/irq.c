@@ -27,7 +27,7 @@ void irq_handler(uint8_t irq)
 {
 	#ifdef DEBUG_IRQ_PRINT
 		kdebug("IRQ%d got fired!\r\n", (int)irq);
-	#endif
+        #endif
 
 	void (*handler)();
 
@@ -35,6 +35,10 @@ void irq_handler(uint8_t irq)
 	handler = irq_routines[irq];
 
 	if (handler) {
+		#ifdef DEBUG_IRQ_PRINT_ROUTINE
+			kdebug("IRQ%d got fired!\r\n", (int)irq);
+		#endif
+
 		handler();
 	}
 
