@@ -9,6 +9,7 @@ typedef struct {
 	int height;
 	int x;
 	int y;
+	int background;
 } window;
 
 void desktop_init(void *fb, multiboot_info_t *mbi);
