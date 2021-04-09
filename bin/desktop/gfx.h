@@ -1,3 +1,5 @@
+#include "../include/kernel/kernel.h"
+
 void putpixel(void *fb, multiboot_info_t *mbi, int x, int y, int color)
 {
         multiboot_uint16_t *pixel = fb + mbi->framebuffer_pitch * y + 2 * x;
@@ -110,6 +112,19 @@ void draw_circle_filled(void *fb, multiboot_info_t *mbi, int x0, int y0, int rad
 	}
 }
 
+void draw_char(void *fb, multiboot_info_t *mbi, int x, int y, int *font, char c, int color)
+{
+	for(int i=0; i < 32; i++) {
+		for(int j=0; j < 32; j++) {
+			//kdebug("i: %d, j: %d, data: %d\r\n", i, j, font[j+i*8]);
+			if(font[j+i*32] == 1) {
+				putpixel(fb, mbi, x+j, y+i, color);
+			} else {
+				continue;
+			}
+		}
+	}
+}
 
 /*
 void drawimage(void *fb, multiboot_info_t *mbi, int x, int y, int w, int h, int data[])

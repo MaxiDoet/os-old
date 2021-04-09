@@ -2,11 +2,12 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 # Config
-name="tm"
+name="font"
 size=20
-width=16
+width=32
 height=32
-chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-/*#+ß!§$%&"
+count=200
 out_file="font.h"
 
 # Colors
@@ -14,47 +15,64 @@ COLOR_BLACK=(0, 0, 0)
 COLOR_WHITE=(255, 255, 255)
 
 data="/* Generated using font converter tool by TheHeroCraft1579 */\n\n"
+# C Definition
+data+="int %s[][%s] = {" % (name, width*height)
 
-for i in range(len(chars)):
+font = ImageFont.truetype(sys.argv[1], size)
 
-    # C Definition
-    data+="int %s_char_%s[%s] = {" % (name, chars[i], width*height)
-    
-    print("Char: %s" % chars[i])
+for a in range(count):
+	for b in range(len(chars)):
+		print("a: %s, b: %s, char: %s" % (a, b, chars[b]))
+		if(ord(chars[b]) == a):
+			char = chars[b]
+			print("%s, ASCI: %s, Index: %s" % (char, ord(char), a))
+    			# Write char on image
+			im = Image.new("RGB",(width,height), color=(0, 0, 0))
+			draw = ImageDraw.Draw(im)
+			w, h = draw.textsize(char, font=font)
+			draw.fontmode = "1"
+			draw.text(((width-w)/2,(height-h)/2), char, fill="white", font=font)
 
-    # Write char on image
-    char=chars[i]
-    font = ImageFont.truetype(sys.argv[1], size)
+    			#im.save("char_%s.png" % char, "PNG")
 
-    im = Image.new("RGB",(width,height), color=(0, 0, 0))
-    draw = ImageDraw.Draw(im)
-    w, h = draw.textsize(char, font=font)
-    draw.fontmode = "1"
-    draw.text(((width-w)/2,(height-h)/2), char, fill="white", font=font)
+			pixels = im.load()
 
-    #im.save("char_%s.png" % char, "PNG")
+			data+="\n"
+			data+="{"
 
-    pixels = im.load()
+    			# Convert pixel
+			for c in range(height):
+				for d in range(width):
+					if (pixels[d, c] == COLOR_BLACK):
+						if d == width-1 and c == height-1:
+							data+="0"
+						else:
+							data+="0, "
+					else:
+						if d == width-1 and c == height-1:
+							data+="1"
+						else:
+							data+="1, "
 
-    # Convert pixels
-    for i in range(height):
-        for j in range(width):
-            if (pixels[j, i] == COLOR_BLACK):
-                data+="0, "
-            else:
-                data+="1, "
+			data+="}, // ASCI: %s\n" % (ord(char))
+			break
 
-        data+="\n"
+	else:
 
-    data = data[:-3]
+		data+="\n"
+		data+="{"
+		for e in range(width*height-1):
+			data+="0, "
 
-    # Footer
-    data+="};\n"
+		if a == count-1:
+			data+="0}  // None\n"
+		else:
+			data+="0}, // None\n"
 
-
-
+# Footer
+data+="};\n\n"
 data+="/* END */"
 
 with open(out_file, "w") as fp:
-    fp.write(data)
+	fp.write(data)
 
