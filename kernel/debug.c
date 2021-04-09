@@ -48,10 +48,12 @@ void kdebug(char* format, ...)
 					s = va_arg(args, char *);
 					puts(DEBUG_PORT, s);
 					break;
+				/*
 				case 'c':
 					cc = va_arg(args, int);
-					puts(DEBUG_PORT, (char *)cc);
+					puts(DEBUG_PORT, cc + '\0');
 					break;
+				*/
 				case 'x':
 					base=16;
                                         goto print_num;

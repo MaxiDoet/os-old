@@ -42,7 +42,7 @@ void ac97_init(uint32_t bar0, uint32_t bar1)
 	int final;
 
 	for (i = 0; (i < 32) && size; i++) {
-		BufDescList[i].buffer = nambar;
+		//BufDescList[i].buffer = ;
 
 		if (size >= 0x20000)
  		{
