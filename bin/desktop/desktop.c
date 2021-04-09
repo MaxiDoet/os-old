@@ -65,11 +65,10 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 
 	int r=255, g=0, b=0;
 
-	//int font[][64] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1}};
-
-	for(int j=0; j<64; j++) {
-		kdebug("Data: %d\r\n", font[0][j]);
-	}
+	int x=50;
+	int y=50;
+	int vx = 10;
+	int vy = -5;
 
 	while(1) {
 		// Background
@@ -93,16 +92,29 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 			b++;
 		}
 
-		draw_circle_filled(sfb, mbi, 500+i, 200, 100, (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_circle_filled(sfb, mbi, 500+i, 200, 100, (((r+50 & 0xf8)<<8) + ((g+50 & 0xfc)<<3)+(b+50>>3)));
 		i++;
 
-		draw_char(sfb, mbi, 40, 50, font[87], 'W', 0x02DF);
-		draw_char(sfb, mbi, 60, 50, font[101], 'e', 0x02DF);
- 		draw_char(sfb, mbi, 80, 50, font[108], 'l', 0x02DF);
-		draw_char(sfb, mbi, 100, 50, font[99], 'c', 0x02DF);
-                draw_char(sfb, mbi, 120, 50, font[111], 'o', 0x02DF);
-                draw_char(sfb, mbi, 140, 50, font[109], 'm', 0x02DF);
-		draw_char(sfb, mbi, 160, 50, font[101], 'e', 0x02DF);
+		// Bounce
+		x=x+vx;
+		y=y+vy;
+
+		if(x<0 || x>800) {
+			vx=-vx;
+			x=x+vx;
+		}
+		if(y<0 || y>600) {
+			vy=-vy;
+			y=y+vy;
+		}
+
+		draw_char(sfb, mbi, x, y, font[87], 'W', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_char(sfb, mbi, x+20, y, font[101], 'e', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+ 		draw_char(sfb, mbi, x+40, y, font[108], 'l', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_char(sfb, mbi, x+60, y, font[99], 'c', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+                draw_char(sfb, mbi, x+80, y, font[111], 'o', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+                draw_char(sfb, mbi, x+100, y, font[109], 'm', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_char(sfb, mbi, x+120, y, font[101], 'e', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
 
 		/*
 		for(int i=0; i<2; i++) {
