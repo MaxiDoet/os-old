@@ -6,6 +6,7 @@
 #include "../include/kernel/kernel.h"
 #include "../bin/desktop/gfx.h"
 #include "../bin/desktop/font.h"
+#include "../bin/desktop/image.h"
 
 window windows[10];
 
@@ -108,14 +109,18 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 			y=y+vy;
 		}
 
-		draw_char(sfb, mbi, x, y, font[87], 'W', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-		draw_char(sfb, mbi, x+20, y, font[101], 'e', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
- 		draw_char(sfb, mbi, x+40, y, font[108], 'l', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-		draw_char(sfb, mbi, x+60, y, font[99], 'c', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-                draw_char(sfb, mbi, x+80, y, font[111], 'o', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-                draw_char(sfb, mbi, x+100, y, font[109], 'm', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-		draw_char(sfb, mbi, x+120, y, font[101], 'e', (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_monochrome_bitmap(sfb, mbi, x, y, font[87],     (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_monochrome_bitmap(sfb, mbi, x+20, y, font[101], (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+ 		draw_monochrome_bitmap(sfb, mbi, x+40, y, font[108], (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_monochrome_bitmap(sfb, mbi, x+60, y, font[99],  (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+                draw_monochrome_bitmap(sfb, mbi, x+80, y, font[111], (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+                draw_monochrome_bitmap(sfb, mbi, x+100, y, font[109],(((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
+		draw_monochrome_bitmap(sfb, mbi, x+120, y, font[101],(((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
 
+		draw_string(sfb, mbi, 40, 80, font, "Hello", 0xff8200);
+
+
+		draw_image(sfb, mbi, 50, 10, 400, 225, image);
 		/*
 		for(int i=0; i<2; i++) {
 			draw_rectangle(fb2, mbi, windows[i].x, windows[i].y, windows[i].width, windows[i].height, windows[i].background);
