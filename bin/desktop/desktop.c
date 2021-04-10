@@ -80,6 +80,8 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 
 		draw_line(sfb, mbi, 20, 100, 50, 300, 0x07E5);
 
+		draw_image(sfb, mbi, 50, 10, 400, 225, image);
+
 		if (r > 0 && b == 0) {
 			r--;
 			g++;
@@ -119,8 +121,6 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 
 		draw_string(sfb, mbi, 40, 80, font, "Hello", 0xff8200);
 
-
-		draw_image(sfb, mbi, 50, 10, 400, 225, image);
 		/*
 		for(int i=0; i<2; i++) {
 			draw_rectangle(fb2, mbi, windows[i].x, windows[i].y, windows[i].width, windows[i].height, windows[i].background);
