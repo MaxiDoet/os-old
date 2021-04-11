@@ -184,9 +184,9 @@ void idt_install()
 	idt_set_gate(52, (uint32_t)(uintptr_t)&int_handler_52, 0x8, 0x8e);
 	idt_set_gate(53, (uint32_t)(uintptr_t)&int_handler_53, 0x8, 0x8e);
 	idt_set_gate(54, (uint32_t)(uintptr_t)&int_handler_54, 0x8, 0x8e);
-    idt_set_gate(55, (uint32_t)(uintptr_t)&int_handler_55, 0x8, 0x8e);
-    idt_set_gate(56, (uint32_t)(uintptr_t)&int_handler_56, 0x8, 0x8e);
-    idt_set_gate(57, (uint32_t)(uintptr_t)&int_handler_57, 0x8, 0x8e);
+    	idt_set_gate(55, (uint32_t)(uintptr_t)&int_handler_55, 0x8, 0x8e);
+    	idt_set_gate(56, (uint32_t)(uintptr_t)&int_handler_56, 0x8, 0x8e);
+    	idt_set_gate(57, (uint32_t)(uintptr_t)&int_handler_57, 0x8, 0x8e);
     idt_set_gate(58, (uint32_t)(uintptr_t)&int_handler_58, 0x8, 0x8e);
     idt_set_gate(59, (uint32_t)(uintptr_t)&int_handler_59, 0x8, 0x8e);
     idt_set_gate(60, (uint32_t)(uintptr_t)&int_handler_60, 0x8, 0x8e);

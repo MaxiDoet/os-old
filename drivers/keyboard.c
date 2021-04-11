@@ -8,13 +8,13 @@
 #include "../include/kernel/irq.h"
 #include "../include/lib/print.h"
 
+static int keyboard_callback_num = 0;
 static void (*keyboard_callbacks[8])(struct keyboard_event);
 static bool shift_pressed;
 static struct keyboard_event event;
 
 void keyboard_fire_callback(enum keyboard_key key, bool released)
 {
-	kdebug("keyboard: fire callback\r\n");
 	if (key == KEY_LSHIFT || key == KEY_RSHIFT) {
 		shift_pressed = !released;
 	}
@@ -30,7 +30,13 @@ void keyboard_fire_callback(enum keyboard_key key, bool released)
 
 void keyboard_add_callback(void (*callback)(struct keyboard_event))
 {
-	keyboard_callbacks[0] = callback;
+	keyboard_callbacks[keyboard_callback_num] = callback;
+	keyboard_callback_num++;
+}
+
+void keyboard_remove_callback()
+{
+	keyboard_callbacks[keyboard_callback_num] = 0;
 }
 
 void keyboard_irq_handler()
@@ -41,7 +47,7 @@ void keyboard_irq_handler()
 
 	if((scancode & 128) == 128) {
 		// Released
-		keyboard_fire_callback(keyboard_scancodeset[scancode], false);
+		keyboard_fire_callback(keyboard_scancodeset[scancode], true);
 	} else {
 		// Pressed
 		keyboard_fire_callback(keyboard_scancodeset[scancode], false);

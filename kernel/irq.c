@@ -44,4 +44,9 @@ void irq_handler(uint8_t irq)
 
 	// Send EOI
 	outb(0x20, 0x20);
+
+	// Send EOI to slave pic
+	if (irq >= 8) {
+		outb(0xA0, 0x20);
+	}
 }

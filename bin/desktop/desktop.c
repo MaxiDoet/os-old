@@ -7,6 +7,10 @@
 #include "../bin/desktop/gfx.h"
 #include "../bin/desktop/font.h"
 #include "../bin/desktop/image.h"
+#include "../include/drivers/keyboard.h"
+#include "../include/drivers/mouse.h"
+
+#include "../bin/desktop/cursor.h"
 
 window windows[10];
 
@@ -24,25 +28,16 @@ window desktop_new_window(char* title, int width, int height, int x, int y, int 
 	return win;
 }
 
-/*
-void memcpy(void *dest, void *src, size_t n)
-{
-   // Typecast src and dest addresses to (char *)
-   char *csrc = (char *)src;
-   char *cdest = (char *)dest;
+int cursorX=0;
+int cursorY=0;
 
-   // Copy contents of src[] to dest[]
-   for (int i=0; i<n; i++)
-       cdest[i] = csrc[i];
-}
-*/
-
-/*
-void memcpy(void *dst, const void *src, size_t n)
+void mouse_handler(struct mouse_event event)
 {
-    asm volatile("rep movsb" : "+D" (dst) : "c"(n), "S"(src) : "cc", "memory");
+	cursorX = event.x * 10;
+	cursorY = event.y * 10;
+
+	kdebug("CursorX: %d, CursorY: %d\r\n", cursorX, cursorY);
 }
-*/
 
 void memcpy(void *dst, const void *src, size_t n)
 {
@@ -54,6 +49,8 @@ void memcpy(void *dst, const void *src, size_t n)
 void desktop_init(void *fb, multiboot_info_t *mbi)
 {
 	void *sfb = (void *) (unsigned long) 0x0B4534B;
+
+	mouse_add_callback(mouse_handler);
 
 	// Test windows
 	window win1 = desktop_new_window("Window 1", 300, 200, 100, 100, 0xffa200);
@@ -111,16 +108,6 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 			y=y+vy;
 		}
 
-		draw_monochrome_bitmap(sfb, mbi, x, y, font[87],     (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-		draw_monochrome_bitmap(sfb, mbi, x+20, y, font[101], (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
- 		draw_monochrome_bitmap(sfb, mbi, x+40, y, font[108], (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-		draw_monochrome_bitmap(sfb, mbi, x+60, y, font[99],  (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-                draw_monochrome_bitmap(sfb, mbi, x+80, y, font[111], (((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-                draw_monochrome_bitmap(sfb, mbi, x+100, y, font[109],(((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-		draw_monochrome_bitmap(sfb, mbi, x+120, y, font[101],(((r & 0xf8)<<8) + ((g & 0xfc)<<3)+(b>>3)));
-
-		draw_string(sfb, mbi, 40, 80, font, "Hello", 0xff8200);
-
 		/*
 		for(int i=0; i<2; i++) {
 			draw_rectangle(fb2, mbi, windows[i].x, windows[i].y, windows[i].width, windows[i].height, windows[i].background);
@@ -136,6 +123,10 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 			}
 		}
 		*/
+
+		// Cursor
+		draw_image_transparent(sfb, mbi, cursorX, cursorY, 19, 27, cursor);
+
 
 		memcpy(fb, sfb, mbi->framebuffer_width * mbi->framebuffer_height * 2);
 	}

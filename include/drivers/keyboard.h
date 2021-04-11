@@ -32,7 +32,29 @@ enum keyboard_key {
 };
 
 static enum keyboard_key keyboard_scancodeset[] = {
-	KEY_UNUSED, KEY_F9, KEY_UNUSED, KEY_F5
+	KEY_UNUSED, KEY_ESC, KEY_1, KEY_2,
+	KEY_3, KEY_4, KEY_5, KEY_6,
+	KEY_7, KEY_8, KEY_9, KEY_0,
+	KEY_MINUS, KEY_EQUALS, KEY_BACKSPACE, KEY_TAB,
+	KEY_Q, KEY_W, KEY_E, KEY_R,
+	KEY_T, KEY_Y, KEY_U, KEY_I,
+	KEY_O, KEY_P, KEY_RSQ_BRACKET, KEY_LSQ_BRACKET,
+	KEY_ENTER, KEY_LCTRL, KEY_A, KEY_S,
+	KEY_D, KEY_F, KEY_G, KEY_H,
+	KEY_J, KEY_K, KEY_L, KEY_SEMICOLON,
+	KEY_APOSTROPHE, KEY_BACKTICK, KEY_LSHIFT, KEY_BACKSLASH,
+	KEY_Z, KEY_X, KEY_C, KEY_V,
+	KEY_B, KEY_N, KEY_M, KEY_COMMA,
+	KEY_DOT, KEY_SLASH, KEY_RSHIFT, KEY_TIMES_KP,
+	KEY_ALT, KEY_SPACE, KEY_CAPSLOCK, KEY_F1,
+	KEY_F2, KEY_F3, KEY_F4, KEY_F5,
+	KEY_F6, KEY_F7, KEY_F8, KEY_F9,
+	KEY_F10, KEY_NUMLOCK, KEY_SCROLLLOCK, KEY_7_KP,
+	KEY_8_KP, KEY_9_KP, KEY_MINUS_KP, KEY_4_KP,
+	KEY_5_KP, KEY_6_KP, KEY_PLUS_KP, KEY_DOT_KP,
+	KEY_UNUSED, KEY_UNUSED, KEY_UNUSED, KEY_F11,
+	KEY_F12, KEY_UNUSED, KEY_UNUSED, KEY_UNUSED,
+	KEY_UNUSED
 };
 
 struct keyboard_event {
@@ -44,5 +66,6 @@ struct keyboard_event {
 void keyboard_init();
 void keyboard_irq_handler();
 void keyboard_add_callback(void (*callback)(struct keyboard_event));
+void keyboard_remove_callback();
 
 #endif

@@ -147,3 +147,19 @@ void draw_image(void *fb, multiboot_info_t *mbi, int x, int y, int w, int h, int
                 }
         }
 }
+
+void draw_image_transparent(void *fb, multiboot_info_t *mbi, int x, int y, int w, int h, int data[])
+{
+        int i,j;
+
+        for (i=0; i<h; i++) {
+                for (j=0; j<w; j++) {
+			if (data[i*w+j] == 0x20304) continue;
+
+                        int color24 = data[i*w+j];
+                        int color16;
+                        color16 = (((color24&0xf80000)>>8) + ((color24&0xfc00)>>5) + ((color24&0xf8)>>3));
+                        putpixel(fb, mbi, x+j, y+i, color16);
+                }
+        }
+}

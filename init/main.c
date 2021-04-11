@@ -16,6 +16,7 @@
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/pci.h"
 #include "../include/drivers/keyboard.h"
+#include "../include/drivers/mouse.h"
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/kernel/asm.h"
@@ -24,11 +25,6 @@
 #include "../bin/desktop/desktop.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
-
-void test_callback(struct keyboard_event event)
-{
-	kdebug("Works!\r\n");
-}
 
 void kmain(unsigned long magic, unsigned long addr)
 {
@@ -61,7 +57,7 @@ void kmain(unsigned long magic, unsigned long addr)
 	kdebug("-------- Stage 2 --------\r\n");
 
 	keyboard_init();
-	keyboard_add_callback(test_callback);
+	mouse_init();
 
 	pci_probe();
 	if(sb16_probe() == 0) {
