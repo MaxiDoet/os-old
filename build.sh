@@ -17,10 +17,12 @@ gcc $GCCPARAMS -c drivers/sb16.c -o drivers/sb16.o
 gcc $GCCPARAMS -c drivers/pit.c -o drivers/pit.o
 gcc $GCCPARAMS -c drivers/ac97.c -o drivers/ac97.o
 
-# Build libs
-gcc $GCCPARAMS -c lib/print.c -o lib/print.o
-gcc $GCCPARAMS -c lib/string.c -o lib/string.o
-gcc $GCCPARAMS -c lib/convert.c -o lib/convert.o
+# Build libc
+gcc $GCCPARAMS -c libc/string/memcmp.c -o libc/string/memcmp.o
+gcc $GCCPARAMS -c libc/string/memcpy.c -o libc/string/memcpy.o
+gcc $GCCPARAMS -c libc/string/memmove.c -o libc/string/memmove.o
+gcc $GCCPARAMS -c libc/string/memset.c -o libc/string/memset.o
+gcc $GCCPARAMS -c libc/string/strlen.c -o libc/string/strlen.o
 
 # Build kernel
 gcc $GCCPARAMS -c kernel/debug.c -o kernel/debug.o
@@ -39,7 +41,12 @@ gcc $GCCPARAMS -c init/main.c -o init/main.o
 gcc $GCCPARAMS -c bin/desktop/desktop.c -o bin/desktop/desktop.o
 
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/gdt_asm.o kernel/idt_asm.o kernel/irq.o kernel/panic.o boot/boot.o init/main.o drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o lib/print.o lib/string.o lib/convert.o bin/desktop/desktop.o #bin/shell/shell.o
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/idt_asm.o kernel/gdt_asm.o \
+boot/boot.o \
+init/main.o \
+drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o \
+libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o \
+bin/desktop/desktop.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin

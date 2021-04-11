@@ -39,7 +39,7 @@ void mouse_handler(struct mouse_event event)
 	kdebug("CursorX: %d, CursorY: %d\r\n", cursorX, cursorY);
 }
 
-void memcpy(void *dst, const void *src, size_t n)
+void copy_fb(void *dst, const void *src, size_t n)
 {
     //asm volatile("rep movsq" : "+D" (dst) : "c"(n/8), "S"(src) : "cc", "memory");
 
@@ -128,7 +128,7 @@ void desktop_init(void *fb, multiboot_info_t *mbi)
 		draw_image_transparent(sfb, mbi, cursorX, cursorY, 19, 27, cursor);
 
 
-		memcpy(fb, sfb, mbi->framebuffer_width * mbi->framebuffer_height * 2);
+		copy_fb(fb, sfb, mbi->framebuffer_width * mbi->framebuffer_height * 2);
 	}
 }
 
