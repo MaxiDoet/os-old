@@ -59,10 +59,7 @@ for k in range(nof):
 	for y in range(height):
 		for x in range(width):
 			info("Frame: %s x:%s y:%s %s" % (k+1, x, y, rgb2hex(*pixels[x, y])))
-			if x == width-1 and y == height-1:
-				data+="%s" % rgb2hex(*pixels[x, y])
-			else:
-				data+="%s, " % rgb2hex(*pixels[x, y])
+			data+="%s, " % rgb2hex(*pixels[x, y])
 		data+="\n"
 
 # Footer
