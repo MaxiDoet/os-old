@@ -16,13 +16,16 @@ void draw_horizontal_line(int x, int y, int w, int color)
 	}
 }
 
-void draw_rectangle(int x, int y, int w, int h, int color)
+void draw_vertical_line(int x, int y, int h, int color)
 {
 	int i;
 
-	for(i=0; i<h; i++) {
-		draw_horizontal_line(x, y+i, w, color);
-	}
+        multiboot_uint16_t *pixel = fb + fb_pitch * y + 2 * x;
+
+        for (i=0; i<h; i++) {
+                *pixel = color;
+                pixel = fb + fb_pitch * (y+i) + 2 * x;
+        }
 }
 
 void draw_line(int x0, int y0, int x1, int y1, int color)
@@ -40,6 +43,34 @@ void draw_line(int x0, int y0, int x1, int y1, int color)
 			D-=2*dx;
 		}
 		D+=2*dy;
+	}
+}
+
+void draw_filled_rectangle(int x, int y, int w, int h, int color)
+{
+	int i;
+
+	for(i=0; i<h; i++) {
+		draw_horizontal_line(x, y+i, w, color);
+	}
+}
+
+void draw_rectangle(int x, int y, int w, int h, int size, int color)
+{
+	if (size==1) {
+		// Top, Bottom
+		draw_horizontal_line(x, y, w, color);
+		draw_horizontal_line(x, y+h, w, color);
+		// Left, Right
+		draw_vertical_line(x, y, h, color);
+		draw_vertical_line(x+w, y, h, color);
+	} else {
+		// Top, Bottom
+		draw_filled_rectangle(x, y, w, size, color);
+		draw_filled_rectangle(x, y+h, w, size, color);
+		// Left, Right
+		draw_filled_rectangle(x, y, size, h, color);
+		draw_filled_rectangle(x+w, y, size, h+size, color);
 	}
 }
 

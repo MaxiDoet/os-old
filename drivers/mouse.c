@@ -41,7 +41,6 @@ void mouse_remove_callback()
         mouse_callbacks[mouse_callback_num] = 0;
 }
 
-
 void mouse_irq_handler()
 {
 	static uint16_t mouse_receive_byte[3];
@@ -64,15 +63,9 @@ void mouse_irq_handler()
 			// Y Movement
 			mouse_receive_byte[2] = data;
 
-			/*
-			mouse_x += mouse_receive_byte[1] | 0;
-			mouse_y -= mouse_receive_byte[2] | 0;
-			*/
-
 			mouse_x += mouse_receive_byte[1] - ((mouse_receive_byte[0] << 4) & 0x100);
 			mouse_y -= mouse_receive_byte[2] - ((mouse_receive_byte[0] << 3) & 0x100);
 
-			/*
 			if (mouse_x < 0)
 				mouse_x = 0;
 			if (mouse_y < 0)
@@ -81,7 +74,6 @@ void mouse_irq_handler()
 				mouse_x = 799;
 			if (mouse_y >= 599)
 				mouse_y = 599;
-			*/
 
 			mouse_fire_callback();
 

@@ -37,8 +37,6 @@ void mouse_handler(struct mouse_event event)
 {
 	cursorX = event.x * 10;
 	cursorY = event.y * 10;
-
-	kdebug("CursorX: %d, CursorY: %d\r\n", cursorX, cursorY);
 }
 
 void desktop_swap_fb()
@@ -55,6 +53,17 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	fb_height = height;
 	fb_pitch = pitch;
 
+	int progress=0;
+
+	while(progress<100) {
+		draw_filled_rectangle(0, 0, fb_width, fb_height, 0x2104);
+		draw_filled_rectangle((fb_width / 2) - 100, 400, progress, 10, 0xFFFF);
+		progress++;
+
+		// Swap frontbuffer and backbuffer
+		desktop_swap_fb();
+	}
+
 	mouse_add_callback(mouse_handler);
 
 	while(1) {
@@ -62,17 +71,17 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 		#ifdef DESKTOP_WALLPAPER
 			draw_image(0, 0, fb_width, fb_height, wallpaper_image);
 		#else
-			draw_rectangle(0, 0, fb_width, fb_height, 0x4A69);
+			draw_filled_rectangle(0, 0, fb_width, fb_height, 0x4A69);
 		#endif
 
 		// Navbar
-		draw_rectangle(0, 0, fb_width, 20, 0x4228);
+		draw_filled_rectangle(0, 0, fb_width, 20, 0x4228);
 
 		// Cursor
 		draw_image_transparent(cursorX, cursorY, 19, 27, cursor);
 
 		// Swap frontbuffer and backbuffer
-		desktop_swap_fb();
+                desktop_swap_fb();
 	}
 }
 
