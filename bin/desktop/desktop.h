@@ -12,6 +12,13 @@ typedef struct {
 	int background;
 } window;
 
-void desktop_init(void *fb, multiboot_info_t *mbi);
+void* fb;
+void* bb;
+
+int fb_width;
+int fb_height;
+int fb_pitch;
+
+void desktop_init(unsigned long fbaddr, int width, int height, int pitch);
 
 #endif

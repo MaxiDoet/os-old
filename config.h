@@ -4,3 +4,4 @@
 //#define DEBUG_IRQ_PRINT_ROUTINE
 
 #define DESKTOP
+#define DESKTOP_WALLPAPER

@@ -65,6 +65,6 @@ void kmain(unsigned long magic, unsigned long addr)
 	}
 
 	#ifdef DESKTOP
-		desktop_init(fb, mbi);
+		desktop_init(mbi->framebuffer_addr, mbi->framebuffer_width, mbi->framebuffer_height, mbi->framebuffer_pitch);
 	#endif
 }

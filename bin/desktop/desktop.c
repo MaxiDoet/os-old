@@ -4,12 +4,14 @@
 
 #include "../bin/desktop/desktop.h"
 #include "../include/kernel/kernel.h"
-#include "../bin/desktop/gfx.h"
-#include "../bin/desktop/font.h"
-#include "../bin/desktop/image.h"
+#include "../bin/desktop/ui.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
 
+#include "../config.h"
+
+#include "../bin/desktop/font.h"
+#include "../bin/desktop/wallpaper.h"
 #include "../bin/desktop/cursor.h"
 
 window windows[10];
@@ -39,96 +41,38 @@ void mouse_handler(struct mouse_event event)
 	kdebug("CursorX: %d, CursorY: %d\r\n", cursorX, cursorY);
 }
 
-void copy_fb(void *dst, const void *src, size_t n)
+void desktop_swap_fb()
 {
-    //asm volatile("rep movsq" : "+D" (dst) : "c"(n/8), "S"(src) : "cc", "memory");
-
-	__asm__ volatile("rep movsw" : : "D" (dst), "S" (src), "c" (n / 2));
+	__asm__ volatile("rep movsw" : : "D" (bb), "S" (fb), "c" ((fb_width * fb_height * 2) / 2));
 }
 
-void desktop_init(void *fb, multiboot_info_t *mbi)
+void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 {
-	void *sfb = (void *) (unsigned long) 0x0B4534B;
+	bb = (void *) (unsigned long) fbaddr;
+	fb = (void *) (unsigned long) 0x0B4534B;
+
+	fb_width = width;
+	fb_height = height;
+	fb_pitch = pitch;
 
 	mouse_add_callback(mouse_handler);
 
-	// Test windows
-	window win1 = desktop_new_window("Window 1", 300, 200, 100, 100, 0xffa200);
-	window win2 = desktop_new_window("Window 2", 330, 200, 300, 200, 0x00fffb);
-
-	windows[0] = win1;
-	windows[1] = win2;
-
-	int i=0;
-
-	int r=255, g=0, b=0;
-
-	int x=50;
-	int y=50;
-	int vx = 10;
-	int vy = -5;
-
 	while(1) {
 		// Background
-		draw_rectangle(sfb, mbi, 0, 0, mbi->framebuffer_width, mbi->framebuffer_height, 0xE71C);
+		#ifdef DESKTOP_WALLPAPER
+			draw_image(0, 0, fb_width, fb_height, wallpaper_image);
+		#else
+			draw_rectangle(0, 0, fb_width, fb_height, 0x4A69);
+		#endif
 
 		// Navbar
-		draw_rectangle(sfb, mbi, 0, 0, mbi->framebuffer_width, 20, 0xBDD7);
-
-		draw_line(sfb, mbi, 20, 100, 50, 300, 0x07E5);
-
-		draw_image(sfb, mbi, 50, 10, 400, 225, image);
-
-		if (r > 0 && b == 0) {
-			r--;
-			g++;
-		}
-		if (g > 0 && r == 0) {
-			g--;
-		b++;
-		}
-		if (b > 0 && g == 0) {
-			r++;
-			b++;
-		}
-
-		draw_circle_filled(sfb, mbi, 500+i, 200, 100, (((r+50 & 0xf8)<<8) + ((g+50 & 0xfc)<<3)+(b+50>>3)));
-		i++;
-
-		// Bounce
-		x=x+vx;
-		y=y+vy;
-
-		if(x<0 || x>800) {
-			vx=-vx;
-			x=x+vx;
-		}
-		if(y<0 || y>600) {
-			vy=-vy;
-			y=y+vy;
-		}
-
-		/*
-		for(int i=0; i<2; i++) {
-			draw_rectangle(fb2, mbi, windows[i].x, windows[i].y, windows[i].width, windows[i].height, windows[i].background);
-		}
-		*/
-
-		/*
-		for(int line=0; line < mbi->framebuffer_height; line++) {
-			int offset = line * mbi->framebuffer_width;
-
-			for (int pixel=0; pixel < mbi-framebuffer_width; pixel++) {
-				if ()
-			}
-		}
-		*/
+		draw_rectangle(0, 0, fb_width, 20, 0x4228);
 
 		// Cursor
-		draw_image_transparent(sfb, mbi, cursorX, cursorY, 19, 27, cursor);
+		draw_image_transparent(cursorX, cursorY, 19, 27, cursor);
 
-
-		copy_fb(fb, sfb, mbi->framebuffer_width * mbi->framebuffer_height * 2);
+		// Swap frontbuffer and backbuffer
+		desktop_swap_fb();
 	}
 }
 
