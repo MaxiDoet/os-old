@@ -1,3 +1,13 @@
 # OS
+
+A simple 32bit os written in C
+
 ## Drivers
- - Serial Port (COM1) - PCI - VGA Text - CMOS (RTC)
+ - Serial Port
+ - PS/2 (Keyboard, Mouse)
+ - PCI
+ - PIT
+ - RTC
+
+## Building
+ 1. ``` git clone htt``` 
