@@ -17,6 +17,7 @@
 #include "../include/drivers/pci.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
+#include "../include/drivers/cmos.h"
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/kernel/asm.h"
@@ -34,35 +35,30 @@ void kmain(unsigned long magic, unsigned long addr)
 	int debug_port;
 
 	// Init serial debug
-
 	serial_init(DEBUG_PORT);
 
-	kdebug("Multiboot Magic: ");
+	kdebug(BUILD_INFO);
 
-	if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
-		kdebug("Correct!\r\n");
-	} else {
-		kdebug("Not correct!\r\n");
-	}
-
-	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
-
-	kdebug("-------- Stage 1 --------\r\n");
+	kdebug("-------- Init Stage 1 --------\r\n");
 
 	kdebug("GDT init\r\n");
 	gdt_setup();
 	kdebug("IDT init\r\n");
 	idt_install();
 
-	kdebug("-------- Stage 2 --------\r\n");
+	kdebug("-------- Init Stage 2 --------\r\n");
 
 	keyboard_init();
 	mouse_init();
+
+	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
 	pci_probe();
 	if(sb16_probe() == 0) {
 		sb16_init();
 	}
+
+	kdebug("-------- Init Stage 3 --------\r\n");
 
 	#ifdef DESKTOP
 		desktop_init(mbi->framebuffer_addr, mbi->framebuffer_width, mbi->framebuffer_height, mbi->framebuffer_pitch);
