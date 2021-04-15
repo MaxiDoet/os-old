@@ -3,6 +3,7 @@
 A simple 32bit os written in C
 
 ## Drivers
+ - VBE 800x600
  - Serial Port
  - PS/2 (Keyboard, Mouse)
  - PCI
