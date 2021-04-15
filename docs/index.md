@@ -14,7 +14,7 @@ A simple 32bit os written in C
  3. Adjust config ``` nano config.h ```
  4. Build ``` ./build.sh ```
 
-## Plans
+## Progress
  <p>
   Audio System / Driver 
   <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
