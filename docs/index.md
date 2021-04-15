@@ -17,5 +17,5 @@ A simple 32bit os written in C
 ## Plans
  <p>
   Audio System / Driver 
-  <img src="https://progress-bar-theherocraft1579.herokuapp.com/0">
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
  </p>
