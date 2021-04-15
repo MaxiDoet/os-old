@@ -1,4 +1,3 @@
 # OS
 
-## Docs
-docs/index.md
+[Docs](https://theherocraft1579.github.io/os/)
