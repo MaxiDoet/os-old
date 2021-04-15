@@ -19,3 +19,16 @@ A simple 32bit os written in C
   Audio System / Driver 
   <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
  </p>
+ <p>
+  Multitasking
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/40">
+ </p>
+ <p>
+  Networking
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/0">
+ </p>
+ <p>
+  Filesystem
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/0">
+ </p>
+ 
