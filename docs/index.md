@@ -13,3 +13,9 @@ A simple 32bit os written in C
  2. Install dependencys ``` sudo apt-get install gcc nasm build-essential gcc-multilib xorriso```
  3. Adjust config ``` nano config.h ```
  4. Build ``` ./build.sh ```
+
+## Plans
+ <p>
+  Audio System / Driver 
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/0">
+ </p>
