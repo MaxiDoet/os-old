@@ -5,8 +5,10 @@
 #include "../bin/desktop/desktop.h"
 #include "../include/kernel/kernel.h"
 #include "../bin/desktop/ui.h"
+
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
+#include "../include/drivers/serial.h"
 
 #include "../config.h"
 
@@ -39,6 +41,13 @@ void mouse_handler(struct mouse_event event)
 	cursorY = event.y * 10;
 }
 
+void keyboard_handler(struct keyboard_event event)
+{
+	if (!event.released) {
+		serial_write(0x3F8, event.asci);
+	}
+}
+
 void desktop_swap_fb()
 {
 	__asm__ volatile("rep movsw" : : "D" (bb), "S" (fb), "c" ((fb_width * fb_height * 2) / 2));
@@ -58,12 +67,13 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	while(progress<100) {
 		draw_filled_rectangle(0, 0, fb_width, fb_height, 0x2104);
 		draw_filled_rectangle((fb_width / 2) - 100, 400, progress, 10, 0xFFFF);
-		progress++;
+		progress+=2;
 
 		// Swap frontbuffer and backbuffer
 		desktop_swap_fb();
 	}
 
+	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);
 
 	while(1) {

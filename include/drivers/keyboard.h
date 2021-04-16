@@ -31,7 +31,7 @@ enum keyboard_key {
     KEY_UNUSED
 };
 
-static enum keyboard_key keyboard_scancodeset[] = {
+static enum keyboard_key keyboard_scancodeset[256] = {
 	KEY_UNUSED, KEY_ESC, KEY_1, KEY_2,
 	KEY_3, KEY_4, KEY_5, KEY_6,
 	KEY_7, KEY_8, KEY_9, KEY_0,
@@ -61,6 +61,7 @@ struct keyboard_event {
 	enum keyboard_key key;
 	bool released;
 	bool shift_pressed;
+	char asci;
 };
 
 void keyboard_init();
