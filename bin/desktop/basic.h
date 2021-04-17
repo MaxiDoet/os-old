@@ -1,3 +1,17 @@
+void putpixel(int x, int y, int color);
+void draw_horizontal_line(int x, int y, int w, int color);
+void draw_vertical_line(int x, int y, int h, int color);
+void draw_line(int x0, int y0, int x1, int y1, int color);
+void draw_filled_rectangle(int x, int y, int w, int h, int color);
+void draw_rectangle(int x, int y, int w, int h, int size, int color);
+void draw_rounded_rectangle(int x, int y, int w, int h, int color);
+void draw_circle(int x0, int y0, int radius, int color);
+void draw_circle_filled(int x0, int y0, int radius, int color);
+void draw_monochrome_bitmap(int x, int y, int *bitmap, int color);
+void draw_string(int x, int y, int font[][1024], char* str, int color);
+void draw_image(int x, int y, int w, int h, int data[]);
+void draw_image_transparent(int x, int y, int w, int h, int data[]);
+
 void putpixel(int x, int y, int color)
 {
         multiboot_uint16_t *pixel = fb + fb_pitch * y + 2 * x;
@@ -72,6 +86,17 @@ void draw_rectangle(int x, int y, int w, int h, int size, int color)
 		draw_filled_rectangle(x, y, size, h, color);
 		draw_filled_rectangle(x+w, y, size, h+size, color);
 	}
+}
+
+void draw_rounded_rectangle(int x, int y, int w, int h, int color)
+{
+	draw_filled_rectangle(x, y, w, h, color);
+
+	draw_circle_filled(x+2, y+2, 2, color);
+
+	draw_horizontal_line(x, y, 3, 0xFFF);
+	draw_vertical_line(x, y, 3, 0xFFF);
+	draw_line(x, y, x+3, y+3, 0xFFF);
 }
 
 void draw_circle(int x0, int y0, int radius, int color)

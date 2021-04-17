@@ -22,7 +22,6 @@
 #include "../include/drivers/pit.h"
 #include "../include/kernel/asm.h"
 
-#include "../bin/shell/shell.h"
 #include "../bin/desktop/desktop.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))

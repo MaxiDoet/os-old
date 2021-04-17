@@ -35,6 +35,9 @@ window desktop_new_window(char* title, int width, int height, int x, int y, int 
 int cursorX=0;
 int cursorY=0;
 
+char* str="";
+int i=0;
+
 void mouse_handler(struct mouse_event event)
 {
 	cursorX = event.x * 10;
@@ -44,7 +47,8 @@ void mouse_handler(struct mouse_event event)
 void keyboard_handler(struct keyboard_event event)
 {
 	if (!event.released) {
-		serial_write(0x3F8, event.asci);
+		str[i]=event.asci;
+		i++;
 	}
 }
 
@@ -89,6 +93,10 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 
 		// Cursor
 		draw_image_transparent(cursorX, cursorY, 19, 27, cursor);
+
+		draw_rounded_rectangle(70, 70, 40, 40, 0x4228);
+
+		draw_string(50, 50, font, str, 0x4228);
 
 		// Swap frontbuffer and backbuffer
                 desktop_swap_fb();
