@@ -69,8 +69,8 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	int progress=0;
 
 	while(progress<100) {
-		draw_filled_rectangle(0, 0, fb_width, fb_height, 0x2104);
-		draw_filled_rectangle((fb_width / 2) - 100, 400, progress, 10, 0xFFFF);
+		draw_rounded_rectangle(0, 0, fb_width, fb_height, 2, 0x2104);
+		draw_rounded_rectangle((fb_width / 2) - 100, 400, progress, 10, 2, 0xFFFF);
 		progress+=2;
 
 		// Swap frontbuffer and backbuffer
@@ -94,7 +94,11 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 		// Cursor
 		draw_image_transparent(cursorX, cursorY, 19, 27, cursor);
 
-		draw_rounded_rectangle(70, 70, 40, 40, 0x4228);
+		draw_rounded_rectangle(70, 70, 200, 100, 5, 0x4228);
+
+		draw_circle_filled(70+160, 77, 5, 0x5ECC);
+		draw_circle_filled(70+175, 77, 5, 0xFE26);
+		draw_circle_filled(70+190, 77, 5, 0xF28A);
 
 		draw_string(50, 50, font, str, 0x4228);
 

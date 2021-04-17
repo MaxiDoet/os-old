@@ -4,7 +4,7 @@ void draw_vertical_line(int x, int y, int h, int color);
 void draw_line(int x0, int y0, int x1, int y1, int color);
 void draw_filled_rectangle(int x, int y, int w, int h, int color);
 void draw_rectangle(int x, int y, int w, int h, int size, int color);
-void draw_rounded_rectangle(int x, int y, int w, int h, int color);
+void draw_rounded_rectangle(int x, int y, int w, int h, int r, int color);
 void draw_circle(int x0, int y0, int radius, int color);
 void draw_circle_filled(int x0, int y0, int radius, int color);
 void draw_monochrome_bitmap(int x, int y, int *bitmap, int color);
@@ -88,15 +88,87 @@ void draw_rectangle(int x, int y, int w, int h, int size, int color)
 	}
 }
 
-void draw_rounded_rectangle(int x, int y, int w, int h, int color)
+/*
+void draw_rounded_rectangle(int x, int y, int w, int h, int radius, int color)
 {
-	draw_filled_rectangle(x, y, w, h, color);
+	//draw_filled_rectangle(x+radius*2, y+radius*2, w-radius*2, h-radius*2, color);
 
-	draw_circle_filled(x+2, y+2, 2, color);
+	// Top left
+	draw_circle_filled(x+radius, y+radius, radius, 0xFFF);
+	// Top right
+	draw_circle_filled(x+w-radius, y+radius, radius, 0xFFF);
+	// Bottom left
+	draw_circle_filled(x+radius, y+h-radius, radius, 0xFFF);
+	// Bottom right
+	draw_circle_filled(x+w-radius, y+h-radius, radius, 0xFFF);
 
-	draw_horizontal_line(x, y, 3, 0xFFF);
-	draw_vertical_line(x, y, 3, 0xFFF);
-	draw_line(x, y, x+3, y+3, 0xFFF);
+	// Left
+	draw_filled_rectangle(x, y+radius*2, radius*2, h-radius*4-1, 0x37E0);
+	// Right
+	draw_filled_rectangle(x+w, y+radius, radius*2, h-radius, 0x37E0);
+	// Top
+	draw_filled_rectangle(x+radius*2, y, w-radius, radius*2, 0x37E0);
+	// Bottom
+        draw_filled_rectangle(x, y+h, w, radius, 0x37E0);
+
+	// Debug
+	putpixel(x, y, 0xF800);
+	putpixel(x+w, y, 0xF800);
+	putpixel(x, y+h, 0xF800);
+	putpixel(x+w, y+h, 0xF800);
+
+}
+*/
+/*
+void draw_rounded_rectangle(int x, int y, int w, int h, int r, int color)
+{
+	draw_horizontal_line(x+r  , y    , w-2*r, color); // Top
+  	draw_horizontal_line(x+r  , y+h-1, w-2*r, color); // Bottom
+  	draw_vertical_line(x    , y+r  , h-2*r, color); // Left
+	draw_vertical_line(x+w-1, y+r  , h-2*r, color); // Right
+
+  	draw_circle_filled(x+r    , y+r    , r, color);
+  	draw_circle_filled(x+w-r-1, y+r    , r, color);
+  	draw_circle_filled(x+w-r-1, y+h-r-1, r, color);
+  	draw_circle_filled(x+r    , y+h-r-1, r, color);
+}
+*/
+
+void e(short x0, short y0, short r, int cornername, int delta, int color)
+{
+	short f     = 1 - r;
+  	short ddF_x = 1;
+  	short ddF_y = -2 * r;
+  	short x     = 0;
+  	short y     = r;
+
+  while (x<y) {
+    if (f >= 0) {
+      y--;
+      ddF_y += 2;
+      f     += ddF_y;
+    }
+    x++;
+    ddF_x += 2;
+    f     += ddF_x;
+
+    if (cornername & 0x1) {
+      draw_vertical_line(x0+x, y0-y, 2*y+1+delta, color);
+      draw_vertical_line(x0+y, y0-x, 2*x+1+delta, color);
+    }
+    if (cornername & 0x2) {
+      draw_vertical_line(x0-x, y0-y, 2*y+1+delta, color);
+      draw_vertical_line(x0-y, y0-x, 2*x+1+delta, color);
+    }
+  }
+}
+
+void draw_rounded_rectangle(int x, int y, int w, int h, int r, int color) {
+  draw_filled_rectangle(x+r, y, w-2*r, h, color);
+
+  // draw four corners
+  e(x+w-r-1, y+r, r, 1, h-2*r-1, color);
+  e(x+r    , y+r, r, 2, h-2*r-1, color);
 }
 
 void draw_circle(int x0, int y0, int radius, int color)

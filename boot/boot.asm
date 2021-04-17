@@ -10,7 +10,7 @@ section .multiboot
     dd 0
     dd 800
     dd 600
-    dd 24
+    dd 16
     ;space 4 * 13
 
 section .bootstrap_stack nobits
