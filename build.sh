@@ -16,6 +16,7 @@ gcc $GCCPARAMS -c drivers/mouse.c -o drivers/mouse.o
 gcc $GCCPARAMS -c drivers/sb16.c -o drivers/sb16.o
 gcc $GCCPARAMS -c drivers/pit.c -o drivers/pit.o
 gcc $GCCPARAMS -c drivers/ac97.c -o drivers/ac97.o
+gcc $GCCPARAMS -c drivers/ata.c -o drivers/ata.o
 
 # Build libc
 gcc $GCCPARAMS -c libc/string/memcmp.c -o libc/string/memcmp.o
@@ -44,7 +45,7 @@ gcc $GCCPARAMS -c bin/desktop/desktop.c -o bin/desktop/desktop.o
 ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/idt_asm.o kernel/gdt_asm.o \
 boot/boot.o \
 init/main.o \
-drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o \
+drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o \
 libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o \
 bin/desktop/desktop.o
 

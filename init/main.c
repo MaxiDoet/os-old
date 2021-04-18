@@ -20,6 +20,7 @@
 #include "../include/drivers/cmos.h"
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
+#include "../include/drivers/ata.h"
 #include "../include/kernel/asm.h"
 
 #include "../bin/desktop/desktop.h"
@@ -55,6 +56,20 @@ void kmain(unsigned long magic, unsigned long addr)
 	pci_probe();
 	if(sb16_probe() == 0) {
 		sb16_init();
+	}
+
+	int8_t data[] = {
+		0xEF
+	};
+
+	ata_dev_t ata0 = ata_init(0x1F0, true);
+	ata_write(ata0, 1, data, 16);
+	ata_flush(ata0);
+	uint16_t data_read = ata_read(ata0, 1, 16);
+	kdebug("Read: %x\r\n", data_read);
+
+	if(data_read == 0xEF) {
+		kdebug("it works!\r\n");
 	}
 
 	kdebug("-------- Init Stage 3 --------\r\n");
