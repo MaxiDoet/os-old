@@ -7,8 +7,7 @@
 #include "../include/drivers/serial.h"
 #include "../include/drivers/vgacon.h"
 #include "../include/drivers/vga-color.h"
-#include "../include/lib/print.h"
-#include "../include/lib/convert.h"
+#include "../libc/include/mm.h"
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/idt.h"
@@ -27,10 +26,10 @@
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
-void kmain(unsigned long magic, unsigned long addr)
+void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
-	mbi = (multiboot_info_t *) addr;
+	mbi = (multiboot_info_t *) mbi_addr;
 
 	int debug_port;
 
@@ -45,6 +44,14 @@ void kmain(unsigned long magic, unsigned long addr)
 	gdt_setup();
 	kdebug("IDT init\r\n");
 	idt_install();
+
+	// 10MB
+	size_t heap_size = 1024*1024*10;
+
+	uint32_t* memupper = (uint32_t*)(((size_t)mbi_addr) + 8);
+
+	mm_t mm = mm_init(heap_size, (*memupper)* 1024 - heap_size - 10*1024);
+	void*  test = malloc(mm, 1024);
 
 	kdebug("-------- Init Stage 2 --------\r\n");
 
@@ -63,14 +70,9 @@ void kmain(unsigned long magic, unsigned long addr)
 	};
 
 	ata_dev_t ata0 = ata_init(0x1F0, true);
-	ata_write(ata0, 1, data, 16);
-	ata_flush(ata0);
-	uint16_t data_read = ata_read(ata0, 1, 16);
-	kdebug("Read: %x\r\n", data_read);
-
-	if(data_read == 0xEF) {
-		kdebug("it works!\r\n");
-	}
+	//ata_write(ata0, 1, data, 16);
+	//ata_flush(ata0);
+	ata_read(ata0, 0, 512);
 
 	kdebug("-------- Init Stage 3 --------\r\n");
 

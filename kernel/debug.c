@@ -31,6 +31,7 @@ void kdebug(char* format, ...)
 	char cc;
 
 	int base;
+	char* prefix;
 
         while(format[i] != '\0') {
 
@@ -55,10 +56,13 @@ void kdebug(char* format, ...)
 					break;
 				*/
 				case 'x':
+					prefix="0x";
 					base=16;
                                         goto print_num;
 
 				print_num:
+					puts(DEBUG_PORT, prefix);
+
 					n = va_arg(args, long);
 
                                         static char buf[32] = {0};

@@ -24,6 +24,7 @@ gcc $GCCPARAMS -c libc/string/memcpy.c -o libc/string/memcpy.o
 gcc $GCCPARAMS -c libc/string/memmove.c -o libc/string/memmove.o
 gcc $GCCPARAMS -c libc/string/memset.c -o libc/string/memset.o
 gcc $GCCPARAMS -c libc/string/strlen.c -o libc/string/strlen.o
+gcc $GCCPARAMS -c libc/mm.c -o libc/mm.o
 
 # Build kernel
 gcc $GCCPARAMS -c kernel/debug.c -o kernel/debug.o
@@ -46,7 +47,7 @@ ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o k
 boot/boot.o \
 init/main.o \
 drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o \
-libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o \
+libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o libc/mm.o \
 bin/desktop/desktop.o
 
 mkdir -p isodir/boot/grub
