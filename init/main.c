@@ -37,23 +37,20 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	serial_init(DEBUG_PORT);
 
 	kdebug(BUILD_INFO);
+	kdebug("\r\n");
 
-	kdebug("-------- Init Stage 1 --------\r\n");
-
-	kdebug("GDT init\r\n");
+	kdebug("[\e[0;33mkernel\e[0;37m] GDT init\r\n");
 	gdt_setup();
-	kdebug("IDT init\r\n");
+	kdebug("[\e[0;33mkernel\e[0;37m] IDT init\r\n");
 	idt_install();
-
-	// 10MB
-	size_t heap_size = 1024*1024*10;
 
 	uint32_t* memupper = (uint32_t*)(((size_t)mbi_addr) + 8);
 
-	mm_t mm = mm_init(heap_size, (*memupper)* 1024 - heap_size - 10*1024);
-	void*  test = malloc(mm, 1024);
+	mm_t mm = mm_init(HEAP_SIZE, (*memupper)* 1024 - HEAP_SIZE - 10*1024);
+	kdebug("[\e[0;33mkernel\e[0;37m] Memory Manager init\r\n");
+	kdebug("[\e[0;33mkernel\e[0;37m] Heap Size: %d\r\n", HEAP_SIZE);
 
-	kdebug("-------- Init Stage 2 --------\r\n");
+	void* test = malloc(mm, 1024);
 
 	keyboard_init();
 	mouse_init();
@@ -65,16 +62,8 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		sb16_init();
 	}
 
-	int8_t data[] = {
-		0xEF
-	};
-
-	ata_dev_t ata0 = ata_init(0x1F0, true);
-	//ata_write(ata0, 1, data, 16);
-	//ata_flush(ata0);
-	ata_read(ata0, 0, 512);
-
-	kdebug("-------- Init Stage 3 --------\r\n");
+	//ata_dev_t ata0 = ata_init(0x1F0, true);
+	//ata_read(ata0, 0, 512);
 
 	#ifdef DESKTOP
 		desktop_init(mbi->framebuffer_addr, mbi->framebuffer_width, mbi->framebuffer_height, mbi->framebuffer_pitch);

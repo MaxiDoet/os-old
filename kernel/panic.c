@@ -6,77 +6,72 @@
 
 void kpanic(int exception)
 {
-	/*
-		0: Division by null
-	*/
-
         serial_init(DEBUG_PORT);
-	kdebug("Kernel Panic! ");
 
 	switch(exception) {
 		case 0x00:
-			kdebug("Division by Null");
+			kdebug("[\e[0;31mpanic\e[0;37m] Division by Null");
 			break;
 		case 0x01:
-			kdebug("Debug");
+			kdebug("[\e[0;31mpanic\e[0;37m] Debug");
 			break;
 		case 0x02:
-			kdebug("NMI");
+			kdebug("[\e[0;31mpanic\e[0;37m] NMI");
 			break;
 		case 0x03:
-			kdebug("Breakpoint");
+			kdebug("[\e[0;31mpanic\e[0;37m] Breakpoint");
 			break;
 		case 0x04:
-			kdebug("Overflow");
+			kdebug("[\e[0;31mpanic\e[0;37m] Overflow");
 			break;
 		case 0x05:
-			kdebug("Bounds Check");
+			kdebug("[\e[0;31mpanic\e[0;37m] Bounds Check");
 			break;
 		case 0x06:
-			kdebug("Invalid Opcode");
+			kdebug("[\e[0;31mpanic\e[0;37m] Invalid Opcode");
 			break;
 		case 0x07:
-			kdebug("NPX Not Avaiable");
+			kdebug("[\e[0;31mpanic\e[0;37m] NPX Not Avaiable");
 			break;
 		case 0x08:
-			kdebug("Double Fault");
+			kdebug("[\e[0;31mpanic\e[0;37m] Double Fault");
 			break;
 		case 0x09:
-			kdebug("NPX Segment Overrun");
+			kdebug("[\e[0;31mpanic\e[0;37m] NPX Segment Overrun");
 			break;
 		case 0x10:
-			kdebug("Invalid Task State Segment(TSS)");
+			kdebug("[\e[0;31mpanic\e[0;37m] Invalid Task State Segment(TSS)");
 			break;
 		case 0x11:
-			kdebug("Segment Not Preset");
+			kdebug("[\e[0;31mpanic\e[0;37m] Segment Not Preset");
 			break;
 		case 0x12:
-			kdebug("Stack Fault");
+			kdebug("[\e[0;31mpanic\e[0;37m] Stack Fault");
 			break;
 		case 0x13:
-			kdebug("General Protection");
+			kdebug("[\e[0;31mpanic\e[0;37m] General Protection");
 			break;
 		case 0x14:
-			kdebug("Page Fault");
+			kdebug("[\e[0;31mpanic\e[0;37m] Page Fault");
 			break;
 		case 0x15:
 			// Note: Add some more details here
-			kdebug("Intel Reserved");
+			kdebug("[\e[0;31mpanic\e[0;37m] Intel Reserved");
 			break;
 		case 0x16:
-			kdebug("Floating Point");
+			kdebug("[\e[0;31mpanic\e[0;37m] Floating Point");
 			break;
 		case 0x17:
-			kdebug("Alignment Check");
+			kdebug("[\e[0;31mpanic\e[0;37m] Alignment Check");
 			break;
 		case 0x18:
-			kdebug("Machine Check");
+			kdebug("[\e[0;31mpanic\e[0;37m] Machine Check");
 			break;
 		case 0x19:
-			kdebug("SIMD Floating Point");
+			kdebug("[\e[0;31mpanic\e[0;37m] SIMD Floating Point");
 			break;
 		default:
-			kdebug("Unknown Exception");
+			kdebug("[\e[0;31mpanic\e[0;37m] Unknown Exception");
 			break;
 	}
 
