@@ -4,7 +4,7 @@
 #include "../include/kernel/multiboot.h"
 
 void pmm_init(multiboot_info_t *mbi);
-uint32_t pmm_alloc_page();
-void pmm_free_page(uint32_t page);
+uint32_t pmm_alloc();
+void pmm_free(uint32_t index);
 
 #endif

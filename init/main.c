@@ -60,10 +60,10 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	pmm_init(mbi);
 
 	kdebug("First alloc\r\n");
-	pmm_alloc_page();
+	pmm_alloc();
 
 	kdebug("Second alloc\r\n");
-	pmm_alloc_page();
+	pmm_alloc();
 
 	keyboard_init();
 	mouse_init();

@@ -8,12 +8,14 @@
 #include "../config.h"
 
 static uint8_t *bitmap;
-size_t bitmap_size;
+uint32_t bitmap_size;
 
-void pmm_mark_used()
-{
+/* These are defined in the linker.ld file */
+extern const void kernel_start;
+extern const void kernel_end;
 
-}
+void pmm_free(uint32_t index);
+void pmm_mark(uint32_t index);
 
 void pmm_init(multiboot_info_t *mbi)
 {
@@ -33,32 +35,23 @@ void pmm_init(multiboot_info_t *mbi)
 	}
 	*/
 
-	for (int i=0; i < mbi->mmap_length; i++) {
-                if (mmap[i].type == MULTIBOOT_MEMORY_AVAILABLE) {
-                        if (mmap[i].size >= bitmap_size) {
-                                bitmap = (uint8_t *) (unsigned long) mmap[i].addr;
-                                kdebug("[mem] PMM init\r\n      Bitmap Address: %x\r\n", mmap[i].addr);
-                                return;
-                        }
-                }
-        }
+	kdebug("Bitmap Size: %d\r\n", bitmap_size);
+	bitmap = (uint8_t*) (&kernel_end);
 
+	for (int i=0; i<bitmap_size; i++) {
+		bitmap[i] = 0;
+	}
 
-	kpanic("No space for bitmap!\r\n");
-
-	memset(bitmap, 0, bitmap_size);
 }
 
-uint32_t pmm_alloc_page()
+uint32_t pmm_alloc()
 {
-	bitmap[0] = 1;
-
 	for (int i=0; i < bitmap_size; i++) {
 		kdebug("Page: %d |%s|\r\n", i, (bitmap[i]==1) ? "x" : " ");
 
 		if (bitmap[i] == 0) {
 			// Set page to allocated
-			bitmap[i] = i;
+			bitmap[i] = 1;
 			return i;
 		}
 	}
@@ -67,7 +60,12 @@ uint32_t pmm_alloc_page()
 	kpanic("Out of Memory!");
 }
 
-void pmm_free_page(uint32_t page)
+void pmm_free(uint32_t index)
 {
-	bitmap[page] = 0;
+	bitmap[index] = 0;
+}
+
+void pmm_mark(uint32_t index)
+{
+	bitmap[index] = 1;
 }
