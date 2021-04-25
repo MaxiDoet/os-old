@@ -33,6 +33,7 @@ gcc $GCCPARAMS -c kernel/gdt.c -o kernel/gdt.o
 gcc $GCCPARAMS -c kernel/idt.c -o kernel/idt.o
 gcc $GCCPARAMS -c kernel/irq.c -o kernel/irq.o
 gcc $GCCPARAMS -c kernel/panic.c -o kernel/panic.o
+gcc $GCCPARAMS -c kernel/mem/pmm.c -o kernel/mem/pmm.o
 nasm $ASPARAMS kernel/idt.asm -o kernel/idt_asm.o
 nasm $ASPARAMS kernel/gdt.asm -o kernel/gdt_asm.o
 
@@ -43,7 +44,7 @@ gcc $GCCPARAMS -c init/main.c -o init/main.o
 gcc $GCCPARAMS -c bin/desktop/desktop.c -o bin/desktop/desktop.o
 
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/idt_asm.o kernel/gdt_asm.o \
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o \
 boot/boot.o \
 init/main.o \
 drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o \

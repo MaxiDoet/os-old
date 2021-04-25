@@ -16,6 +16,10 @@ void *irq_routines[16] = {
 void irq_install_handler(int irq, void (*handler))
 {
 	irq_routines[irq] = handler;
+
+	#ifdef DEBUG_IRQ_INSTALL
+		kdebug("[irq] installed handler for irq %d\r\n", irq);
+	#endif
 }
 
 void irq_uninstall_handler(int irq)
@@ -48,5 +52,20 @@ void irq_handler(uint8_t irq)
 	// Send EOI to slave pic
 	if (irq >= 8) {
 		outb(0xA0, 0x20);
+	}
+}
+
+void irq_print_map()
+{
+	kdebug("IRQ Map\r\n");
+	kdebug("| IRQ | Used |\r\n");
+
+	for (int i=0; i<16; i++) {
+		if (i >= 10) {
+			kdebug("|  %d |   %s   |\r\n", i, (irq_routines[i] != 0) ? "x" : " ");
+			continue;
+		}
+
+		kdebug("|  %d  |   %s   |\r\n", i, (irq_routines[i] != 0) ? "x" : " ");
 	}
 }

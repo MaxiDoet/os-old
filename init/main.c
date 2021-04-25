@@ -13,6 +13,7 @@
 #include "../include/kernel/idt.h"
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
+#include "../include/kernel/pmm.h"
 #include "../include/drivers/pci.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
@@ -26,6 +27,17 @@
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
+void serial_irq_handler()
+{
+	char c = serial_read(DEBUG_PORT);
+
+	switch(c) {
+		case 'i':
+			irq_print_map();
+			break;
+	}
+}
+
 void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
@@ -35,22 +47,23 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	// Init serial debug
 	serial_init(DEBUG_PORT);
+	irq_install_handler(4, serial_irq_handler);
 
 	kdebug(BUILD_INFO);
 	kdebug("\r\n");
 
-	kdebug("[\e[0;33mkernel\e[0;37m] GDT init\r\n");
+	kdebug("[kernel\e[0;37m] GDT init\r\n");
 	gdt_setup();
-	kdebug("[\e[0;33mkernel\e[0;37m] IDT init\r\n");
+	kdebug("[kernel\e[0;37m] IDT init\r\n");
 	idt_install();
 
-	uint32_t* memupper = (uint32_t*)(((size_t)mbi_addr) + 8);
+	pmm_init(mbi);
 
-	mm_t mm = mm_init(HEAP_SIZE, (*memupper)* 1024 - HEAP_SIZE - 10*1024);
-	kdebug("[\e[0;33mkernel\e[0;37m] Memory Manager init\r\n");
-	kdebug("[\e[0;33mkernel\e[0;37m] Heap Size: %d\r\n", HEAP_SIZE);
+	kdebug("First alloc\r\n");
+	pmm_alloc_page();
 
-	void* test = malloc(mm, 1024);
+	kdebug("Second alloc\r\n");
+	pmm_alloc_page();
 
 	keyboard_init();
 	mouse_init();
@@ -62,8 +75,11 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		sb16_init();
 	}
 
-	//ata_dev_t ata0 = ata_init(0x1F0, true);
-	//ata_read(ata0, 0, 512);
+	/*
+	ata_dev_t ata0 = ata_init(0x1F0, true);
+	uint8_t *ata_buf = (uint16_t *)malloc(mm, 512);
+	ata_read(ata0, 0, 2, ata_buf);
+	*/
 
 	#ifdef DESKTOP
 		desktop_init(mbi->framebuffer_addr, mbi->framebuffer_width, mbi->framebuffer_height, mbi->framebuffer_pitch);

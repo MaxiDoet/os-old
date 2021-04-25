@@ -261,8 +261,74 @@ void int_handler(struct cpu_state* state)
 {
 	// Here we receive the cpu state
 	if (state->intr < 20) {
+
 		// Kernel Exception
-		kpanic(state->intr);
+        	kdebug("[kernel] ");
+
+        	switch(state->intr) {
+                	case 0x00:
+                        	kpanic("Division by Null");
+                        	break;
+                	case 0x01:
+                        	kpanic("Debug");
+ 	                       	break;
+                	case 0x02:
+                        	kpanic("NMI");
+                        	break;
+                	case 0x03:
+                        	kpanic("Breakpoint");
+                        	break;
+                	case 0x04:
+                        	kpanic("Overflow");
+                        	break;
+                	case 0x05:
+                        	kpanic("Bounds Check");
+                        	break;
+                	case 0x06:
+                        	kpanic("Invalid Opcode");
+                        	break;
+                	case 0x07:
+                        	kpanic("NPX Not Avaiable");
+                        	break;
+                	case 0x08:
+                        	kpanic("Double Fault");
+                        	break;
+                	case 0x09:
+                        	kpanic("NPX Segment Overrun");
+                        	break;
+                	case 0x10:
+                        	kpanic("Invalid Task State Segment(TSS)");
+                       	 	break;
+                	case 0x11:
+                        	kpanic("Segment Not Preset");
+                        	break;
+                	case 0x12:
+                        	kpanic("Stack Fault");
+				break;
+			case 0x13:
+                        	kpanic("General Protection");
+                        	break;
+                	case 0x14:
+                        	kpanic("Page Fault");
+                        	break;
+                	case 0x15:
+                        	// Note: Add some more details here
+                        	kpanic("Intel Reserved");
+                        	break;
+                	case 0x16:
+                        	kpanic("Floating Point");
+                        	break;
+                	case 0x17:
+                        	kpanic("Alignment Check");
+                        	break;
+                	case 0x18:
+                        	kpanic("Machine Check");
+                        	break;
+                	case 0x19:
+                        	kpanic("SIMD Floating Point");
+                        	break;
+		}
+
 	} else if (state->intr > 31){
 		// IRQ
 		irq_handler(state->intr - 32);

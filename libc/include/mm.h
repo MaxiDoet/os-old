@@ -12,7 +12,9 @@ typedef struct {
 	mm_chunk* first_chunk;
 } mm_t;
 
-mm_t mm_init(size_t start, size_t size);
+mm_t mm;
+
+void mm_init(size_t start, size_t size);
 void* malloc(mm_t manager, size_t size);
 void free(mm_t manager, void* ptr);
 

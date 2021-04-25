@@ -17,9 +17,10 @@ void puts(int data_port, char* str)
 	}
 }
 
+/* Add more functions and add padding to hex numbers */
+
 void kdebug(char* format, ...)
 {
-
 	va_list args;
 
 	va_start(args, format);
@@ -42,7 +43,11 @@ void kdebug(char* format, ...)
                         c=format[i];
 
                         switch(c) {
+				case '%':
+					puts(DEBUG_PORT, "%");
+					break;
                                 case 'd':
+					prefix="";
 					base=10;
                                         goto print_num;
 				case 's':
@@ -64,6 +69,8 @@ void kdebug(char* format, ...)
 					puts(DEBUG_PORT, prefix);
 
 					n = va_arg(args, long);
+
+					if (n==0) kdebug("0");
 
                                         static char buf[32] = {0};
 

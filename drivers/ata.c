@@ -78,15 +78,15 @@ uint8_t ata_busy_wait(ata_dev_t dev)
 	return status;
 }
 
-void ata_read(ata_dev_t dev, uint32_t sector, int count)
+void ata_read_sector(ata_dev_t dev, uint32_t lba, uint8_t *buf)
 {
 	// Select sector
-	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
+	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
 	outb(dev.error_port, 0);
 	outb(dev.sector_count_port, 1);
-	outb(dev.lba_low_port, sector & 0x000000FF);
-	outb(dev.lba_mid_port, (sector & 0x0000FF00) >> 8);
-	outb(dev.lba_high_port, (sector & 0x00FF0000) >> 16);
+	outb(dev.lba_low_port, lba & 0x000000FF);
+	outb(dev.lba_mid_port, (lba & 0x0000FF00) >> 8);
+	outb(dev.lba_high_port, (lba & 0x00FF0000) >> 16);
 	outb(dev.command_port, 0x20);
 
 	uint8_t status = ata_busy_wait(dev);
@@ -95,28 +95,20 @@ void ata_read(ata_dev_t dev, uint32_t sector, int count)
 		return;
 	}
 
-	for (int i=0; i < count; i +=2) {
+	for (int i=0; i < ATA_SECTOR_SIZE / 2; i++) {
 		uint16_t data = inw(dev.data_port);
-
-		char *text = "  \0";
-		text[0] = data & 0xFF;
-
-		if (i+1 < count) {
-			text[1] = (data >> 8) & 0xFF;
-		} else {
-			text[1] = '\0';
-		}
-
-		kdebug("%x ", text);
+		*(uint16_t *)(buf + i * 2) = data;
 	}
 
-	for(int i = count + (count%2); i < 512; i += 2) {
-		inb(dev.data_port);
-	}
-
-	kdebug("\r\n");
+	ata_busy_wait(dev);
 }
 
+void ata_read(ata_dev_t dev, uint32_t lba, int sector_count, uint8_t *buf) {
+	for (int i=0; i < sector_count; i++) {
+		ata_read_sector(dev, lba + i, buf);
+		buf += ATA_SECTOR_SIZE;
+	}
+}
 
 void ata_write(ata_dev_t dev, uint32_t sector, uint8_t* data, uint32_t count)
 {

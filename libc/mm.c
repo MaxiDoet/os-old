@@ -4,7 +4,7 @@
 
 #include "../libc/include/mm.h"
 
-mm_t mm_init(size_t start, size_t size)
+void mm_init(size_t start, size_t size)
 {
 	mm_t manager;
 
@@ -18,6 +18,8 @@ mm_t mm_init(size_t start, size_t size)
 		manager.first_chunk->previous_chunk = 0;
 		manager.first_chunk->size = size - sizeof(mm_chunk);
 	}
+
+	mm = manager;
 }
 
 void* malloc(mm_t manager, size_t size)

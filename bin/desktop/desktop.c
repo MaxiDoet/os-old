@@ -4,6 +4,7 @@
 
 #include "../bin/desktop/desktop.h"
 #include "../include/kernel/kernel.h"
+#include "../libc/include/mm.h"
 #include "../bin/desktop/ui.h"
 
 #include "../include/drivers/keyboard.h"
@@ -61,6 +62,7 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 {
 	bb = (void *) (unsigned long) fbaddr;
 	fb = (void *) (unsigned long) 0x0B4534B;
+	//fb = (void *) malloc(mm, fb_width * fb_height * 10);
 
 	fb_width = width;
 	fb_height = height;
@@ -88,12 +90,6 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 			draw_filled_rectangle(0, 0, fb_width, fb_height, 0x4A69);
 		#endif
 
-		// Navbar
-		draw_filled_rectangle(0, 0, fb_width, 20, 0x4228);
-
-		// Cursor
-		draw_image_transparent(cursorX, cursorY, 19, 27, cursor);
-
 		draw_rounded_rectangle(70, 70, 200, 100, 5, 0x4228);
 
 		draw_circle_filled(70+160, 77, 5, 0x5ECC);
@@ -101,6 +97,12 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 		draw_circle_filled(70+190, 77, 5, 0xF28A);
 
 		draw_string(50, 50, font, str, 0x4228);
+
+		// Navbar
+		draw_filled_rectangle(0, 0, fb_width, 20, 0x4228);
+
+		// Cursor
+		draw_image_transparent(cursorX, cursorY, 19, 27, cursor);
 
 		// Swap frontbuffer and backbuffer
                 desktop_swap_fb();

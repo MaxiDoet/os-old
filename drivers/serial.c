@@ -8,6 +8,7 @@
 
 void serial_init(int data_port)
 {
+	outb(data_port + 1, 1); // Fires irq if data is avaiable
 	outb(data_port + 3, 0x80); // Allow access to baud rate registers
 	outb(data_port + 0, 0x03); // Send low byte of divisor
 	outb(data_port + 1, 0x00); // Send high byte of divisor
