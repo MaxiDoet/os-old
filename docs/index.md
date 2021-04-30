@@ -31,4 +31,8 @@ A simple 32bit os written in C
   Filesystem / ATA Driver
   <img src="https://progress-bar-theherocraft1579.herokuapp.com/20">
  </p>
+ <p>
+  Memory Management
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
+ </p>
  
