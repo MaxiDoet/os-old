@@ -35,7 +35,6 @@ void pmm_init(multiboot_info_t *mbi)
 	}
 	*/
 
-	kdebug("Bitmap Size: %d\r\n", bitmap_size);
 	bitmap = (uint8_t*) (&kernel_end);
 
 	for (int i=0; i<bitmap_size; i++) {
@@ -47,8 +46,6 @@ void pmm_init(multiboot_info_t *mbi)
 uint32_t pmm_alloc()
 {
 	for (int i=0; i < bitmap_size; i++) {
-		kdebug("Page: %d |%s|\r\n", i, (bitmap[i]==1) ? "x" : " ");
-
 		if (bitmap[i] == 0) {
 			// Set page to allocated
 			bitmap[i] = 1;
@@ -60,6 +57,22 @@ uint32_t pmm_alloc()
 	kpanic("Out of Memory!");
 }
 
+void pmm_info()
+{
+	int allocated_pages = 0;
+
+	// Count allocated pages
+	for (int i=0; i < bitmap_size; i++) {
+		if (bitmap[i] == 1) {
+			allocated_pages++;
+		}
+	}
+
+	kdebug("Physical Memory Info\r\n");
+	kdebug("| Pages Avaiable | Pages Used | Pages Free |\r\n");
+	kdebug("|  %d               %d           %d\r\n", bitmap_size, allocated_pages, bitmap_size - allocated_pages);
+}
+
 void pmm_free(uint32_t index)
 {
 	bitmap[index] = 0;
@@ -69,3 +82,4 @@ void pmm_mark(uint32_t index)
 {
 	bitmap[index] = 1;
 }
+

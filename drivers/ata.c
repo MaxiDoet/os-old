@@ -28,8 +28,7 @@ ata_dev_t ata_init(uint16_t port_base, bool master)
 	outb(dev.device_select_port, 0xA0);
 	uint8_t status = inb(dev.command_port);
 	if (status == 0xFF) {
-		kdebug("err\r\n");
-		return dev;
+		kpanic("ata: drive is busy");
 	}
 
 	// Reset
@@ -43,30 +42,18 @@ ata_dev_t ata_init(uint16_t port_base, bool master)
 	outb(dev.command_port, 0xEC);
 	status = inb(dev.command_port);
 	if (status == 0x00) {
-		kdebug("err\r\n");
+		kpanic("ata: no drive");
 	}
 
 	// Waits until device is ready
-	status = ata_busy_wait(dev);
+	status = ata_pio_sleep(dev);
 
 	if (status & 0x01) {
-		kdebug("err\r\n");
-		return dev;
+		kpanic("ata: drive is busy");
 	}
-
-	for(int i = 0; i < 256; i++) {
-        	uint16_t data = inw(dev.data_port);
-        	char *text = "  \0";
-        	text[0] = (data >> 8) & 0xFF;
-        	text[1] = data & 0xFF;
-
-		kdebug(text);
-    	}
-
-	kdebug("\r\n");
 }
 
-uint8_t ata_busy_wait(ata_dev_t dev)
+uint8_t ata_pio_sleep(ata_dev_t dev)
 {
 	uint8_t status;
 
@@ -78,39 +65,45 @@ uint8_t ata_busy_wait(ata_dev_t dev)
 	return status;
 }
 
-void ata_read_sector(ata_dev_t dev, uint32_t lba, uint8_t *buf)
+void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 {
 	// Select sector
 	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
 	outb(dev.error_port, 0);
-	outb(dev.sector_count_port, 1);
-	outb(dev.lba_low_port, lba & 0x000000FF);
-	outb(dev.lba_mid_port, (lba & 0x0000FF00) >> 8);
-	outb(dev.lba_high_port, (lba & 0x00FF0000) >> 16);
+	outb(dev.sector_count_port, sector_count);
+	outb(dev.lba_low_port, lba);
+	outb(dev.lba_mid_port, (uint8_t)(lba >> 8));
+	outb(dev.lba_high_port, (uint8_t) (lba >> 16));
 	outb(dev.command_port, 0x20);
 
-	uint8_t status = ata_busy_wait(dev);
+	uint8_t status = ata_pio_sleep(dev);
 
 	if (status & 0x01) {
 		return;
 	}
 
-	for (int i=0; i < ATA_SECTOR_SIZE / 2; i++) {
+	for (int i=0; i < sector_count; i++) {
+		ata_pio_sleep(dev);
+
+		for (int j=0; j < 256; j++) {
+
+			uint16_t data = inw(dev.data_port);
+
+			buf[j] = data;
+		}
+
+		buf+=226;
+
+		/*
 		uint16_t data = inw(dev.data_port);
 		*(uint16_t *)(buf + i * 2) = data;
+		*/
 	}
 
-	ata_busy_wait(dev);
+	ata_pio_sleep(dev);
 }
 
-void ata_read(ata_dev_t dev, uint32_t lba, int sector_count, uint8_t *buf) {
-	for (int i=0; i < sector_count; i++) {
-		ata_read_sector(dev, lba + i, buf);
-		buf += ATA_SECTOR_SIZE;
-	}
-}
-
-void ata_write(ata_dev_t dev, uint32_t sector, uint8_t* data, uint32_t count)
+void ata_pio_write(ata_dev_t dev, uint32_t sector, uint16_t* buf, uint32_t count)
 {
 	// Select sector
         outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
@@ -121,30 +114,36 @@ void ata_write(ata_dev_t dev, uint32_t sector, uint8_t* data, uint32_t count)
         outb(dev.lba_high_port, (sector & 0x00FF0000) >> 16);
         outb(dev.command_port, 0x20);
 
-	for(int i = 0; i < count; i += 2) {
-        	uint16_t data16 = data[i];
-        	if(i+1 < count) {
-            		data16 |= ((uint16_t)data[i+1]) << 8;
-		}
-
-		outw(dev.data_port, data16);
-
-        	char *text = "  \0";
-        	text[0] = (data16 >> 8) & 0xFF;
-        	text[1] = data16 & 0xFF;
+	for(int i = 0; i < 256; i++) {
+		outw(dev.data_port, buf[i]);
     	}
+}
 
-	for(int i = count + (count%2); i < 512; i += 2) {
-		outw(dev.data_port, 0x0000);
+void read_sectors_ATA_PIO(uint32_t target_address, uint32_t LBA, uint8_t sector_count)
+{
+	outb(0x1F0, 0xE0 | ((LBA >>24) & 0xF));
+	outb(0x1F2, sector_count);
+	outb(0x1F3, (uint8_t) LBA);
+	outb(0x1F4, (uint8_t)(LBA >> 8));
+	outb(0x1F5, (uint8_t)(LBA >> 16)); 
+	outb(0x1F7, 0x20); //Send the read command
+
+	uint16_t *target = (uint16_t*) target_address;
+
+	for (int j =0;j<sector_count;j++)
+	{
+		for(int i=0;i<256;i++)
+			target[i] = inw(0x1F0);
+		target+=256;
 	}
 }
 
-void ata_flush(ata_dev_t dev)
+void ata_pio_flush(ata_dev_t dev)
 {
 	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0));
 	outb(dev.command_port, 0xE7);
 
-	uint8_t status = ata_busy_wait(dev);
+	uint8_t status = ata_pio_sleep(dev);
 
 	if (status & 0x01) {
 		return;

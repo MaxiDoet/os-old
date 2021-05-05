@@ -21,11 +21,15 @@
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
+#include "../include/kernel/fat16.h"
 #include "../include/kernel/asm.h"
 
 #include "../bin/desktop/desktop.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
+
+extern const void kernel_start;
+extern const void kernel_end;
 
 void serial_irq_handler()
 {
@@ -34,6 +38,9 @@ void serial_irq_handler()
 	switch(c) {
 		case 'i':
 			irq_print_map();
+			break;
+		case 'p':
+			pmm_info();
 			break;
 	}
 }
@@ -47,26 +54,55 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	// Init serial debug
 	serial_init(DEBUG_PORT);
-	irq_install_handler(4, serial_irq_handler);
-
 	kdebug(BUILD_INFO);
 	kdebug("\r\n");
+
+	// For debug commands
+	irq_install_handler(4, serial_irq_handler);
+
 
 	kdebug("[kernel\e[0;37m] GDT init\r\n");
 	gdt_setup();
 	kdebug("[kernel\e[0;37m] IDT init\r\n");
 	idt_install();
 
-	pmm_init(mbi);
+	kdebug("[kernel] PMM init\r\n");
+	//pmm_init(mbi);
+	//pmm_alloc();
 
-	kdebug("First alloc\r\n");
-	pmm_alloc();
-
-	kdebug("Second alloc\r\n");
-	pmm_alloc();
+	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", mbi->mem_upper);
+	mm_init(mbi->mem_upper, 10*1024);
 
 	keyboard_init();
 	mouse_init();
+
+	kdebug("[ata] ATA init\r\n");
+	ata_dev_t ata = ata_init(0x1F0, true);
+
+	//uint16_t *ata_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
+
+	uint32_t* target;
+
+    	read_sectors_ATA_PIO(target, 0x0, 1);
+
+	int i;
+    	i = 0;
+    	while(i < 128)
+    	{
+        	kdebug("%x ", target[i] & 0xFF);
+        	kdebug("%x ", (target[i] >> 8) & 0xFF);
+        	i++;
+    	}
+
+
+	//ata_pio_read(ata, 0x0, 1, ata_buf);
+
+	//fat16_bpb *bpb = (fat16_bpb *) &ata_buf;
+	/*
+	for (int i=0; i < ATA_SECTOR_SIZE; i++) {
+		kdebug("%x ", ata_buf[i]);
+	}
+	*/
 
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
@@ -74,12 +110,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	if(sb16_probe() == 0) {
 		sb16_init();
 	}
-
-	/*
-	ata_dev_t ata0 = ata_init(0x1F0, true);
-	uint8_t *ata_buf = (uint16_t *)malloc(mm, 512);
-	ata_read(ata0, 0, 2, ata_buf);
-	*/
 
 	#ifdef DESKTOP
 		desktop_init(mbi->framebuffer_addr, mbi->framebuffer_width, mbi->framebuffer_height, mbi->framebuffer_pitch);

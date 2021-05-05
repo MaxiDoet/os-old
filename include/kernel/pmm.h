@@ -5,6 +5,7 @@
 
 void pmm_init(multiboot_info_t *mbi);
 uint32_t pmm_alloc();
+void pmm_info();
 void pmm_free(uint32_t index);
 
 #endif
