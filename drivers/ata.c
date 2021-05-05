@@ -6,51 +6,57 @@
 #include "../include/kernel/asm.h"
 #include "../include/kernel/kernel.h"
 
-ata_dev_t ata_init(uint16_t port_base, bool master)
+uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 {
-	ata_dev_t dev;
-
-	dev.data_port = port_base;
-	dev.error_port = port_base + 0x1;
-	dev.sector_count_port = port_base + 0x2;
-	dev.lba_low_port = port_base + 0x3;
-	dev.lba_mid_port = port_base + 0x4;
-	dev.lba_high_port = port_base + 0x5;
-	dev.device_select_port = port_base + 0x6;
-	dev.command_port = port_base + 0x7;
-	dev.control_port = port_base + 0x206;
-	dev.master = master;
+	dev->data_port = port_base;
+	dev->error_port = port_base + 0x1;
+	dev->sector_count_port = port_base + 0x2;
+	dev->lba_low_port = port_base + 0x3;
+	dev->lba_mid_port = port_base + 0x4;
+	dev->lba_high_port = port_base + 0x5;
+	dev->device_select_port = port_base + 0x6;
+	dev->command_port = port_base + 0x7;
+	dev->control_port = port_base + 0x206;
+	dev->master = master;
 
 	// Select drive
-	outb(dev.device_select_port, master ? 0xA0 : 0xB0);
-	outb(dev.control_port, 0);
+	outb(dev->device_select_port, master ? 0xA0 : 0xB0);
+	outb(dev->control_port, 0);
 
-	outb(dev.device_select_port, 0xA0);
-	uint8_t status = inb(dev.command_port);
+	outb(dev->device_select_port, 0xA0);
+	uint8_t status = inb(dev->command_port);
 	if (status == 0xFF) {
 		kpanic("ata: drive is busy");
 	}
 
 	// Reset
-	outb(dev.device_select_port, master ? 0xA0 : 0xB0);
-	outb(dev.sector_count_port, 0);
-	outb(dev.lba_low_port, 0);
-	outb(dev.lba_mid_port, 0);
-	outb(dev.lba_high_port, 0);
+	outb(dev->device_select_port, master ? 0xA0 : 0xB0);
+	outb(dev->sector_count_port, 0);
+	outb(dev->lba_low_port, 0);
+	outb(dev->lba_mid_port, 0);
+	outb(dev->lba_high_port, 0);
 
 	// Identify
-	outb(dev.command_port, 0xEC);
-	status = inb(dev.command_port);
+	outb(dev->command_port, 0xEC);
+	status = inb(dev->command_port);
 	if (status == 0x00) {
-		kpanic("ata: no drive");
+		return 0;
 	}
 
 	// Waits until device is ready
-	status = ata_pio_sleep(dev);
+	status = ata_pio_sleep(*dev);
+	return 1;
+}
 
-	if (status & 0x01) {
-		kpanic("ata: drive is busy");
-	}
+void ata_find(ata_dev_t *dev) {
+	// Look for root ata dev
+
+	if (ata_init(dev, ATA_PRIMARY_MASTER, true)) kdebug("[ata] root device: primary master\r\n"); return;
+	if (ata_init(dev, ATA_PRIMARY_SLAVE, false)) kdebug("[ata] root device: primary slave\r\n"); return;
+	if (ata_init(dev, ATA_SECONDARY_MASTER, true)) kdebug("[ata] root device: secondary master\r\n"); return;
+	if (ata_init(dev, ATA_SECONDARY_SLAVE, false)) kdebug("[ata] root device: secondary slave\r\n"); return;
+
+	kpanic("no ata root device");
 }
 
 uint8_t ata_pio_sleep(ata_dev_t dev)

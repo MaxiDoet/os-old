@@ -77,7 +77,8 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	mouse_init();
 
 	kdebug("[ata] ATA init\r\n");
-	ata_dev_t ata = ata_init(0x1F0, true);
+	ata_dev_t ata_dev;
+	ata_find(&ata_dev);
 
 	//uint16_t *ata_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
 
