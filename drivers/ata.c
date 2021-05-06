@@ -6,6 +6,9 @@
 #include "../include/kernel/asm.h"
 #include "../include/kernel/kernel.h"
 
+char* ata_device_tree(bool primary, bool master);
+void ata_device_debug(bool primary, bool master, char* msg);
+
 uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 {
 	dev->data_port = port_base;
@@ -19,15 +22,10 @@ uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 	dev->control_port = port_base + 0x206;
 	dev->master = master;
 
-	// Select drive
+	uint8_t status;
+
 	outb(dev->device_select_port, master ? 0xA0 : 0xB0);
 	outb(dev->control_port, 0);
-
-	outb(dev->device_select_port, 0xA0);
-	uint8_t status = inb(dev->command_port);
-	if (status == 0xFF) {
-		kpanic("ata: drive is busy");
-	}
 
 	// Reset
 	outb(dev->device_select_port, master ? 0xA0 : 0xB0);
@@ -39,16 +37,47 @@ uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 	// Identify
 	outb(dev->command_port, 0xEC);
 	status = inb(dev->command_port);
-	if (status == 0x00) {
-		return 0;
+	if (status == 0) return 0;
+
+	while (status & (1 << 7)) {
+		status = inb(dev->command_port);
 	}
 
-	// Waits until device is ready
-	status = ata_pio_sleep(*dev);
+	// Wait for data
+	status = inb(dev->command_port);
+
+	while ((status & (1 << 3)) && (status & (1 << 0))) {
+		status = inb(dev->command_port);
+	}
+
+	if (status & (1 << 0)) return 0;
+	ata_device_debug((port_base == 0x1F0 || port_base == 0x1E8), master, "ready");
+
+	// Read data
+	uint16_t info[256];
+	for (int i=0; i < 256; i++) {
+		info[i] = inw(dev->data_port);
+	}
+
 	return 1;
 }
 
-void ata_find(ata_dev_t *dev) {
+char* ata_device_tree(bool primary, bool master)
+{
+	if (primary) {
+		return (master) ? "ATA->Primary Master" : "ATA->Primary Slave";
+	} else {
+		return (master) ? "ATA->Secondary Master": "ATA->Secondary Slave";
+	}
+}
+
+void ata_device_debug(bool primary, bool master, char* msg)
+{
+	kdebug("[ata] %s: %s\r\n", ata_device_tree(primary, master), msg);
+}
+
+void ata_find(ata_dev_t *dev)
+{
 	// Look for root ata dev
 
 	if (ata_init(dev, ATA_PRIMARY_MASTER, true)) kdebug("[ata] root device: primary master\r\n"); return;
@@ -63,8 +92,17 @@ uint8_t ata_pio_sleep(ata_dev_t dev)
 {
 	uint8_t status;
 
+	kdebug("[ata] device sleep\r\n");
+
 	// Drive is busy
-        while(((status & 0x80) == 0x80) && ((status & 0x01) != 0x01)) {
+        while(status & (1 << 7)) {
+		// Wait 400ns before reading the status register
+		asm volatile ("nop");
+            	asm volatile ("nop");
+            	asm volatile ("nop");
+            	asm volatile ("nop");
+            	asm volatile ("nop");
+
                 status = inb(dev.command_port);
         }
 

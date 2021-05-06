@@ -1,7 +1,7 @@
 #!/bin/sh
 
-block_size=2M
-blocks=5
+block_size=512
+blocks=51200
 output_file="hdd.img"
 fs_type="fat"
 

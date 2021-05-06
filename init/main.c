@@ -60,7 +60,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	// For debug commands
 	irq_install_handler(4, serial_irq_handler);
 
-
 	kdebug("[kernel\e[0;37m] GDT init\r\n");
 	gdt_setup();
 	kdebug("[kernel\e[0;37m] IDT init\r\n");
@@ -76,7 +75,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	keyboard_init();
 	mouse_init();
 
-	kdebug("[ata] ATA init\r\n");
+	kdebug("[kernel] ATA init\r\n");
 	ata_dev_t ata_dev;
 	ata_find(&ata_dev);
 
@@ -84,7 +83,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	uint32_t* target;
 
-    	read_sectors_ATA_PIO(target, 0x0, 1);
+    	read_sectors_ATA_PIO(target, 2048, 1);
 
 	int i;
     	i = 0;
