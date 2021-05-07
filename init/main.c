@@ -21,7 +21,7 @@
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
-#include "../include/kernel/fat16.h"
+#include "../include/kernel/fat.h"
 #include "../include/kernel/asm.h"
 
 #include "../bin/desktop/desktop.h"
@@ -79,20 +79,16 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	ata_dev_t ata_dev;
 	ata_find(&ata_dev);
 
+	fat_probe(&ata_dev);
+
+	/*
 	uint16_t *ata_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
 	ata_pio_read(ata_dev, 0, 1, ata_buf);
 
-	//fat16_bpb *bpb = (fat16_bpb *) &ata_buf;
-
 	for (int i=0; i < 256; i++) {
 		kdebug("%x ", ata_buf[i]);
-
-		/*
-		if (ata_buf[i] == 0x) {
-			kdebug("Found signature: %d\r\n", i);
-		}
-		*/
 	}
+	*/
 
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
