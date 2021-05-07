@@ -79,30 +79,20 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	ata_dev_t ata_dev;
 	ata_find(&ata_dev);
 
-	//uint16_t *ata_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
-
-	uint32_t* target;
-
-    	read_sectors_ATA_PIO(target, 2048, 1);
-
-	int i;
-    	i = 0;
-    	while(i < 128)
-    	{
-        	kdebug("%x ", target[i] & 0xFF);
-        	kdebug("%x ", (target[i] >> 8) & 0xFF);
-        	i++;
-    	}
-
-
-	//ata_pio_read(ata, 0x0, 1, ata_buf);
+	uint16_t *ata_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
+	ata_pio_read(ata_dev, 0, 1, ata_buf);
 
 	//fat16_bpb *bpb = (fat16_bpb *) &ata_buf;
-	/*
-	for (int i=0; i < ATA_SECTOR_SIZE; i++) {
+
+	for (int i=0; i < 256; i++) {
 		kdebug("%x ", ata_buf[i]);
+
+		/*
+		if (ata_buf[i] == 0x) {
+			kdebug("Found signature: %d\r\n", i);
+		}
+		*/
 	}
-	*/
 
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 

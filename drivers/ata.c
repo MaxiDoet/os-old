@@ -115,19 +115,21 @@ void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
 	outb(dev.error_port, 0);
 	outb(dev.sector_count_port, sector_count);
-	outb(dev.lba_low_port, lba);
-	outb(dev.lba_mid_port, (uint8_t)(lba >> 8));
-	outb(dev.lba_high_port, (uint8_t) (lba >> 16));
+	outb(dev.lba_low_port, lba & 0x000000FF);
+	outb(dev.lba_mid_port, (lba & 0x0000FF00) >> 8);
+	outb(dev.lba_high_port, (lba & 0x00FF0000) >> 16);
 	outb(dev.command_port, 0x20);
 
+	/*
 	uint8_t status = ata_pio_sleep(dev);
 
 	if (status & 0x01) {
 		return;
 	}
+	*/
 
 	for (int i=0; i < sector_count; i++) {
-		ata_pio_sleep(dev);
+		//ata_pio_sleep(dev);
 
 		for (int j=0; j < 256; j++) {
 

@@ -61,7 +61,7 @@ void kdebug(char* format, ...)
 					break;
 				*/
 				case 'x':
-					prefix="0x";
+					prefix="";
 					base=16;
                                         goto print_num;
 
