@@ -58,7 +58,7 @@ typedef struct fs_fat16_t {
 	uint8_t boot_signature[2];
 } __attribute__((packed)) fs_fat16_t;
 
-typedef fs_fat16_entry {
+typedef struct fs_fat16_entry {
 	uint8_t file_name[8];
 	uint8_t file_extension[3];
 	uint8_t attribute;

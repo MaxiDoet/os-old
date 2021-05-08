@@ -46,7 +46,7 @@ uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 	// Wait for data
 	status = inb(dev->command_port);
 
-	while ((status & (1 << 3)) && (status & (1 << 0))) {
+	while ((!status & (1 << 3)) && (!status & (1 << 0))) {
 		status = inb(dev->command_port);
 	}
 
@@ -88,13 +88,10 @@ void ata_find(ata_dev_t *dev)
 	kpanic("no ata root device");
 }
 
-uint8_t ata_pio_sleep(ata_dev_t dev)
+uint8_t ata_pio_wait_bsy(ata_dev_t dev)
 {
 	uint8_t status;
 
-	kdebug("[ata] device sleep\r\n");
-
-	// Drive is busy
         while(status & (1 << 7)) {
 		// Wait 400ns before reading the status register
 		asm volatile ("nop");
@@ -109,6 +106,18 @@ uint8_t ata_pio_sleep(ata_dev_t dev)
 	return status;
 }
 
+uint8_t ata_pio_wait_drq(ata_dev_t dev)
+{
+	uint8_t status;
+
+        while(!(status & ((1 << 3) | (1 << 0)))) {
+		kdebug("[ata] waiting\r\n");
+                status = inb(dev.command_port);
+        }
+
+        return status;
+}
+
 void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 {
 	// Select sector
@@ -120,16 +129,8 @@ void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 	outb(dev.lba_high_port, (lba & 0x00FF0000) >> 16);
 	outb(dev.command_port, 0x20);
 
-	/*
-	uint8_t status = ata_pio_sleep(dev);
-
-	if (status & 0x01) {
-		return;
-	}
-	*/
-
 	for (int i=0; i < sector_count; i++) {
-		//ata_pio_sleep(dev);
+		ata_pio_wait_drq(dev);
 
 		for (int j=0; j < 256; j++) {
 
@@ -145,8 +146,6 @@ void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 		*(uint16_t *)(buf + i * 2) = data;
 		*/
 	}
-
-	ata_pio_sleep(dev);
 }
 
 void ata_pio_write(ata_dev_t dev, uint32_t sector, uint16_t* buf, uint32_t count)
@@ -189,7 +188,7 @@ void ata_pio_flush(ata_dev_t dev)
 	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0));
 	outb(dev.command_port, 0xE7);
 
-	uint8_t status = ata_pio_sleep(dev);
+	uint8_t status = ata_pio_wait_bsy(dev);
 
 	if (status & 0x01) {
 		return;
