@@ -30,13 +30,33 @@ void fat_probe(ata_dev_t *ata_dev)
 			uint32_t fat_start = entry.start_sector;
 			ata_pio_read(*ata_dev, fat_start, 1, fat_buf);
 
-			//fs_fat16_t *fat = (fs_fat16_t *) fat_buf;
+			fs_fat16_t *fat = (fs_fat16_t *) fat_buf;
 
-			for (int j=0; j < 256; j++) {
-				kdebug("%x ", fat_buf[j]);
+			uint32_t root_dir_start = fat_start + fat->sectors_per_fat * fat->fat_copies + 2;
+			uint32_t root_dir_size = (fat->max_root_entries * 32) / fat->bytes_per_sector;
+			uint32_t data_start = root_dir_start + root_dir_size;
+			uint16_t entries_per_sector = fat->bytes_per_sector / 32;
+			uint16_t entries_per_cluster = entries_per_sector * fat->sectors_per_cluster;
+
+			uint16_t *root_dir_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
+			ata_pio_read(*ata_dev, root_dir_start, 1, root_dir_buf);
+
+			fs_fat16_dir_t *root_first = (fs_fat16_dir_t *) root_dir_buf;
+			kdebug("FAT Info:\r\nroot_dir_start: %d\r\nroot_dir_size: %d\r\ndata_start: %d\r\n", root_dir_start, root_dir_size, data_start);
+
+			/*
+			char* filename;
+			for (int k=0; k < 8; k++) {
+				filename[k] = root_first->file_name[k];
 			}
+			filename[9] = '\0';
 
-			//kdebug("[fs] fat test: %x\r\n", fat->boot_code[0]);
+			kdebug("[fs] Filename: %x\r\n", root_first->file_name[0]);
+
+			*/
+			for (int l=0; l < 256; l++) {
+                		kdebug("%x ", root_dir_buf[l]);
+        		}
 		}
 	}
 }

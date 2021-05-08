@@ -8,6 +8,7 @@
 
 char* ata_device_tree(bool primary, bool master);
 void ata_device_debug(bool primary, bool master, char* msg);
+void ata_err_dump(ata_dev_t dev, uint8_t status);
 
 uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 {
@@ -101,17 +102,55 @@ uint8_t ata_pio_wait_bsy(ata_dev_t dev)
             	asm volatile ("nop");
 
                 status = inb(dev.command_port);
+
+		if (status & (1 << 0)) ata_err_dump(dev, status);
         }
 
 	return status;
+}
+
+void ata_err_dump(ata_dev_t dev, uint8_t status)
+{
+	char* error_text;
+	uint8_t error;
+
+	// Error bit is set
+	if (status & (1 << 0)) {
+		uint8_t error = inb(dev.error_port);
+
+		if (error & (1 << 0)) {
+			error_text = "Address Mark not found";
+		} else if (error & (1 << 1)) {
+			error_text = "Track zero not found";
+		} else if (error & (1 << 2)) {
+			error_text = "Aborted command";
+		} else if (error & (1 << 3)) {
+			error_text = "Media change request";
+		} else if (error & (1 << 4)) {
+			error_text = "ID not found";
+		} else if (error & (1 << 5)) {
+			error_text = "Media changed";
+		} else if (error & (1 << 6)) {
+			error_text = "Uncorrectable data error";
+		} else if (error & (1 << 7)) {
+			error_text = "Bad Block detected";
+		} else {
+			error_text = "Unknown error";
+		}
+	}
+
+	kdebug("[ata] %s -> Error: %s\r\n", ata_device_tree((dev.data_port == 0x1F0 || dev.data_port == 0x1E8), dev.master), error_text);
 }
 
 uint8_t ata_pio_wait_drq(ata_dev_t dev)
 {
 	uint8_t status;
 
-        while(!(status & ((1 << 3) | (1 << 0)))) {
+        while(!(status & (1 << 3))) {
 		kdebug("[ata] waiting\r\n");
+
+		if (status & (1 << 0)) ata_err_dump(dev, status);
+
                 status = inb(dev.command_port);
         }
 
@@ -130,21 +169,15 @@ void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 	outb(dev.command_port, 0x20);
 
 	for (int i=0; i < sector_count; i++) {
+		ata_pio_wait_bsy(dev);
 		ata_pio_wait_drq(dev);
 
 		for (int j=0; j < 256; j++) {
-
 			uint16_t data = inw(dev.data_port);
-
 			buf[j] = data;
 		}
 
 		buf+=226;
-
-		/*
-		uint16_t data = inw(dev.data_port);
-		*(uint16_t *)(buf + i * 2) = data;
-		*/
 	}
 }
 

@@ -70,7 +70,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	//pmm_alloc();
 
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", mbi->mem_upper);
-	mm_init(mbi->mem_upper, 10*1024);
+	mm_init(mbi->mem_upper, 100*1024);
 
 	keyboard_init();
 	mouse_init();

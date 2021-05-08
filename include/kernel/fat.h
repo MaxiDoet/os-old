@@ -58,16 +58,18 @@ typedef struct fs_fat16_t {
 	uint8_t boot_signature[2];
 } __attribute__((packed)) fs_fat16_t;
 
-typedef struct fs_fat16_entry {
+typedef struct fs_fat16_dir_t {
 	uint8_t file_name[8];
 	uint8_t file_extension[3];
 	uint8_t attribute;
-	uint8_t reserved[10];
+	uint8_t time_created[3];
+	uint16_t date_created;
+	uint16_t date_last_access;
 	uint16_t time_last_change;
 	uint16_t date_last_change;
 	uint16_t start_cluster;
 	uint32_t size;
-} __attribute__((packed)) fs_fat16_entry;
+} __attribute__((packed)) fs_fat16_dir_t;
 
 void fat_probe(ata_dev_t *ata_dev);
 
