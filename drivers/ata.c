@@ -7,7 +7,7 @@
 #include "../include/kernel/kernel.h"
 
 char* ata_device_tree(bool primary, bool master);
-void ata_device_debug(bool primary, bool master, char* msg);
+void ata_device_debug(ata_dev_t dev, char* msg);
 void ata_err_dump(ata_dev_t dev, uint8_t status);
 
 uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
@@ -52,7 +52,7 @@ uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 	}
 
 	if (status & (1 << 0)) return 0;
-	ata_device_debug((port_base == 0x1F0 || port_base == 0x1E8), master, "ready");
+	ata_device_debug(*dev, "ready");
 
 	// Read data
 	uint16_t info[256];
@@ -72,9 +72,9 @@ char* ata_device_tree(bool primary, bool master)
 	}
 }
 
-void ata_device_debug(bool primary, bool master, char* msg)
+void ata_device_debug(ata_dev_t dev, char* msg)
 {
-	kdebug("[ata] %s: %s\r\n", ata_device_tree(primary, master), msg);
+	kdebug("[ata] %s: %s\r\n", ata_device_tree((dev.data_port == (ATA_PRIMARY_MASTER | ATA_PRIMARY_SLAVE)), dev.master), msg);
 }
 
 void ata_find(ata_dev_t *dev)
@@ -91,7 +91,7 @@ void ata_find(ata_dev_t *dev)
 
 uint8_t ata_pio_wait_bsy(ata_dev_t dev)
 {
-	uint8_t status;
+	uint8_t status = inb(dev.command_port);
 
         while(status & (1 << 7)) {
 		// Wait 400ns before reading the status register
@@ -100,6 +100,8 @@ uint8_t ata_pio_wait_bsy(ata_dev_t dev)
             	asm volatile ("nop");
             	asm volatile ("nop");
             	asm volatile ("nop");
+
+		ata_device_debug(dev, "busy");
 
                 status = inb(dev.command_port);
 
@@ -139,7 +141,7 @@ void ata_err_dump(ata_dev_t dev, uint8_t status)
 		}
 	}
 
-	kdebug("[ata] %s -> Error: %s\r\n", ata_device_tree((dev.data_port == 0x1F0 || dev.data_port == 0x1E8), dev.master), error_text);
+	ata_device_debug(dev, error_text);
 }
 
 uint8_t ata_pio_wait_drq(ata_dev_t dev)
@@ -147,7 +149,7 @@ uint8_t ata_pio_wait_drq(ata_dev_t dev)
 	uint8_t status;
 
         while(!(status & (1 << 3))) {
-		kdebug("[ata] waiting\r\n");
+		ata_device_debug(dev, "waiting drq");
 
 		if (status & (1 << 0)) ata_err_dump(dev, status);
 
@@ -159,8 +161,10 @@ uint8_t ata_pio_wait_drq(ata_dev_t dev)
 
 void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 {
-	// Select sector
+	// Select device
 	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
+	ata_pio_wait_bsy(dev);
+
 	outb(dev.error_port, 0);
 	outb(dev.sector_count_port, sector_count);
 	outb(dev.lba_low_port, lba & 0x000000FF);

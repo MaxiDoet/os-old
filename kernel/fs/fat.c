@@ -42,7 +42,7 @@ void fat_probe(ata_dev_t *ata_dev)
 			ata_pio_read(*ata_dev, root_dir_start, 1, root_dir_buf);
 
 			fs_fat16_dir_t *root_first = (fs_fat16_dir_t *) root_dir_buf;
-			kdebug("FAT Info:\r\nroot_dir_start: %d\r\nroot_dir_size: %d\r\ndata_start: %d\r\n", root_dir_start, root_dir_size, data_start);
+			//kdebug("FAT Info:\r\nroot_dir_start: %d\r\nroot_dir_size: %d\r\ndata_start: %d\r\n", root_dir_start, root_dir_size, data_start);
 
 			/*
 			char* filename;
@@ -52,8 +52,8 @@ void fat_probe(ata_dev_t *ata_dev)
 			filename[9] = '\0';
 
 			kdebug("[fs] Filename: %x\r\n", root_first->file_name[0]);
-
 			*/
+
 			for (int l=0; l < 256; l++) {
                 		kdebug("%x ", root_dir_buf[l]);
         		}
