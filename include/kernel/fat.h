@@ -62,14 +62,19 @@ typedef struct fs_fat16_dir_t {
 	uint8_t file_name[8];
 	uint8_t file_extension[3];
 	uint8_t attribute;
-	uint8_t time_created[3];
-	uint16_t date_created;
-	uint16_t date_last_access;
+	uint8_t reserved[10];
 	uint16_t time_last_change;
 	uint16_t date_last_change;
 	uint16_t start_cluster;
 	uint32_t size;
 } __attribute__((packed)) fs_fat16_dir_t;
+
+#define FAT_ATTRIBUTE_READ_ONLY 0x01
+#define FAT_ATTRIBUTE_HIDDEN 0x02
+#define FAT_ATTRIBUTE_SYSTEM 0x04
+#define FAT_ATTRIBUTE_VOLUME_LABEL 0x08
+#define FAT_ATTRIBUTE_SUBDIR 0x10
+#define FAT_ATTRIBUTE_ARCHIVE 0x20
 
 void fat_probe(ata_dev_t *ata_dev);
 

@@ -42,21 +42,44 @@ void fat_probe(ata_dev_t *ata_dev)
 			ata_pio_read(*ata_dev, root_dir_start, 1, root_dir_buf);
 
 			fs_fat16_dir_t *root_first = (fs_fat16_dir_t *) root_dir_buf;
-			//kdebug("FAT Info:\r\nroot_dir_start: %d\r\nroot_dir_size: %d\r\ndata_start: %d\r\n", root_dir_start, root_dir_size, data_start);
+			fs_fat16_dir_t *root_last = (fs_fat16_dir_t *) root_dir_buf + 10;
+			kdebug("FAT Info:\r\nsectors_per_cluster: %d\r\nroot_dir_size: %d\r\ndata_start: %d\r\n", fat->sectors_per_cluster, root_dir_start, root_dir_size, data_start);
+
+			fs_fat16_dir_t *test = (fs_fat16_dir_t *) root_dir_buf + 7;
+			uint32_t test_sector = data_start + (test->start_cluster - 2) * 2;
+
+			kdebug("test:\r\nName: %s\r\nStart cluster: %d\r\nSector: %d\r\n", (char *) test->file_name, test->start_cluster, test_sector);
+
+			uint16_t *test_buf = (uint16_t *) malloc(mm, test->size);
+			ata_pio_read(*ata_dev, test_sector, 1, test_buf);
+
+			for (int l=0; l < 256; l++) {
+				char* text = "  \0";
+				text[1] = (test_buf[l] >> 8) & 0xFF;
+				text[0] = test_buf[l] & 0xFF;
+				kdebug(text);
+			}
 
 			/*
-			char* filename;
-			for (int k=0; k < 8; k++) {
-				filename[k] = root_first->file_name[k];
-			}
-			filename[9] = '\0';
+			kdebug("D Filename    First cluster \r\n");
+			for (fs_fat16_dir_t *dir = root_first; dir != root_last; ++dir) {
+				if (dir->attribute & FAT_ATTRIBUTE_SUBDIR) {
+					kdebug("x ");
+				} else {
+					kdebug("  ");
+				}
 
-			kdebug("[fs] Filename: %x\r\n", root_first->file_name[0]);
+				kdebug((char *) dir->file_name);
+
+				kdebug("%d\r\n", dir->start_cluster);
+			}
 			*/
 
+			/*
 			for (int l=0; l < 256; l++) {
                 		kdebug("%x ", root_dir_buf[l]);
         		}
+			*/
 		}
 	}
 }
