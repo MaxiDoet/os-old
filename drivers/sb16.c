@@ -6,7 +6,6 @@
 #include "../include/kernel/asm.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
-#include "../audio.h"
 
 /* Some testing
 uint16_t block_size = 44100 / 100 * 2; // 44100 samples per second Note: We need two buffers!
@@ -17,8 +16,6 @@ uint8_t buffer[buffer_size] = {0};
 uint16_t bufferOffset;
 uint16_t bufferSegment;
 */
-
-int address = 0x00104020;
 
 void sb16_reset()
 {
@@ -48,7 +45,7 @@ void sb16_irq_handler()
 	outb(0x0A, 5); // Disable channel 1
         outb(0x0C, 1); // Flip-Flop
         outb(0x0B, 0x49); // Set transfer mode: Mode + Channel Number | Modes: Single: 0x48, Auto: 0x58
-        outb(0x83, address); // Page number
+        //outb(0x83, address); // Page number
         outb(0x02, 0x00); // Position low
         outb(0x02, 0x00); // Position high
         outb(0x03, 0xFF); // Count low
@@ -91,8 +88,8 @@ void sb16_init()
 	outb(0x0C, 1); // Flip-Flop
 	outb(0x0B, 0x49); // Set transfer mode: Mode + Channel Number | Modes: Single: 0x48, Auto: 0x58
 	outb(0x83, 0x01); // Page number
-	outb(0x02, address); // Position low
-	outb(0x02, address >> 8); // Position high
+	//outb(0x02, address); // Position low
+	//outb(0x02, address >> 8); // Position high
 	outb(0x03, 0xFF); // Count low
 	outb(0x03, 0x1F);
 	outb(0x0A, 1); // Enable channel 1

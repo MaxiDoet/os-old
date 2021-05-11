@@ -5,6 +5,7 @@
 #include "../include/drivers/ata.h"
 #include "../include/kernel/asm.h"
 #include "../include/kernel/kernel.h"
+#include "../config.h"
 
 char* ata_device_tree(bool primary, bool master);
 void ata_device_debug(ata_dev_t dev, char* msg);
@@ -101,7 +102,9 @@ uint8_t ata_pio_wait_bsy(ata_dev_t dev)
             	asm volatile ("nop");
             	asm volatile ("nop");
 
-		ata_device_debug(dev, "busy");
+		#ifdef ATA_DEBUG_BUSY
+			ata_device_debug(dev, "busy");
+		#endif
 
                 status = inb(dev.command_port);
 
@@ -149,7 +152,9 @@ uint8_t ata_pio_wait_drq(ata_dev_t dev)
 	uint8_t status;
 
         while(!(status & (1 << 3))) {
-		ata_device_debug(dev, "waiting drq");
+		#ifdef ATA_DEBUG_WAIT_DRQ
+			ata_device_debug(dev, "waiting drq");
+		#endif
 
 		if (status & (1 << 0)) ata_err_dump(dev, status);
 

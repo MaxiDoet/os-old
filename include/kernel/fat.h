@@ -33,7 +33,7 @@ typedef struct mbr_t {
 	uint8_t boot_signature[2];
 } __attribute__((packed)) mbr_t;
 
-typedef struct fs_fat16_t {
+typedef struct fs_fat16_info {
 	uint8_t boot_code[3];
 	uint8_t oem_name[8];
 	uint16_t bytes_per_sector;
@@ -56,7 +56,13 @@ typedef struct fs_fat16_t {
 	uint8_t fat_type[8];
 	uint8_t bootloader[448];
 	uint8_t boot_signature[2];
-} __attribute__((packed)) fs_fat16_t;
+} __attribute__((packed)) fs_fat16_info;
+
+typedef struct fs_fat16_t {
+	fs_fat16_info info;
+	ata_dev_t dev;
+	uint32_t fat_start;
+} fs_fat16_t;
 
 typedef struct fs_fat16_dir_t {
 	uint8_t file_name[8];

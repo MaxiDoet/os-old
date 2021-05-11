@@ -7,6 +7,9 @@
 #include "../include/drivers/ata.h"
 #include "../libc/include/mm.h"
 
+char* fat_get_filename(fs_fat16_dir_t *dir);
+uint32_t fat_cluster_to_sector(uint32_t data_start, uint16_t cluster);
+
 void fat_probe(ata_dev_t *ata_dev)
 {
 	// Read first sector
@@ -21,16 +24,13 @@ void fat_probe(ata_dev_t *ata_dev)
 
 	for (int i=0; i < 4; i++) {
 		if (mbr->partition_table[i].type == 6) {
-			uint16_t *fat_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
-
 			mbr_table_entry entry = mbr->partition_table[i];
-
 			kdebug("[fs] Partition %d: Start: %d Type: %d\r\n", i+1, entry.start_sector, entry.type);
 
 			uint32_t fat_start = entry.start_sector;
+			uint16_t *fat_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
 			ata_pio_read(*ata_dev, fat_start, 1, fat_buf);
-
-			fs_fat16_t *fat = (fs_fat16_t *) fat_buf;
+			fs_fat16_info *fat = (fs_fat16_info *) fat_buf;
 
 			uint32_t root_dir_start = fat_start + fat->sectors_per_fat * fat->fat_copies + 2;
 			uint32_t root_dir_size = (fat->max_root_entries * 32) / fat->bytes_per_sector;
@@ -38,20 +38,23 @@ void fat_probe(ata_dev_t *ata_dev)
 			uint16_t entries_per_sector = fat->bytes_per_sector / 32;
 			uint16_t entries_per_cluster = entries_per_sector * fat->sectors_per_cluster;
 
-			uint16_t *root_dir_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
-			ata_pio_read(*ata_dev, root_dir_start, 1, root_dir_buf);
+			uint16_t *root_dir_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE * root_dir_size);
+			ata_pio_read(*ata_dev, root_dir_start, root_dir_size, root_dir_buf);
 
 			fs_fat16_dir_t *root_first = (fs_fat16_dir_t *) root_dir_buf;
-			fs_fat16_dir_t *root_last = (fs_fat16_dir_t *) root_dir_buf + 10;
-			kdebug("FAT Info:\r\nsectors_per_cluster: %d\r\nroot_dir_size: %d\r\ndata_start: %d\r\n", fat->sectors_per_cluster, root_dir_start, root_dir_size, data_start);
+			fs_fat16_dir_t *root_last = (fs_fat16_dir_t *) root_dir_buf + root_dir_size;
 
 			fs_fat16_dir_t *test = (fs_fat16_dir_t *) root_dir_buf + 7;
-			uint32_t test_sector = data_start + (test->start_cluster - 2) * 2;
-
-			kdebug("test:\r\nName: %s\r\nStart cluster: %d\r\nSector: %d\r\n", (char *) test->file_name, test->start_cluster, test_sector);
-
+			uint32_t test_sector = 2284;
 			uint16_t *test_buf = (uint16_t *) malloc(mm, test->size);
+
 			ata_pio_read(*ata_dev, test_sector, 1, test_buf);
+
+			kdebug("root: %x test: %x\r\n", *root_dir_buf, *test_buf);
+
+			/*
+			fs_fat16_dir_t *folder = (fs_fat16_dir_t *) root_dir_buf + 2;
+			kdebug("rs: %d ds: %d folder: %d rds: %d\r\n", root_dir_start, data_start, fat_cluster_to_sector(data_start, folder->start_cluster), root_dir_size);
 
 			for (int l=0; l < 256; l++) {
 				char* text = "  \0";
@@ -59,38 +62,38 @@ void fat_probe(ata_dev_t *ata_dev)
 				text[0] = test_buf[l] & 0xFF;
 				kdebug(text);
 			}
-
-			/*
-			kdebug("D Filename    First cluster \r\n");
-			for (fs_fat16_dir_t *dir = root_first; dir != root_last; ++dir) {
-				if (dir->attribute & FAT_ATTRIBUTE_SUBDIR) {
-					kdebug("x ");
-				} else {
-					kdebug("  ");
-				}
-
-				kdebug((char *) dir->file_name);
-
-				kdebug("%d\r\n", dir->start_cluster);
-			}
 			*/
 
-			/*
-			for (int l=0; l < 256; l++) {
-                		kdebug("%x ", root_dir_buf[l]);
+			for (int k=0; k < 256; k++) {
+                		kdebug("%x ", root_dir_buf[k]);
         		}
-			*/
 		}
 	}
 }
 
-/*
-void fat_print_mbr_table(mbr_t *mbr)
+char* fat_get_filename(fs_fat16_dir_t *dir)
 {
-	if (mbr->boot_signature[0] == 0x55 && mbr->boot_signature[1] == 0xAA) {
-		for (int i=0; i < 4; i++) {
-			kdebug("");
-		}
+	char* filename = (char *) dir->file_name;
+	char* extension = (char *) dir->file_extension;
+	int i;
+
+	// Remove tail spaces from basename
+	for (i = 7; i != 0; i--) {
+		if (filename[i] != ' ') break;
+		filename[i] == '\0';
 	}
+
+	for (int j=0; j < 2; j++) {
+		filename[i+j] = extension[j];
+	}
+
+	return filename;
 }
-*/
+
+uint32_t fat_cluster_to_sector(uint32_t data_start, uint16_t cluster)
+{
+	if (cluster <= 1) return 0;
+
+	uint32_t sector = data_start + (cluster - 2) * 2;
+	return sector;
+}

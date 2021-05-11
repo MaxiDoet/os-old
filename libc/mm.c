@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "../libc/include/mm.h"
+//#include "../include/kernel/kernel.h"
 
 void mm_init(size_t start, size_t size)
 {

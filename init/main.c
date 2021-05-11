@@ -78,17 +78,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	kdebug("[kernel] ATA init\r\n");
 	ata_dev_t ata_dev;
 	ata_find(&ata_dev);
-
 	fat_probe(&ata_dev);
-
-	/*
-	uint16_t *ata_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
-	ata_pio_read(ata_dev, 0, 1, ata_buf);
-
-	for (int i=0; i < 256; i++) {
-		kdebug("%x ", ata_buf[i]);
-	}
-	*/
 
 	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 
