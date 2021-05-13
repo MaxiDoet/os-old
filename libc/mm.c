@@ -26,7 +26,7 @@ void* malloc(mm_t manager, size_t size)
 {
 	mm_chunk* result = 0;
 
-	for (mm_chunk* chunk; chunk != 0 && result == 0; chunk = chunk->next_chunk) {
+	for (mm_chunk* chunk = manager.first_chunk; chunk != 0 && result == 0; chunk = chunk->next_chunk) {
 		if (chunk->size > size && !chunk->allocated) {
 			result = chunk;
 		}

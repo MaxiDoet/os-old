@@ -43,6 +43,51 @@ typedef struct ext2_bg_descriptor {
 	uint16_t directories_in_group;
 } __attribute__((packed)) ext2_bg_descriptor;
 
+enum ext2_inode_type {
+	EXT2_INODE_TYPE_FIFO = 0x1000,
+	EXT2_INODE_TYPE_CHARDEV = 0x2000,
+	EXT2_INODE_TYPE_DIRECTORY = 0x4000,
+	EXT2_INODE_TYPE_BLOCKDEV = 0x6000,
+	EXT2_INODE_TYPE_REGULAR = 0x8000,
+	EXT2_INODE_TYPE_SYMBOLIC_LINK = 0xA000,
+	EXT2_INODE_TYPE_SOCKET = 0xC000
+};
+
+typedef struct ext2_inode {
+	uint16_t type;
+	uint16_t user_id;
+	uint32_t size_low;
+	uint32_t last_access;
+	uint32_t creation_time;
+	uint32_t last_modification;
+	uint32_t deletion_time;
+	uint16_t group_id;
+	uint16_t hard_links_count;
+	uint32_t disk_sectors_count;
+	uint32_t flags;
+	uint32_t os_specific;
+	uint32_t direct_block_ptr0;
+	uint32_t direct_block_ptr1;
+	uint32_t direct_block_ptr2;
+	uint32_t direct_block_ptr3;
+	uint32_t direct_block_ptr4;
+	uint32_t direct_block_ptr5;
+	uint32_t direct_block_ptr6;
+	uint32_t direct_block_ptr7;
+	uint32_t direct_block_ptr8;
+	uint32_t direct_block_ptr9;
+	uint32_t direct_block_ptr10;
+	uint32_t direct_block_ptr11;
+	uint32_t indirect_singly_block_ptr;
+	uint32_t indirect_doubly_block_ptr;
+	uint32_t indirect_triply_block_ptr;
+	uint32_t generation_number;
+	uint32_t extended_attribute;
+	uint32_t size_high;
+	uint32_t fragment_block;
+	uint8_t reserved[12];
+} __attribute__((packed)) ext2_inode;
+
 uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry);
 
 #endif

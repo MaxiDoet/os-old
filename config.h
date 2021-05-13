@@ -6,8 +6,8 @@
 //#define DEBUG_IRQ_PRINT
 //#define DEBUG_IRQ_PRINT_ROUTINE
 
-//#define ATA_DEBUG_BUSY
-//#define ATA_DEBUG_WAIT_DRQ
+#define ATA_DEBUG_BUSY
+#define ATA_DEBUG_WAIT_DRQ
 
 #define PAGE_SIZE 4096
 #define HEAP_SIZE 10485760

@@ -70,8 +70,10 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	//pmm_init(mbi);
 	//pmm_alloc();
 
-	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", mbi->mem_upper);
-	mm_init(mbi->mem_upper, 100*1024);
+	size_t heap_start = mbi->mem_upper + 10*1024*1024;
+	size_t heap_size = mbi->mem_upper * 1024 - heap_size - 10*1024;
+	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
+	mm_init(heap_start, heap_size);
 
 	keyboard_init();
 	mouse_init();
@@ -90,7 +92,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
         if (mbr->boot_signature[0] == 0x55 && mbr->boot_signature[1] == 0xAA) {
 		for (int i=0; i < 4; i++) {
 			mbr_table_entry entry = mbr->partition_table[i];
-			//kdebug("%s %x    %d\r\n", (entry.boot_flag == 0x80) ? " x  " : "    ", entry.type, entry.start_sector);
+			kdebug("%s %x    %d\r\n", (entry.boot_flag == 0x80) ? " x  " : "    ", entry.type, entry.start_sector);
 
 			if (entry.type == 0x83) {
 				ext2_probe(&root_dev, entry);
