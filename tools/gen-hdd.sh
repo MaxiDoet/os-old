@@ -3,8 +3,8 @@
 block_size=512
 blocks=51200
 output_file="hdd.img"
-fs_type="fat"
-fs_code="6"
+fs_type="ext2"
+fs_code="83"
 
 fat_type="16"
 fat_name="HDD"
@@ -32,6 +32,10 @@ losetup -f -P $output_file
 
 if [ $fs_type = "fat" ]; then
         mkfs.fat -F $fat_type -n $fat_name -s $fat_secs_per_cluster -r $fat_root_entries /dev/loop0p1
+fi
+
+if [ $fs_type = "ext2" ]; then
+	mkfs.ext2 /dev/loop0p1
 fi
 
 # Mount hdd

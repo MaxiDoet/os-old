@@ -166,6 +166,8 @@ uint8_t ata_pio_wait_drq(ata_dev_t dev)
 
 void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 {
+	if (!dev.data_port) return;
+
 	// Select device
 	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
 	ata_pio_wait_bsy(dev);

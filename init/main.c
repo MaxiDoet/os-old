@@ -21,7 +21,8 @@
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
-#include "../include/kernel/fat.h"
+#include "../include/kernel/ext2.h"
+#include "../include/kernel/mbr.h"
 #include "../include/kernel/asm.h"
 
 #include "../bin/desktop/desktop.h"
@@ -76,11 +77,26 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	mouse_init();
 
 	kdebug("[kernel] ATA init\r\n");
-	ata_dev_t ata_dev;
-	ata_find(&ata_dev);
-	fat_probe(&ata_dev);
+	ata_dev_t root_dev;
+	ata_find(&root_dev);
 
-	void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
+	// Look for mbr
+        uint16_t *mbr_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
+        ata_pio_read(root_dev, 0, 1, mbr_buf);
+        mbr_t *mbr = (mbr_t *) mbr_buf;
+
+	kdebug("MBR\r\nBoot Type Start\r\n---------------\r\n");
+
+        if (mbr->boot_signature[0] == 0x55 && mbr->boot_signature[1] == 0xAA) {
+		for (int i=0; i < 4; i++) {
+			mbr_table_entry entry = mbr->partition_table[i];
+			//kdebug("%s %x    %d\r\n", (entry.boot_flag == 0x80) ? " x  " : "    ", entry.type, entry.start_sector);
+
+			if (entry.type == 0x83) {
+				ext2_probe(&root_dev, entry);
+			}
+		}
+	}
 
 	pci_probe();
 	if(sb16_probe() == 0) {
@@ -88,6 +104,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	}
 
 	#ifdef DESKTOP
+		void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
 		desktop_init(mbi->framebuffer_addr, mbi->framebuffer_width, mbi->framebuffer_height, mbi->framebuffer_pitch);
 	#endif
 }
