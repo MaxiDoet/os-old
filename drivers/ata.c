@@ -168,8 +168,6 @@ void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 {
 	if (!dev.data_port) return;
 
-	kdebug("ata_pio_read: lba: %d sector_count: %d\r\n", lba, sector_count);
-
 	// Select device
 	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
 	ata_pio_wait_bsy(dev);

@@ -17,7 +17,7 @@
 #include "../include/drivers/pci.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
-#include "../include/drivers/cmos.h"
+#include "../include/drivers/rtc.h"
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
@@ -77,6 +77,10 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	keyboard_init();
 	mouse_init();
+
+	// RTC init
+	kdebug("[rtc] now: ");
+	rtc_print_time_date();
 
 	kdebug("[kernel] ATA init\r\n");
 	ata_dev_t root_dev;

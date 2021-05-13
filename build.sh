@@ -7,7 +7,7 @@ nasm $ASPARAMS boot/boot.asm -o boot/boot.o
 
 # Build drivers
 gcc $GCCPARAMS -c drivers/vgacon.c -o drivers/vgacon.o
-gcc $GCCPARAMS -c drivers/cmos.c -o drivers/cmos.o
+gcc $GCCPARAMS -c drivers/rtc.c -o drivers/rtc.o
 gcc $GCCPARAMS -c drivers/pci.c -o drivers/pci.o
 gcc $GCCPARAMS -c drivers/serial.c -o drivers/serial.o
 gcc $GCCPARAMS -c drivers/bga.c -o drivers/bga.o
@@ -49,7 +49,7 @@ gcc $GCCPARAMS -c bin/desktop/desktop.c -o bin/desktop/desktop.o
 ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/ext2.o \
 boot/boot.o \
 init/main.o \
-drivers/vgacon.o drivers/cmos.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o \
+drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o \
 libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o libc/mm.o \
 bin/desktop/desktop.o
 
