@@ -78,18 +78,6 @@ void ata_device_debug(ata_dev_t dev, char* msg)
 	kdebug("[ata] %s: %s\r\n", ata_device_tree((dev.data_port == (ATA_PRIMARY_MASTER | ATA_PRIMARY_SLAVE)), dev.master), msg);
 }
 
-void ata_find(ata_dev_t *dev)
-{
-	// Look for root ata dev
-
-	if (ata_init(dev, ATA_PRIMARY_MASTER, true)) kdebug("[ata] root device: primary master\r\n"); return;
-	if (ata_init(dev, ATA_PRIMARY_SLAVE, false)) kdebug("[ata] root device: primary slave\r\n"); return;
-	if (ata_init(dev, ATA_SECONDARY_MASTER, true)) kdebug("[ata] root device: secondary master\r\n"); return;
-	if (ata_init(dev, ATA_SECONDARY_SLAVE, false)) kdebug("[ata] root device: secondary slave\r\n"); return;
-
-	kpanic("no ata root device");
-}
-
 uint8_t ata_pio_wait_bsy(ata_dev_t dev)
 {
 	uint8_t status = inb(dev.command_port);

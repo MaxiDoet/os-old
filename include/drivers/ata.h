@@ -22,7 +22,6 @@ typedef struct {
 #define ATA_SECONDARY_SLAVE 0x168
 
 uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master);
-void ata_find(ata_dev_t *dev);
 uint8_t ata_pio_wait_bsy(ata_dev_t dev);
 uint8_t ata_pio_wait_drq(ata_dev_t dev);
 void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf);
