@@ -109,13 +109,113 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 				switch (header->type) {
 					case 0:
 						;
-						kdebug("        BIOS:   %s %d\r\n", smbios_get_string(offset, header, 1), 64 * (smbios_get_int(offset, header, 9) - 1));
+						kdebug("        BIOS:   %s %dK\r\n", smbios_get_string(offset, header, 0), 64 * (smbios_get_int(offset, header, 8) - 1));
 						break;
 					case 1:
 						;
-						kdebug("        Vendor: %s\r\n", smbios_get_string(offset, header, 1));
-						kdebug("        Model:  %s\r\n", smbios_get_string(offset, header, 2));
+						kdebug("        Vendor: %s\r\n", smbios_get_string(offset, header, 0));
+						kdebug("        Model:  %s\r\n", smbios_get_string(offset, header, 1));
 						break;
+					case 2:
+						;
+						kdebug("        Board: %s %s\r\n", smbios_get_string(offset, header, 0), smbios_get_string(offset, header, 1));
+						break;
+					case 4:
+						kdebug("        Processor: ");
+
+						int core_count = smbios_get_int(offset, header, 35);
+						if (core_count != 0) kdebug("%d Core(s) ", core_count);
+
+						char* manufacturer = smbios_get_string(offset, header, 1);
+						if (manufacturer != "") {
+							kdebug("%s ", manufacturer);
+						} else {
+							kdebug("Unknown OEM ");
+						}
+
+						/* Note: Add some cpu family codes here */
+
+						int clock = smbios_get_int(offset, header, 18);
+						if (clock != 0) kdebug("%d Mhz ", clock);
+
+						kdebug("\r\n");
+						break;
+					case 16:
+						kdebug("        Memory: ");
+
+						int count = smbios_get_int(offset, header, 13);
+						if (count != 0) {
+							kdebug("\r\n                %dx ", count);
+						} else {
+							kdebug("\r\n");
+							break;
+						}
+
+						int use = smbios_get_int(offset, header, 5);
+						if (use != 0) {
+							switch (use) {
+								case 1:
+									kdebug("Unknown Memory");
+									break;
+								case 2:
+									kdebug("Unknown Memory");
+									break;
+								case 3:
+									kdebug("System Memory");
+									break;
+								case 4:
+									kdebug("Video Memory");
+									break;
+								case 5:
+									kdebug("Flash Memory");
+									break;
+								case 6:
+									kdebug("NVRAM");
+									break;
+								case 7:
+									kdebug("Cache");
+									break;
+								default:
+									kdebug("Unknown Memory");
+									break;
+							}
+
+							kdebug(" ");
+						}
+
+						int ecc = smbios_get_int(offset, header, 6);
+						if (ecc != 0) {
+							switch (ecc) {
+								case 1:
+									kdebug("Unknown ECC");
+									break;
+								case 2:
+									kdebug("Unknown ECC");
+									break;
+								case 3:
+									kdebug("No ECC");
+									break;
+								case 4:
+									kdebug("Parity ECC");
+									break;
+								case 5:
+									kdebug("Single-bit ECC");
+									break;
+								case 6:
+									kdebug("Multi-bit ECC");
+									break;
+								case 7:
+									kdebug("CRC");
+									break;
+								default:
+									kdebug("Unknown ECC");
+									break;
+							}
+
+							kdebug(" ");
+						}
+
+					kdebug("\r\n");
 				}
 			}
 		}

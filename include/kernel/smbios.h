@@ -41,7 +41,7 @@ typedef struct smbios_structure_header {
 
 int smbios_get_int(size_t offset, smbios_structure_header *header, int index)
 {
-	uint8_t *p = (uint8_t *) offset + (index - 1);
+	uint8_t *p = (uint8_t *) offset + index;
 
 	return *p;
 }
@@ -51,7 +51,7 @@ char* smbios_get_string(size_t offset, smbios_structure_header *header, int inde
 	uint8_t *string_table = (uint8_t *) offset + header->length;
 	char* s = (char *) string_table;
 
-	for (int i=0; i < index - 1; i++) {
+	for (int i=0; i < index; i++) {
 		while (*s != '\0') {
 			s++;
 		}
