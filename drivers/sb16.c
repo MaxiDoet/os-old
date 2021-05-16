@@ -6,6 +6,8 @@
 #include "../include/kernel/asm.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
+#include "../libc/include/mm.h"
+#include "../libc/include/string.h"
 
 /* Some testing
 uint16_t block_size = 44100 / 100 * 2; // 44100 samples per second Note: We need two buffers!
@@ -16,6 +18,8 @@ uint8_t buffer[buffer_size] = {0};
 uint16_t bufferOffset;
 uint16_t bufferSegment;
 */
+
+uint16_t *buf;
 
 void sb16_reset()
 {
@@ -45,11 +49,11 @@ void sb16_irq_handler()
 	outb(0x0A, 5); // Disable channel 1
         outb(0x0C, 1); // Flip-Flop
         outb(0x0B, 0x49); // Set transfer mode: Mode + Channel Number | Modes: Single: 0x48, Auto: 0x58
-        //outb(0x83, address); // Page number
-        outb(0x02, 0x00); // Position low
-        outb(0x02, 0x00); // Position high
+        outb(0x83, 0xa1); // Page number
+        outb(0x02, 0x10); // Position low
+        outb(0x02, 0xfc); // Position high
         outb(0x03, 0xFF); // Count low
-        outb(0x03, 0x1F);
+        outb(0x03, 0x0F);
         outb(0x0A, 1); // Enable channel 1
 
 	kdebug("SB16: Init dma end after irq\r\n");
@@ -77,21 +81,30 @@ void sb16_init()
 
 	irq_install_handler(5, sb16_irq_handler);
 
+	// Allocate sound buffer
+	buf = malloc(mm, 4095);
+
+	for (int i=0; i < 4095; i+=2) {
+		buf[i] = 0x07;
+		buf[i+1] = 0xFD;
+	}
 
 	// Turn speaker on
 	sb16_write(0xD1);
 
 	kdebug("SB16: Init dma start\r\n");
 
+	kdebug("%x", buf);
+
 	// Init dma
 	outb(0x0A, 5); // Disable channel 1
 	outb(0x0C, 1); // Flip-Flop
 	outb(0x0B, 0x49); // Set transfer mode: Mode + Channel Number | Modes: Single: 0x48, Auto: 0x58
-	outb(0x83, 0x01); // Page number
-	//outb(0x02, address); // Position low
-	//outb(0x02, address >> 8); // Position high
+	outb(0x83, 0xa1); // Page number
+	outb(0x02, 0x10); // Position low
+	outb(0x02, 0xfc); // Position high
 	outb(0x03, 0xFF); // Count low
-	outb(0x03, 0x1F);
+	outb(0x03, 0x0F);
 	outb(0x0A, 1); // Enable channel 1
 
 	kdebug("SB16: Init dma end\r\n");
@@ -109,7 +122,7 @@ void sb16_init()
 	sb16_write(0x00); // Sound data is mono and unsigned
 	//sb16_write(0x14);
 	sb16_write(0xFF); /* 8Kb */
-	sb16_write(0x1F);
+	sb16_write(0x0F);
 
 	kdebug("SB16: Init dsp end\r\n");
 }
