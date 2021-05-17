@@ -89,5 +89,6 @@ typedef struct ext2_inode {
 } __attribute__((packed)) ext2_inode;
 
 uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry);
+void ext2_read_inode(ata_dev_t *dev, ext2_superblock *sb, uint16_t *bg_descriptor_table_buf, uint32_t inode, ext2_inode *inode_buf);
 
 #endif
