@@ -89,6 +89,7 @@ typedef struct ext2_fs_t {
 	uint32_t start_sector;
 	ext2_superblock sb;
 	uint16_t *bgdt;
+	uint32_t block_size;
 } ext2_fs_t;
 
 uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs);

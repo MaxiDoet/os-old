@@ -19,11 +19,12 @@ gcc $GCCPARAMS -c drivers/ac97.c -o drivers/ac97.o
 gcc $GCCPARAMS -c drivers/ata.c -o drivers/ata.o
 
 # Build libc
-gcc $GCCPARAMS -c libc/string/memcmp.c -o libc/string/memcmp.o
-gcc $GCCPARAMS -c libc/string/memcpy.c -o libc/string/memcpy.o
-gcc $GCCPARAMS -c libc/string/memmove.c -o libc/string/memmove.o
-gcc $GCCPARAMS -c libc/string/memset.c -o libc/string/memset.o
-gcc $GCCPARAMS -c libc/string/strlen.c -o libc/string/strlen.o
+#gcc $GCCPARAMS -c libc/string/memcmp.c -o libc/string/memcmp.o
+#gcc $GCCPARAMS -c libc/string/memcpy.c -o libc/string/memcpy.o
+#gcc $GCCPARAMS -c libc/string/memmove.c -o libc/string/memmove.o
+#gcc $GCCPARAMS -c libc/string/memset.c -o libc/string/memset.o
+#gcc $GCCPARAMS -c libc/string/strlen.c -o libc/string/strlen.o
+gcc $GCCPARAMS -c libc/string.c -o libc/string.o
 gcc $GCCPARAMS -c libc/mm.c -o libc/mm.o
 
 # Build kernel
@@ -46,12 +47,14 @@ gcc $GCCPARAMS -c init/main.c -o init/main.o
 #gcc $GCCPARAMS -c bin/shell/shell.c -o bin/shell/shell.o
 gcc $GCCPARAMS -c bin/desktop/desktop.c -o bin/desktop/desktop.o
 
+#libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o libc/mm.o \
+
 # Linking
 ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/vfs.o kernel/fs/ext2.o \
 boot/boot.o \
 init/main.o \
 drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o \
-libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o libc/mm.o \
+libc/string.o libc/mm.o \
 bin/desktop/desktop.o
 
 mkdir -p isodir/boot/grub
