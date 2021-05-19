@@ -44,7 +44,21 @@ void ext2_read_inode(ata_dev_t *dev, ext2_superblock *sb, uint16_t *bg_descripto
 	memcpy(inode_buf, inode_temp, sizeof(ext2_inode));
 }
 
-uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry)
+void ext2_read_root(ata_dev_t *dev, ext2_fs_t *fs)
+{
+	// Read root dir
+	ext2_inode *inode = (ext2_inode *) malloc(mm, sizeof(ext2_inode));
+	ext2_read_inode(dev, &fs->sb, fs->bgdt, 2, inode);
+
+	for (int i=0; i < 12; i++) {
+		uint32_t block = inode->direct_block_ptr[i];
+		if (block == 0) break;
+		kdebug("Root dbp: %d\r\n", fs->start_sector + block_to_sector(block));
+	}
+
+}
+
+uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 {
 	uint16_t *sb_buf = (uint16_t *) malloc(mm, 1024);
 
@@ -57,16 +71,17 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry)
 	uint32_t bg_descriptors_total = sb->blocks_total / sb->blocks_per_group;
 	kdebug("Block Size: %d\r\n", 1024 << sb->block_size);
 
-	uint16_t *bg_descriptor_table_buf = (uint16_t *) malloc(mm, 512);
-	ata_pio_read(*dev, entry.start_sector + block_to_sector(2), 1, bg_descriptor_table_buf);
-	ext2_bg_descriptor *bg_descriptor_first = (ext2_bg_descriptor *) bg_descriptor_table_buf;
+	uint16_t *bg_descriptor_table = (uint16_t *) malloc(mm, 512);
+	ata_pio_read(*dev, entry.start_sector + block_to_sector(2), 1, bg_descriptor_table);
+	ext2_bg_descriptor *bg_descriptor_first = (ext2_bg_descriptor *) bg_descriptor_table;
 
 	kdebug("Test: %d\r\n", entry.start_sector + block_to_sector(bg_descriptor_first->inode_table_start));
 
-	ext2_inode *inode = (ext2_inode *) malloc(mm, sizeof(ext2_inode));
-	ext2_read_inode(dev, sb, bg_descriptor_table_buf, 2, inode);
+	fs->start_sector = entry.start_sector;
+	fs->sb = *sb;
+	fs->bgdt = bg_descriptor_table;
 
-	kdebug("%x\r\n", inode->type);
+	ext2_read_root(dev, fs);
 
 	return 1;
 }

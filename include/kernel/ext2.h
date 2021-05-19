@@ -66,18 +66,7 @@ typedef struct ext2_inode {
 	uint32_t disk_sectors_count;
 	uint32_t flags;
 	uint32_t os_specific;
-	uint32_t direct_block_ptr0;
-	uint32_t direct_block_ptr1;
-	uint32_t direct_block_ptr2;
-	uint32_t direct_block_ptr3;
-	uint32_t direct_block_ptr4;
-	uint32_t direct_block_ptr5;
-	uint32_t direct_block_ptr6;
-	uint32_t direct_block_ptr7;
-	uint32_t direct_block_ptr8;
-	uint32_t direct_block_ptr9;
-	uint32_t direct_block_ptr10;
-	uint32_t direct_block_ptr11;
+	uint32_t direct_block_ptr[12];
 	uint32_t indirect_singly_block_ptr;
 	uint32_t indirect_doubly_block_ptr;
 	uint32_t indirect_triply_block_ptr;
@@ -88,7 +77,21 @@ typedef struct ext2_inode {
 	uint8_t reserved[12];
 } __attribute__((packed)) ext2_inode;
 
-uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry);
+typedef struct ext2_dir_entry {
+	uint32_t inode;
+	uint16_t size;
+	uint8_t name_length;
+	uint8_t type;
+	uint8_t name_reserved;
+} __attribute__((packed)) ext2_dir_entry;
+
+typedef struct ext2_fs_t {
+	uint32_t start_sector;
+	ext2_superblock sb;
+	uint16_t *bgdt;
+} ext2_fs_t;
+
+uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs);
 void ext2_read_inode(ata_dev_t *dev, ext2_superblock *sb, uint16_t *bg_descriptor_table_buf, uint32_t inode, ext2_inode *inode_buf);
 
 #endif

@@ -104,6 +104,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	kdebug("[kernel] ATA init\r\n");
 	ata_dev_t root_dev;
+	ext2_fs_t fs;
 
 	if (ata_init(&root_dev, ATA_PRIMARY_MASTER, true)) {
 		kdebug("[kernel] root device: primary master\r\n");
@@ -130,7 +131,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 			kdebug("%s %x    %d\r\n", (entry.boot_flag == 0x80) ? " x  " : "    ", entry.type, entry.start_sector);
 
 			if (entry.type == 0x83) {
-				ext2_probe(&root_dev, entry);
+				ext2_probe(&root_dev, entry, &fs);
 			}
 		}
 	}
