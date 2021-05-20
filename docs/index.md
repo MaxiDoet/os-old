@@ -7,6 +7,9 @@ A simple 32bit os written in C
  - PCI
  - PIT
  - RTC
+ - ATA PIO
+ - SoundBlaster 16
+ - SMBIOS
 
 ## Building
  1. Clone this repository ``` git clone https://github.com/TheHeroCraft1579/os``` 
@@ -29,7 +32,7 @@ A simple 32bit os written in C
  </p>
  <p>
   Filesystem / ATA Driver
-  <img src="https://progress-bar-theherocraft1579.herokuapp.com/20">
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/40">
  </p>
  <p>
   Memory Management
