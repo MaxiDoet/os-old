@@ -230,8 +230,7 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 	uint8_t result = ext2_read_file(dev, fs, "/test.txt", file_buf);
 	kdebug("test.txt: %d Content: %s", result, (char *) file_buf);
 
-	ext2_read_inode(dev, fs, 13, inode_buf);
-	kdebug("Type: %x\r\n", inode_buf->type);
+	kdebug("Inodes per group: %d\r\n", fs->sb->inodes_per_group);
 
 	/*
 	ext2_read_inode(dev, &fs->sb, fs->bgdt, 2, inode_buf);

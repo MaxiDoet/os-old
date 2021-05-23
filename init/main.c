@@ -123,13 +123,9 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
         ata_pio_read(root_dev, 0, 1, mbr_buf);
         mbr_t *mbr = (mbr_t *) mbr_buf;
 
-	kdebug("MBR\r\nBoot Type Start\r\n---------------\r\n");
-
         if (mbr->boot_signature[0] == 0x55 && mbr->boot_signature[1] == 0xAA) {
 		for (int i=0; i < 4; i++) {
 			mbr_table_entry entry = mbr->partition_table[i];
-			kdebug("%s %x    %d\r\n", (entry.boot_flag == 0x80) ? " x  " : "    ", entry.type, entry.start_sector);
-
 			if (entry.type == 0x83) {
 				ext2_probe(&root_dev, entry, &fs);
 			}
