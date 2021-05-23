@@ -61,3 +61,25 @@ size_t strsplit(char *str, char c)
 
 	return i;
 }
+
+int strcmp(char *str1, char *str2)
+{
+	int result = 0;
+
+	while (result == 0) {
+		if (*str1 > *str2) {
+			result = 1;
+		} else if (*str1 < *str2) {
+			result = -1;
+		}
+
+		if (*str1 == '\0') {
+			break;
+		}
+
+		str1++;
+		str2++;
+	}
+
+	return result;
+}

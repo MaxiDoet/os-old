@@ -9,5 +9,6 @@ void* memmove(void*, const void*, size_t);
 void* memset(void*, int, size_t);
 size_t strlen(const char*);
 size_t strsplit(char *str, char c);
+int strcmp(char *str1, char *str2);
 
 #endif

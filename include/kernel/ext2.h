@@ -87,12 +87,12 @@ typedef struct ext2_dir_entry {
 
 typedef struct ext2_fs_t {
 	uint32_t start_sector;
-	ext2_superblock sb;
+	ext2_superblock *sb;
 	uint16_t *bgdt;
 	uint32_t block_size;
+	uint32_t inodes_per_block;
 } ext2_fs_t;
 
 uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs);
-void ext2_read_inode(ata_dev_t *dev, ext2_superblock *sb, uint16_t *bg_descriptor_table_buf, uint32_t inode, ext2_inode *inode_buf);
 
 #endif
