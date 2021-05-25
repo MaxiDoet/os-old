@@ -89,7 +89,6 @@ typedef struct ext2_dir_entry {
 typedef struct ext2_fs_t {
 	uint32_t start_sector;
 	ext2_superblock *sb;
-	uint16_t *bgdt;
 	uint32_t block_size;
 	uint32_t inodes_per_block;
 } ext2_fs_t;
