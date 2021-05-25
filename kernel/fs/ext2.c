@@ -42,7 +42,7 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 	}
 
 	uint16_t *block_buf = (uint16_t *) malloc(mm, fs->block_size);
-	kdebug("read_inode: bg: %d bg_index: %d block: %d sector: %d\r\n", bg, bg_index, block, fs->start_sector + block_to_sector(descriptor->inode_table_start) + block_to_sector(block));
+	kdebug("read_inode: inode_table_start: %d bg: %d bg_index: %d block: %d sector: %d\r\n", descriptor->inode_table_start, bg, bg_index, block, fs->start_sector + block_to_sector(descriptor->inode_table_start) + block_to_sector(block));
 	ata_pio_read(*dev, fs->start_sector + block_to_sector(descriptor->inode_table_start) + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, block_buf);
 
 	ext2_inode *inode_temp = (ext2_inode *) block_buf;
@@ -210,11 +210,11 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 	fs->inodes_per_block = fs->block_size / sizeof(ext2_inode);
 
 	uint32_t bg_descriptors_total = sb->blocks_total / sb->blocks_per_group;
-	kdebug("Block Size: %d\r\n", 1024 << sb->block_size);
-
 	uint16_t *bg_descriptor_table = (uint16_t *) malloc(mm, fs->block_size);
 	ata_pio_read(*dev, fs->start_sector + block_to_sector(2), fs->block_size / ATA_SECTOR_SIZE, bg_descriptor_table);
 	fs->bgdt = bg_descriptor_table;
+
+	kdebug("ext2 info: sb_start: %d bgdt_start: %d\r\n", entry.start_sector + 2, fs->start_sector + block_to_sector(2));
 
 	// Init buffers
 	if (!inode_buf) inode_buf = (ext2_inode *) malloc(mm, sizeof(ext2_inode));
@@ -225,6 +225,13 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 	uint32_t tmp_num = ext2_find_file(dev, fs, "/test.txt", tmp);
 	kdebug("Num: %d\r\n", tmp_num);
 	*/
+
+	// Print out bgdt
+	ext2_bg_descriptor *descriptor = (ext2_bg_descriptor *) fs->bgdt;
+	for (int i=0; i < 20; i++) {
+		kdebug("start: %d\r\n", descriptor->inode_table_start);
+		descriptor++;
+	}
 
 	uint16_t *file_buf;
 	uint8_t result = ext2_read_file(dev, fs, "/test.txt", file_buf);

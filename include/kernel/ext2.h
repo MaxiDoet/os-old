@@ -41,6 +41,7 @@ typedef struct ext2_bg_descriptor {
 	uint16_t unallocated_blocks_in_group;
 	uint16_t unallocated_inodes_in_group;
 	uint16_t directories_in_group;
+	uint16_t reserved[7];
 } __attribute__((packed)) ext2_bg_descriptor;
 
 enum ext2_inode_type {
