@@ -28,17 +28,30 @@ uint32_t block_to_sector(uint32_t block)
 static uint16_t *root_buf;
 static ext2_inode *inode_buf;
 
+void ext2_read_block(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block, uint16_t *buf)
+{
+	if (block > fs->sb->blocks_total) {
+		kdebug("attempted to read invalid block\r\n");
+	}
+
+	ata_pio_read(*dev, fs->start_sector + block_to_sector(block), 2, buf);
+}
+
 void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *buf)
 {
+	if (inode > fs->sb->inodes_total) {
+		kdebug("attempted to read invalid inode\r\n");
+		return;
+	}
+
 	uint32_t bg = (inode - 1) / fs->sb->inodes_per_group;
 	uint32_t bg_index = (inode - 1) % fs->sb->inodes_per_group;
-	//bg_index = bg_index % fs->inodes_per_block;
 	uint32_t block = (bg_index * sizeof(ext2_inode)) / fs->block_size;
 	uint32_t block_index = bg_index % fs->inodes_per_block;
 
 	// Read bgdt
 	uint16_t *bgdt_buf = (uint16_t *) malloc(mm, fs->block_size);
-	ata_pio_read(*dev, fs->start_sector + block_to_sector(2), fs->block_size / ATA_SECTOR_SIZE, bgdt_buf);
+	ext2_read_block(dev, fs, 2, bgdt_buf);
 	ext2_bg_descriptor *descriptor = (ext2_bg_descriptor *) bgdt_buf;
 
 	// Seek to block group
@@ -47,23 +60,20 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 	}
 
 	uint16_t *block_buf = (uint16_t *) malloc(mm, fs->block_size);
-	ata_pio_read(*dev, fs->start_sector + block_to_sector(descriptor->inode_table_start) + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE , block_buf);
-
+	ext2_read_block(dev, fs, descriptor->inode_table_start + block, block_buf);
 	ext2_inode *inode_temp = (ext2_inode *) block_buf;
+
 	for (int j=0; j < block_index; j++) {
 		inode_temp++;
 	}
 
-	kdebug("----------------------------------------\r\n");
+	memcpy(buf, inode_temp, sizeof(ext2_inode));
 
+	/*
 	for (int k=0; k < 64; k++) {
 		kdebug("%x ", *((uint16_t *)inode_temp + k));
 	}
-	kdebug("\r\n");
-	kdebug("read_inode: inode: %d type: %x inode_table_start: %d bg: %d bg_index: %d block_index: %d block: %d sector: %d\r\n", inode, inode_temp->type, descriptor->inode_table_start, bg, bg_index, block_index, block, fs->start_sector + block_to_sector(descriptor->inode_table_start) + block_to_sector(block));
-	kdebug("read_inode: direct_block_pointer[0]: %d\r\n", inode_temp->direct_block_ptr[0]);
-	kdebug("----------------------------------------\r\n");
-	memcpy(buf, inode_temp, sizeof(ext2_inode));
+	*/
 }
 
 uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
@@ -78,7 +88,7 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 		ext2_read_inode(dev, fs, 2, inode_buf);
 		for (int i=0; i < 12; i++) {
 			uint32_t block = inode_buf->direct_block_ptr[i];
-			ata_pio_read(*dev, fs->start_sector + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, root_buf);
+			ext2_read_block(dev, fs, block, root_buf);
 			dir = (ext2_dir_entry *) root_buf;
 
 			while(dir->inode != 0) {
@@ -123,7 +133,7 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
 		}
 
 		uint16_t *block_buf = (uint16_t *) malloc(mm, fs->block_size);
-		ata_pio_read(*dev, fs->start_sector + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, block_buf);
+		ext2_read_block(dev, fs, block, block_buf);
 		memcpy(buf + i*(fs->block_size), block_buf, fs->block_size);
 	}
 
@@ -159,36 +169,8 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
         }
 
 	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
-	uint8_t result = ext2_read_file(dev, fs, "/test.txt", file_buf);
-	kdebug("test.txt: %d Content: %s", result, (char *) file_buf);
-
-	/*
-	ext2_read_inode(dev, &fs->sb, fs->bgdt, 2, inode_buf);
-	for (int i=0; i < 12; i++) {
-		uint32_t block = inode_buf->direct_block_ptr[i];
-		if (block == 0) break;
-		kdebug("Root dbp%d: %d %d\r\n", i, block, fs->start_sector + block_to_sector(block));
-		ata_pio_read(*dev, fs->start_sector + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, root_buf);
-
-		ext2_dir_entry *dir = (ext2_dir_entry *) root_buf;
-		while(dir->inode != 0) {
-			char* name = (char *) malloc(mm, dir->name_length + 1);
-			memcpy(name, &dir->name_reserved, dir->name_length);
-			name[dir->name_length] = '\0';
-			if (strcmp(name, "test.txt") == 0) {
-				kdebug("Found file! Inode: %d\r\n", dir->inode);
-			}
-
-			dir = (ext2_dir_entry *) ((uint32_t) dir + dir->size);
-		}
-
-		/*
-		if (ext2_read_directory(dev, fs, (ext2_dir_entry *) root_buf, filename)) {
-			kdebug("Works!\r\n");
-		}
-	}
-	*/
-
+	ext2_read_file(dev, fs, "/test.txt", file_buf);
+	kdebug("test.txt: Content: %s", (char *) file_buf);
 
 	return 1;
 }

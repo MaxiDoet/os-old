@@ -152,7 +152,7 @@ uint8_t ata_pio_wait_drq(ata_dev_t dev)
         return status;
 }
 
-void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
+void ata_pio_read(ata_dev_t dev, uint32_t lba, uint8_t sector_count, uint16_t *buf)
 {
 	if (!dev.data_port) return;
 
@@ -172,11 +172,10 @@ void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf)
 		ata_pio_wait_drq(dev);
 
 		for (int j=0; j < 256; j++) {
-			uint16_t data = inw(dev.data_port);
-			buf[j] = data;
+			buf[j] = inw(dev.data_port);
 		}
 
-		buf+=226;
+		buf+=256;
 	}
 }
 
@@ -194,25 +193,6 @@ void ata_pio_write(ata_dev_t dev, uint32_t sector, uint16_t* buf, uint32_t count
 	for(int i = 0; i < 256; i++) {
 		outw(dev.data_port, buf[i]);
     	}
-}
-
-void read_sectors_ATA_PIO(uint32_t target_address, uint32_t LBA, uint8_t sector_count)
-{
-	outb(0x1F0, 0xE0 | ((LBA >>24) & 0xF));
-	outb(0x1F2, sector_count);
-	outb(0x1F3, (uint8_t) LBA);
-	outb(0x1F4, (uint8_t)(LBA >> 8));
-	outb(0x1F5, (uint8_t)(LBA >> 16)); 
-	outb(0x1F7, 0x20); //Send the read command
-
-	uint16_t *target = (uint16_t*) target_address;
-
-	for (int j =0;j<sector_count;j++)
-	{
-		for(int i=0;i<256;i++)
-			target[i] = inw(0x1F0);
-		target+=256;
-	}
 }
 
 void ata_pio_flush(ata_dev_t dev)

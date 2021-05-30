@@ -24,7 +24,7 @@ typedef struct {
 uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master);
 uint8_t ata_pio_wait_bsy(ata_dev_t dev);
 uint8_t ata_pio_wait_drq(ata_dev_t dev);
-void ata_pio_read(ata_dev_t dev, uint32_t lba, int sector_count, uint16_t *buf);
+void ata_pio_read(ata_dev_t dev, uint32_t lba, uint8_t sector_count, uint16_t *buf);
 void ata_pio_write(ata_dev_t dev, uint32_t sector, uint16_t* buf, uint32_t count);
 void ata_pio_flush(ata_dev_t dev);
 

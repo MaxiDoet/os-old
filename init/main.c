@@ -84,12 +84,12 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	rtc_print_time_date();
 
 	// Detect system hardware
-	kdebug("[kernel] SMBIOS: ");
+	kdebug("[kernel] SMBIOS Version: ");
 	uint8_t *smbios_mem = (uint8_t *) 0xF0000;
 	while ((unsigned int) smbios_mem < 0x100000) {
 		if (smbios_mem[0] == '_' && smbios_mem[1] == 'S' && smbios_mem[2] == 'M' && smbios_mem[3] == '_') {
 			smbios_entry_point *entry_point = (smbios_entry_point *) smbios_mem;
-			kdebug("present\r\n");
+			kdebug("%d.%d\r\n", entry_point->major_version, entry_point->minor_version);
 			break;
 		}
 		smbios_mem+=16;
