@@ -5,6 +5,9 @@
 #include "../include/drivers/pci.h"
 #include "../include/kernel/asm.h"
 #include "../include/kernel/kernel.h"
+#include "../libc/include/mm.h"
+
+#include "../include/drivers/rtl8139.h"
 
 uint32_t pci_read_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset)
 {
@@ -68,6 +71,8 @@ pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_
 
 	dev.class_id = pci_read_dword(bus, device, func, 0x08) >> 24 & 0xFF;
 	dev.subclass_id = pci_read_dword(bus, device, func, 0x08) >> 16 & 0xFF;
+
+	dev.irq = pci_read_word(bus, device, func, 0x3C);
 
 	return dev;
 }
@@ -205,6 +210,11 @@ void pci_scan()
 						break;
 				}
 				kdebug("\r\n");
+
+				// RTL8139
+				if (dev.vendor_id == 0x10EC && dev.device_id == 0x8139) {
+					rtl8139_init(dev);
+				}
 			}
 
 		}

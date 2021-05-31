@@ -21,6 +21,7 @@ typedef struct {
 	uint8_t subclass_id;
 
 	uint32_t io_base;
+	uint8_t irq;
 
 } pci_dev_descriptor;
 
