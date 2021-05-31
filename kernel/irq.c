@@ -58,7 +58,7 @@ void irq_handler(uint8_t irq)
 void irq_print_map()
 {
 	kdebug("IRQ Map\r\n");
-	kdebug("| IRQ | Used |\r\n");
+	kdebug("| IRQ | Used  |\r\n");
 
 	for (int i=0; i<16; i++) {
 		if (i >= 10) {

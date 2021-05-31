@@ -112,11 +112,7 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
 {
 	uint32_t inode = ext2_find_inode(dev, fs, path);
-	if (inode != 0) {
-		kdebug("Found file!\r\n");
-	} else {
-		return -1;
-	}
+	if (inode == 0) return -1;
 
 	ext2_read_inode(dev, fs, inode, inode_buf);
 
@@ -170,7 +166,7 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 
 	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
 	ext2_read_file(dev, fs, "/test.txt", file_buf);
-	kdebug("test.txt: Content: %s", (char *) file_buf);
+	kdebug("test.txt: Content: %s\r\n", (char *) file_buf);
 
 	return 1;
 }

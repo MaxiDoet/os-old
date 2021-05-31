@@ -132,7 +132,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		}
 	}
 
-	pci_probe();
+	pci_scan();
 
 	#ifdef DESKTOP
 		void *fb = (void *) (unsigned long) mbi->framebuffer_addr;

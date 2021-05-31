@@ -36,6 +36,6 @@ void pci_write_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offs
 void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint16_t value);
 pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func);
 pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum);
-void pci_probe();
+void pci_scan();
 
 #endif
