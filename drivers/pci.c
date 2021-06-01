@@ -72,6 +72,7 @@ pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_
 	dev.class_id = pci_read_dword(bus, device, func, 0x08) >> 24 & 0xFF;
 	dev.subclass_id = pci_read_dword(bus, device, func, 0x08) >> 16 & 0xFF;
 
+	dev.command = pci_read_dword(bus, device, func, 0x04);
 	dev.irq = pci_read_word(bus, device, func, 0x3C);
 
 	return dev;

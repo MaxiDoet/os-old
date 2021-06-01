@@ -164,7 +164,7 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 		ext2_read_inode(dev, fs, i, inode_buf);
         }
 
-	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
+	uint16_t *file_buf = (uint16_t *) malloc(mm, 10);
 	ext2_read_file(dev, fs, "/test.txt", file_buf);
 	kdebug("test.txt: Content: %s\r\n", (char *) file_buf);
 

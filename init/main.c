@@ -72,7 +72,8 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	//pmm_alloc();
 
 	size_t heap_start = mbi->mem_upper + 10*1024*1024;
-	size_t heap_size = mbi->mem_upper * 1024 - heap_size - 10*1024;
+	//size_t heap_size = mbi->mem_upper * 1024 - heap_size - 10*1024;
+	size_t heap_size = 1000000;
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
 	mm_init(heap_start, heap_size);
 
