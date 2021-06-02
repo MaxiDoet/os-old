@@ -134,6 +134,8 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 		kdebug("%x%s", mac[i], ((i < 5) ? ":" : "\r\n"));
 	}
 
+	kdebug("TCR: %x\r\n", inl(dev.io_base + REG_TCR));
+
 	/*
 	// Test packet
 	memset(tx_buffer, 0xC4, 1792);

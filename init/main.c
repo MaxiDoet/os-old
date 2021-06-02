@@ -99,9 +99,11 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		kdebug("not present\r\n");
 	}
 
+	/* Doesn't work on copy.sh!
 	if(sb16_probe() == 0) {
 		sb16_init();
 	}
+	*/
 
 	kdebug("[kernel] ATA init\r\n");
 	ata_dev_t root_dev;

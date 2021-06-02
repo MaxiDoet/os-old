@@ -33,8 +33,8 @@ window desktop_new_window(char* title, int width, int height, int x, int y, int 
 	return win;
 }
 
-int cursorX=0;
-int cursorY=0;
+int cursorX=50;
+int cursorY=50;
 
 char* str="";
 int i=0;
@@ -48,6 +48,12 @@ void mouse_handler(struct mouse_event event)
 void keyboard_handler(struct keyboard_event event)
 {
 	if (!event.released) {
+		if (i >= 50) {
+			i=0;
+			str="";
+			return;
+		}
+
 		str[i]=event.asci;
 		i++;
 	}
@@ -96,7 +102,7 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 		draw_circle_filled(70+175, 77, 5, 0xFE26);
 		draw_circle_filled(70+190, 77, 5, 0xF28A);
 
-		draw_string(50, 50, font, str, 0x4228);
+		draw_string(50, 30, font, str, 0x4228);
 
 		// Navbar
 		draw_filled_rectangle(0, 0, fb_width, 20, 0x4228);
