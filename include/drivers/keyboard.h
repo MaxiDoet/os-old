@@ -57,12 +57,13 @@ static enum keyboard_key keyboard_scancodeset[256] = {
 	KEY_UNUSED
 };
 
-struct keyboard_event {
+typedef struct keyboard_event {
 	enum keyboard_key key;
-	bool released;
-	bool shift_pressed;
+	bool pressed;
+	bool printable;
+	bool shift;
 	char asci;
-};
+} keyboard_event;
 
 void keyboard_init();
 void keyboard_irq_handler();

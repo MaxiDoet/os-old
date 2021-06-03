@@ -6,7 +6,7 @@ name="font"
 size=20
 width=32
 height=32
-chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-/*#+ß!§$%&"
+chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!§$%&/()=?+#-.,;:_'*"
 count=200
 out_file="font.h"
 

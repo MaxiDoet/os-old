@@ -29,6 +29,8 @@
 
 #include "../bin/desktop/desktop.h"
 
+#include "../lib/include/libbmp.h"
+
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
 extern const void kernel_start;
@@ -78,9 +80,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
 	mm_init(heap_start, heap_size);
 
-	keyboard_init();
-	mouse_init();
-
 	// RTC init
 	kdebug("[rtc] now: ");
 	rtc_print_time_date();
@@ -126,9 +125,12 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
         vfs_read("/test.bmp", file_buf);
-        kdebug("test.txt: Content: %x\r\n", file_buf);
+        bmp_parse(file_buf);
 
 	pci_scan();
+
+	keyboard_init();
+	mouse_init();
 
 	#ifdef DESKTOP
 		void *fb = (void *) (unsigned long) mbi->framebuffer_addr;

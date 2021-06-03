@@ -10,8 +10,7 @@
 
 static int keyboard_callback_num = 0;
 static void (*keyboard_callbacks[8])(struct keyboard_event);
-static bool shift_pressed;
-static struct keyboard_event event;
+static keyboard_event event;
 
 static char keyboard_char_map[256] = {
     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -29,20 +28,35 @@ static char keyboard_char_map[256] = {
     ' '
 };
 
-void keyboard_fire_callback(enum keyboard_key key, bool released)
+static char keyboard_shift_map[256] = {
+    '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O' ,'P', 'A', 'S', 'D', 'F',
+    'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M',
+
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+
+    '<', '>', '?', '|', '"', ':', '_', '+', ' ', ' ', ' ', '\t', ' ',
+
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', '}', '{', ' ', ' ', ' ',
+
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '*', '+', '.',
+
+    ' '
+};
+
+static char keyboard_printable_map[256] = {
+    true, true, true, true, true, true, true, true, true, true,
+    true, true, true, true, true, true, true, true, true , true, true, true, true, true,
+    true, true, true, true, true, true, true, true, true, true, true, true,
+    false, false, false, false, false, false, false, false, false, false, false, false,
+    true, true, true, true, true, true, true, true, false, true, false, false, false,
+    false, false, false, false, false, false, false, true, true, false, false, false,
+    true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+    false
+};
+
+void keyboard_fire_callback(keyboard_event event)
 {
-	if (key == KEY_LSHIFT || key == KEY_RSHIFT) {
-		shift_pressed = !released;
-	}
-
-	event.key = key;
-	event.released = released;
-	event.shift_pressed = shift_pressed;
-
-	if (key < 256) {
-		event.asci = keyboard_char_map[key];
-	}
-
 	for(int i=0; keyboard_callbacks[i]; i++) {
 		keyboard_callbacks[i](event);
 	}
@@ -61,24 +75,68 @@ void keyboard_remove_callback()
 
 void keyboard_irq_handler()
 {
-	// Wait until output buffer is empty
+	// Wait until keyboard buffer is empty
 	uint8_t status;
 	do {
 		status = inb(0x64);
 	} while ((status & 0x1) == 0);
 
-	uint8_t scancode = inb(0x60);
+	uint8_t key = inb(0x60);
+	bool pressed = ((key & 128) != 128);
 
-	if((scancode & 128) == 128) {
-		// Released
-		keyboard_fire_callback(keyboard_scancodeset[scancode], true);
-	} else {
-		// Pressed
-		keyboard_fire_callback(keyboard_scancodeset[scancode], false);
+	if (!pressed) {
+		key = key & 0x7F;
 	}
+
+	event.key = key;
+	event.pressed = pressed;
+
+	if (event.key == 0x2a) {
+		event.shift = event.pressed;
+	}
+
+	kdebug("Index: %d\r\n", keyboard_scancodeset[event.key]);
+
+	if (pressed && event.key < 256) {
+		if (event.shift) {
+			event.asci = keyboard_shift_map[keyboard_scancodeset[event.key]];
+		} else {
+			event.asci = keyboard_char_map[keyboard_scancodeset[event.key]];
+		}
+	}
+
+	event.printable = keyboard_printable_map[keyboard_scancodeset[event.key]];
+
+	kdebug("--------------\r\n");
+	kdebug("Key: %x\r\n", event.key);
+	kdebug("Pressed: %d\r\n", event.pressed);
+	kdebug("ASCI: %x\r\n", event.asci);
+	kdebug("Shift: %d\r\n", event.shift);
+	kdebug("Printable: %d\r\n", event.printable);
+	kdebug("--------------\r\n");
+
+	keyboard_fire_callback(event);
+}
+
+void keyboard_send(uint8_t command)
+{
+	// Wait until controller is ready
+	while (inb(0x64) & 0x2){
+
+	}
+
+	outb(0x60, command);
 }
 
 void keyboard_init() {
+	// Empty keyboard buffer
+	while (inb(0x64) & 0x1) {
+		inb(0x60);
+	}
+
+	// Activate controller
+	//keyboard_send(0xF4);
+
 	irq_install_handler(1, keyboard_irq_handler);
 }
 

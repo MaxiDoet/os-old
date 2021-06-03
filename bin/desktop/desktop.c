@@ -5,6 +5,7 @@
 #include "../bin/desktop/desktop.h"
 #include "../include/kernel/kernel.h"
 #include "../libc/include/mm.h"
+#include "../libc/include/string.h"
 #include "../bin/desktop/ui.h"
 
 #include "../include/drivers/keyboard.h"
@@ -36,7 +37,7 @@ window desktop_new_window(char* title, int width, int height, int x, int y, int 
 int cursorX=50;
 int cursorY=50;
 
-char* str="";
+char* str;
 int i=0;
 
 void mouse_handler(struct mouse_event event)
@@ -47,15 +48,18 @@ void mouse_handler(struct mouse_event event)
 
 void keyboard_handler(struct keyboard_event event)
 {
-	if (!event.released) {
+	if (event.pressed) {
 		if (i >= 50) {
 			i=0;
-			str="";
+			memset(str, 0, 100);
 			return;
 		}
 
-		str[i]=event.asci;
-		i++;
+
+		if (event.printable) {
+			str[i]=event.asci;
+			i++;
+		}
 	}
 }
 
@@ -84,6 +88,8 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 		// Swap frontbuffer and backbuffer
 		desktop_swap_fb();
 	}
+
+	str = (char *) malloc(mm, 100);
 
 	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);

@@ -28,6 +28,9 @@ gcc $GCCPARAMS -c drivers/rtl8139.c -o drivers/rtl8139.o
 gcc $GCCPARAMS -c libc/string.c -o libc/string.o
 gcc $GCCPARAMS -c libc/mm.c -o libc/mm.o
 
+# Build lib
+gcc $GCCPARAMS -c lib/libbmp.c -o lib/libbmp.o
+
 # Build kernel
 gcc $GCCPARAMS -c kernel/debug.c -o kernel/debug.o
 gcc $GCCPARAMS -c kernel/asm.c -o kernel/asm.o
@@ -56,7 +59,8 @@ boot/boot.o \
 init/main.o \
 drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \
 libc/string.o libc/mm.o \
-bin/desktop/desktop.o
+bin/desktop/desktop.o \
+lib/libbmp.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin
