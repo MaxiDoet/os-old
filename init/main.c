@@ -23,6 +23,7 @@
 #include "../include/drivers/ata.h"
 #include "../include/kernel/ext2.h"
 #include "../include/kernel/mbr.h"
+#include "../include/kernel/vfs.h"
 #include "../include/kernel/asm.h"
 #include "../include/kernel/smbios.h"
 
@@ -121,19 +122,11 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
         	kpanic("no ata root device");
 	}
 
-	// Look for mbr
-        uint16_t *mbr_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
-        ata_pio_read(root_dev, 0, 1, mbr_buf);
-        mbr_t *mbr = (mbr_t *) mbr_buf;
+	vfs_probe(root_dev);
 
-        if (mbr->boot_signature[0] == 0x55 && mbr->boot_signature[1] == 0xAA) {
-		for (int i=0; i < 4; i++) {
-			mbr_table_entry entry = mbr->partition_table[i];
-			if (entry.type == 0x83) {
-				ext2_probe(&root_dev, entry, &fs);
-			}
-		}
-	}
+	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
+        vfs_read("/test.bmp", file_buf);
+        kdebug("test.txt: Content: %x\r\n", file_buf);
 
 	pci_scan();
 

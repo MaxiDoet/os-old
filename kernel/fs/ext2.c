@@ -9,15 +9,6 @@
 #include "../libc/include/mm.h"
 #include "../libc/include/string.h"
 
-/* Note: Add global device structure instead of just ata devices and attach pointer to the specific read/write/flush functions
-
-dev->fs
-	fs->probe (void *)
-	fs->read (void *)
-	.....
-	fs->data contains fs specific data e.g fs->data->inodes_per_block
-*/
-
 uint32_t block_to_sector(uint32_t block)
 {
 	uint32_t sector = (block * 1024) / ATA_SECTOR_SIZE;
@@ -150,23 +141,12 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 	fs->inodes_per_block = fs->block_size / sizeof(ext2_inode);
 
 	uint32_t bg_descriptors_total = sb->blocks_total / sb->blocks_per_group;
-	//uint16_t *bg_descriptor_table = (uint16_t *) malloc(mm, fs->block_size);
-	//ata_pio_read(*dev, fs->start_sector + block_to_sector(2), fs->block_size / ATA_SECTOR_SIZE, bg_descriptor_table);
-	//fs->bgdt = bg_descriptor_table;
 
 	kdebug("ext2 info: sb_start: %d inodes_per_group: %d bgdt_start: %d\r\n", entry.start_sector + 2, sb->inodes_per_group, fs->start_sector + block_to_sector(2));
 
 	// Init buffers
 	if (!inode_buf) inode_buf = (ext2_inode *) malloc(mm, sizeof(ext2_inode));
         if (!root_buf) root_buf = (uint16_t *) malloc(mm, fs->block_size);
-
-        for (int i=1; i < 20; i++) {
-		ext2_read_inode(dev, fs, i, inode_buf);
-        }
-
-	uint16_t *file_buf = (uint16_t *) malloc(mm, 10);
-	ext2_read_file(dev, fs, "/test.txt", file_buf);
-	kdebug("test.txt: Content: %s\r\n", (char *) file_buf);
 
 	return 1;
 }

@@ -94,5 +94,6 @@ typedef struct ext2_fs_t {
 } ext2_fs_t;
 
 uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs);
+uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf);
 
 #endif
