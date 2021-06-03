@@ -5,6 +5,7 @@
 #define DEBUG_IRQ_INSTALL
 //#define DEBUG_IRQ_PRINT
 //#define DEBUG_IRQ_PRINT_ROUTINE
+//#define DEBUG_KEYBOARD_EVENT
 
 //#define ATA_DEBUG_BUSY
 //#define ATA_DEBUG_WAIT_DRQ

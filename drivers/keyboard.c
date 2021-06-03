@@ -7,6 +7,7 @@
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
 #include "../include/lib/print.h"
+#include "../config.h"
 
 static int keyboard_callback_num = 0;
 static void (*keyboard_callbacks[8])(struct keyboard_event);
@@ -95,8 +96,6 @@ void keyboard_irq_handler()
 		event.shift = event.pressed;
 	}
 
-	kdebug("Index: %d\r\n", keyboard_scancodeset[event.key]);
-
 	if (pressed && event.key < 256) {
 		if (event.shift) {
 			event.asci = keyboard_shift_map[keyboard_scancodeset[event.key]];
@@ -107,13 +106,9 @@ void keyboard_irq_handler()
 
 	event.printable = keyboard_printable_map[keyboard_scancodeset[event.key]];
 
-	kdebug("--------------\r\n");
-	kdebug("Key: %x\r\n", event.key);
-	kdebug("Pressed: %d\r\n", event.pressed);
-	kdebug("ASCI: %x\r\n", event.asci);
-	kdebug("Shift: %d\r\n", event.shift);
-	kdebug("Printable: %d\r\n", event.printable);
-	kdebug("--------------\r\n");
+	#ifdef DEBUG_KEYBOARD_EVENT
+		kdebug("[keyboard] %s event: Key: %d Asci: %d Shift: %d\r\n", ((event.pressed) ? "pressed" : "released"), event.key, event.asci, event.shift);
+	#endif
 
 	keyboard_fire_callback(event);
 }
