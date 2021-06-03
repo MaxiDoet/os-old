@@ -2,11 +2,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../bin/desktop/desktop.h"
+#include "../apps/desktop/desktop.h"
 #include "../include/kernel/kernel.h"
 #include "../libc/include/mm.h"
 #include "../libc/include/string.h"
-#include "../bin/desktop/ui.h"
+#include "../apps/desktop/ui.h"
 
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
@@ -14,9 +14,9 @@
 
 #include "../config.h"
 
-#include "../bin/desktop/font.h"
-#include "../bin/desktop/wallpaper.h"
-#include "../bin/desktop/cursor.h"
+#include "../apps/desktop/font.h"
+#include "../apps/desktop/wallpaper.h"
+#include "../apps/desktop/cursor.h"
 
 window windows[10];
 
@@ -40,10 +40,23 @@ int cursorY=50;
 char* str;
 int i=0;
 
+// Grabbing test
+int windowX = 70;
+int windowY = 70;
+bool grabbing;
+
 void mouse_handler(struct mouse_event event)
 {
 	cursorX = event.x * 10;
 	cursorY = event.y * 10;
+
+	if (!grabbing && event.button1_pressed && cursorX >= windowX-10 && cursorX <= windowX-10 + 200 && cursorY >= windowY-10 && cursorY <= windowY-10 + 100) {
+		grabbing = true;
+	}
+
+	if (grabbing && !event.button1_pressed) {
+		grabbing = false;
+	}
 }
 
 void keyboard_handler(struct keyboard_event event)
@@ -83,7 +96,7 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	while(progress<100) {
 		draw_rounded_rectangle(0, 0, fb_width, fb_height, 2, 0x2104);
 		draw_rounded_rectangle((fb_width / 2) - 100, 400, progress, 10, 2, 0xFFFF);
-		progress+=2;
+		progress+=1;
 
 		// Swap frontbuffer and backbuffer
 		desktop_swap_fb();
@@ -102,11 +115,16 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 			draw_filled_rectangle(0, 0, fb_width, fb_height, 0x4A69);
 		#endif
 
-		draw_rounded_rectangle(70, 70, 200, 100, 5, 0x4228);
+		draw_rounded_rectangle(windowX, windowY, 200, 100, 5, 0x4228);
 
-		draw_circle_filled(70+160, 77, 5, 0x5ECC);
-		draw_circle_filled(70+175, 77, 5, 0xFE26);
-		draw_circle_filled(70+190, 77, 5, 0xF28A);
+		draw_circle_filled(windowX+160, windowY + 7, 5, 0x5ECC);
+		draw_circle_filled(windowX+175, windowY + 7, 5, 0xFE26);
+		draw_circle_filled(windowX+190, windowY + 7, 5, 0xF28A);
+
+		if (grabbing) {
+			windowX = cursorX;
+			windowY = cursorY;
+		}
 
 		draw_string(50, 30, font, str, 0x4228);
 

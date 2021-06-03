@@ -48,8 +48,8 @@ gcc $GCCPARAMS -c kernel/fs/ext2.c -o kernel/fs/ext2.o
 gcc $GCCPARAMS -c init/main.c -o init/main.o
 
 # Build programs
-#gcc $GCCPARAMS -c bin/shell/shell.c -o bin/shell/shell.o
-gcc $GCCPARAMS -c bin/desktop/desktop.c -o bin/desktop/desktop.o
+#gcc $GCCPARAMS -c apps/shell/shell.c -o bin/shell/shell.o
+gcc $GCCPARAMS -c apps/desktop/desktop.c -o apps/desktop/desktop.o
 
 #libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o libc/mm.o \
 
@@ -59,7 +59,7 @@ boot/boot.o \
 init/main.o \
 drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \
 libc/string.o libc/mm.o \
-bin/desktop/desktop.o \
+apps/desktop/desktop.o \
 lib/libbmp.o
 
 mkdir -p isodir/boot/grub

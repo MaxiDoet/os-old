@@ -27,7 +27,7 @@
 #include "../include/kernel/asm.h"
 #include "../include/kernel/smbios.h"
 
-#include "../bin/desktop/desktop.h"
+#include "../apps/desktop/desktop.h"
 
 #include "../lib/include/libbmp.h"
 

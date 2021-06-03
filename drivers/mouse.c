@@ -14,16 +14,18 @@ static struct mouse_event event;
 static int mouse_x;
 static int mouse_y;
 
+static bool button1_pressed;
+static bool button2_pressed;
+static bool button3_pressed;
+
 void mouse_fire_callback()
 {
 	event.x = mouse_x;
 	event.y = mouse_y;
 
-	/*
-	event.button1_pressed = mouse_receive_byte[0] & 0x1 ? true : false;
-	event.button2_pressed = mouse_receive_byte[0] & (0x1 << 1) ? true : false;
-	event.button3_pressed = mouse_receive_byte[0] & (0x1 << 2) ? true : false;
-	*/
+	event.button1_pressed = button1_pressed;
+	event.button2_pressed = button2_pressed;
+	event.button3_pressed = button3_pressed;
 
         for(int i=0; mouse_callbacks[i]; i++) {
                	mouse_callbacks[i](event);
@@ -53,6 +55,11 @@ void mouse_irq_handler()
 	 		// Flags, buttons
 			mouse_receive_byte[0] = data;
 			mouse_receive_counter++;
+
+			button1_pressed = mouse_receive_byte[0] & 0x1 ? true : false;
+			button2_pressed = mouse_receive_byte[0] & (0x1 << 1) ? true : false;
+			button3_pressed = mouse_receive_byte[0] & (0x1 << 2) ? true : false;
+
 			break;
 		case 1:
 			// X Movement

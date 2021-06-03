@@ -92,7 +92,7 @@ void keyboard_irq_handler()
 	event.key = key;
 	event.pressed = pressed;
 
-	if (event.key == 0x2a) {
+	if (event.key == 0x2a || event.key == 0x36) {
 		event.shift = event.pressed;
 	}
 
@@ -107,7 +107,7 @@ void keyboard_irq_handler()
 	event.printable = keyboard_printable_map[keyboard_scancodeset[event.key]];
 
 	#ifdef DEBUG_KEYBOARD_EVENT
-		kdebug("[keyboard] %s event: Key: %d Asci: %d Shift: %d\r\n", ((event.pressed) ? "pressed" : "released"), event.key, event.asci, event.shift);
+		kdebug("[keyboard] %s event: Key: %x Asci: %x Shift: %d\r\n", ((event.pressed) ? "pressed" : "released"), event.key, event.asci, event.shift);
 	#endif
 
 	keyboard_fire_callback(event);
