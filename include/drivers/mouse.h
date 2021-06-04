@@ -2,8 +2,8 @@
 #define _mouse_h
 
 struct mouse_event {
-	uint8_t x;
-	uint8_t y;
+	int x;
+	int y;
 	bool button1_pressed;
 	bool button2_pressed;
 	bool button3_pressed;

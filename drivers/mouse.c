@@ -11,23 +11,13 @@ static int mouse_callback_num = 0;
 static void (*mouse_callbacks[8])(struct mouse_event);
 static struct mouse_event event;
 
-static int mouse_x;
-static int mouse_y;
-
 static bool button1_pressed;
 static bool button2_pressed;
 static bool button3_pressed;
 
-void mouse_fire_callback()
+void mouse_fire_callback(struct mouse_event event)
 {
-	event.x = mouse_x;
-	event.y = mouse_y;
-
-	event.button1_pressed = button1_pressed;
-	event.button2_pressed = button2_pressed;
-	event.button3_pressed = button3_pressed;
-
-        for(int i=0; mouse_callbacks[i]; i++) {
+	for(int i=0; mouse_callbacks[i]; i++) {
                	mouse_callbacks[i](event);
         }
 }
@@ -70,37 +60,48 @@ void mouse_irq_handler()
 			// Y Movement
 			mouse_receive_byte[2] = data;
 
-			mouse_x += mouse_receive_byte[1] - ((mouse_receive_byte[0] << 4) & 0x100);
-			mouse_y -= mouse_receive_byte[2] - ((mouse_receive_byte[0] << 3) & 0x100);
+			event.x = mouse_receive_byte[1] - ((mouse_receive_byte[0] << 4) & 0x100);
+			event.y = mouse_receive_byte[2] - ((mouse_receive_byte[0] << 3) & 0x100);
 
-			if (mouse_x < 0)
-				mouse_x = 0;
-			if (mouse_y < 0)
-				mouse_y = 0;
-			if (mouse_x >= 799)
-				mouse_x = 799;
-			if (mouse_y >= 599)
-				mouse_y = 599;
+			event.button1_pressed = button1_pressed;
+			event.button2_pressed = button2_pressed;
+			event.button3_pressed = button3_pressed;
 
-			mouse_fire_callback();
+			mouse_fire_callback(event);
 
 			mouse_receive_counter=0;
 			break;
 	}
 }
 
+void mouse_write(uint8_t data)
+{
+	// Tell controller we're sending a command to the mouse
+	outb(0x64, 0xD4);
+	outb(0x60, data);
+
+	while (inb(0x60) != 0xFA) {
+		// Wait for ack
+	}
+}
+
 void mouse_init()
 {
+	// Enable auxiliary mouse device
 	outb(0x64, 0xA8);
+
+	// Enable irq
         outb(0x64, 0x20);
+
         uint8_t status = inb(0x60) | 2;
         outb(0x64, 0x60);
         outb(0x60, status);
 
-	// Tell the ps2 controller we're using the second port
-        outb(0x64, 0xD4);
-	// Enable packet streaming
-        outb(0x60, 0xF4);
+	// Use default settings
+	mouse_write(0xF6);
+
+	// Enable mouse
+	mouse_write(0xF4);
 
         inb(0x60);
 

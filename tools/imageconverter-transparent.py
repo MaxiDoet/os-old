@@ -5,8 +5,8 @@ def rgb2hex(r, g, b, a):
     return '0x{:02x}{:02x}{:02x}'.format(r, g, b)
 
 # Config
-name="image"
-out_file="image.h"
+name="cursor"
+out_file="cursor.h"
 
 im = Image.open(sys.argv[1])
 width, height = im.size

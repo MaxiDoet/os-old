@@ -22,20 +22,25 @@
 #include "../lib/gui/window.h"
 
 window windows[10];
-
-int cursorX=50;
-int cursorY=50;
+static int cursor_x;
+static int cursor_y;
 context main_context;
 
 static void mouse_handler(struct mouse_event event)
 {
-	cursorX = event.x * 10;
-	cursorY = event.y * 10;
+	cursor_x += event.x * 2;
+	cursor_y -= event.y * 2;
+
+	// Collision
+	if (cursor_x <= 0) cursor_x = 0;
+	if (cursor_x >= main_context.width - 8) cursor_x = main_context.width - 8;
+	if (cursor_y <= 0) cursor_y = 0;
+	if (cursor_y >= main_context.height - 1) cursor_y = main_context.height - 1;
 
 	for (int i=0; i < 10; i++) {
-		if (!windows[i].grabbed && event.button1_pressed && cursorX >= windows[i].x-10 && cursorX <= windows[i].x-10 + windows[i].width && cursorY >= windows[i].y-10 && cursorY <= windows[i].y-10 + windows[i].height) {
-			kdebug("Grab");
+		if (!windows[i].grabbed && event.button1_pressed && cursor_x >= windows[i].x-10 && cursor_x <= windows[i].x-10 + windows[i].width && cursor_y >= windows[i].y-10 && cursor_y <= windows[i].y-10 + 20) {
 			windows[i].grabbed = true;
+			windows[i].focused = true;
 		}
 
 		if (windows[i].grabbed && !event.button1_pressed) {
@@ -54,6 +59,23 @@ void desktop_swap_fb()
 	__asm__ volatile("rep movsw" : : "D" (bb), "S" (fb), "c" ((main_context.width * main_context.height * 2) / 2));
 }
 
+/*
+void desktop_draw_cursor(int data[])
+{
+	for (int i=0; i < 19; i++) {
+		for (int j=0; j < 12; j++) {
+			if (data[j*i] == 0) {
+				draw_pixel(main_context, j + cursor_x, i + cursor_y, 0);
+			} else if (data[j*i] == 1) {
+				draw_pixel(main_context, j + cursor_x, i + cursor_y, 0xFFFFF);
+			} else {
+				continue;
+			}
+		}
+	}
+}
+*/
+
 void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 {
 	bb = (void *) (unsigned long) fbaddr;
@@ -66,11 +88,14 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	main_context.fb_pitch = pitch;
 	main_context.fb = fb;
 
+	cursor_x = 0;
+	cursor_y = 0;
+
 	window test;
 	test.x = 70;
 	test.y = 70;
-	test.width = 100;
-	test.height = 50;
+	test.width = 400;
+	test.height = 300;
 
 	windows[0] = test;
 
@@ -86,16 +111,25 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 		#endif
 
 		for (int i=0; i < 10; i++) {
+			if (windows[i].width == 0 || windows[i].height == 0) continue;
+
 			draw_window(main_context, windows[i]);
 
 			if (windows[i].grabbed) {
-				windows[i].x = cursorX;
-				windows[i].y = cursorY;
+				windows[i].x = cursor_x;
+				windows[i].y = cursor_y;
 			}
+
+			/*
+			// Collide with border
+			if (windows[i].x + windows[i].width >= main_context.width) {
+				windows[i].x = windows[i].x + windows[i].width;
+			}
+			*/
 		}
 
 		// Cursor
-		draw_image_transparent(main_context, cursorX, cursorY, 19, 27, cursor);
+		draw_image_transparent(main_context, cursor_x, cursor_y, 13, 24, cursor);
 
 		// Swap frontbuffer and backbuffer
                 desktop_swap_fb();
