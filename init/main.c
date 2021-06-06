@@ -70,7 +70,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	kdebug("[kernel\e[0;37m] IDT init\r\n");
 	idt_install();
 
-	kdebug("[kernel] PMM init\r\n");
+	//kdebug("[kernel] PMM init\r\n");
 	//pmm_init(mbi);
 	//pmm_alloc();
 

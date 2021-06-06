@@ -21,6 +21,8 @@ typedef struct {
 	uint8_t subclass_id;
 
 	uint32_t io_base;
+	uint32_t mem_base;
+
 	uint16_t command;
 	uint8_t irq;
 

@@ -120,12 +120,13 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 				windows[i].y = cursor_y;
 			}
 
-			/*
-			// Collide with border
 			if (windows[i].x + windows[i].width >= main_context.width) {
-				windows[i].x = windows[i].x + windows[i].width;
+				windows[i].x = main_context.width - windows[i].width;
 			}
-			*/
+
+			if (windows[i].y + windows[i].height >= main_context.height) {
+				windows[i].y = main_context.height - windows[i].height;
+			}
 		}
 
 		// Cursor

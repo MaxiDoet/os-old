@@ -129,6 +129,10 @@ void pci_scan()
 						dev.io_base = (uint32_t) bar.address;
 					}
 
+					if (bar.address && (bar.type == PCI_BAR_LAYOUT_MEMORYMAPPING)) {
+						dev.mem_base = (uint32_t) bar.address;
+					}
+
 				}
 
 				kdebug("[pci] Bus: %d Slot: %d Func: %d Vendor: %x Device: %x ", bus_num, slot_num, function_num, dev.vendor_id, dev.device_id);
