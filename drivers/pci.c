@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/drivers/pci.h"
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 #include "../include/kernel/kernel.h"
 #include "../libc/include/mm.h"
 

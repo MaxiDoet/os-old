@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 #include "../include/drivers/bga.h"
 
 void bga_set_video_mode(int width, int height, int depth)

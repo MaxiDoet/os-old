@@ -4,7 +4,7 @@
 
 #include "../include/kernel/idt.h"
 #include "../include/lib/print.h"
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 #include "../include/drivers/pic.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/kernel.h"

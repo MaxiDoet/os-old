@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/drivers/pit.h"
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 
 void beep(uint32_t freq)
 {

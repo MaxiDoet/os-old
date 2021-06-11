@@ -24,7 +24,7 @@
 #include "../include/kernel/ext2.h"
 #include "../include/kernel/mbr.h"
 #include "../include/kernel/vfs.h"
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 #include "../include/kernel/smbios.h"
 
 #include "../apps/desktop/desktop.h"

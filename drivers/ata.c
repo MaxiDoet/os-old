@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/drivers/ata.h"
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 #include "../include/kernel/kernel.h"
 #include "../config.h"
 

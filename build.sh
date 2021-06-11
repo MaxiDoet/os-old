@@ -36,7 +36,7 @@ gcc $GCCPARAMS -c lib/gui/window.c -o lib/gui/window.o
 
 # Build kernel
 gcc $GCCPARAMS -c kernel/debug.c -o kernel/debug.o
-gcc $GCCPARAMS -c kernel/asm.c -o kernel/asm.o
+gcc $GCCPARAMS -c kernel/io.c -o kernel/io.o
 gcc $GCCPARAMS -c kernel/gdt.c -o kernel/gdt.o
 gcc $GCCPARAMS -c kernel/idt.c -o kernel/idt.o
 gcc $GCCPARAMS -c kernel/irq.c -o kernel/irq.o
@@ -57,7 +57,7 @@ gcc $GCCPARAMS -c apps/desktop/desktop.c -o apps/desktop/desktop.o
 #libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o libc/mm.o \
 
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/asm.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/vfs.o kernel/fs/ext2.o \
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/io.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/vfs.o kernel/fs/ext2.o \
 boot/boot.o \
 init/main.o \
 drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \

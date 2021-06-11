@@ -4,7 +4,7 @@
 
 #include "../include/drivers/serial.h"
 
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 
 void serial_init(int data_port)
 {

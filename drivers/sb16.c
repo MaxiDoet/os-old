@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/drivers/sb16.h"
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
 #include "../libc/include/mm.h"

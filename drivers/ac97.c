@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/drivers/pci.h"
-#include "../include/kernel/asm.h"
+#include "../include/kernel/io.h"
 
 uint32_t nambar;
 uint32_t nabmbar;
