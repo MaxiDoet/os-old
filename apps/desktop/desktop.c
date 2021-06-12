@@ -54,9 +54,9 @@ void keyboard_handler(struct keyboard_event event)
 
 }
 
-void desktop_swap_fb()
+static void desktop_swap_fb()
 {
-	__asm__ volatile("rep movsw" : : "D" (bb), "S" (fb), "c" ((main_context.width * main_context.height * 2) / 2));
+	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((main_context.width * main_context.height * 4) / 2));
 }
 
 /*

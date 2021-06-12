@@ -1,4 +1,4 @@
-GCCPARAMS="-m32 -Iinclude -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings"
+GCCPARAMS="-m32 -Iinclude -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast"
 ASPARAMS="-f elf"
 LDPARAMS="-melf_i386"
 

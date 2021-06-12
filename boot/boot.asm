@@ -23,22 +23,28 @@ section .text
 extern kmain
 
 global _start
+
+global enable_sse
+
+enable_sse:
+	mov eax, cr0
+	and ax, 0xFFFB
+	or ax, 0x2
+	mov cr0, eax
+	mov eax, cr4
+	or ax, 3 << 9
+	mov cr4, eax
+	ret
+
 _start:
     cli
-
-    ; Enable sse
-    mov eax, cr0
-    and ax, 0xFFFB
-    or ax, 0x2
-    mov cr0, eax
-    mov eax, cr4
-    or ax, 3 << 9
-    mov cr4, eax
 
     ; Pass the multiboot info to the kernel
     push ebx
     ; Pass the magic value
     push eax
+
+    call enable_sse
 
     call kmain
 
@@ -46,3 +52,4 @@ _start:
     hlt
 .lhang:
     jmp .lhang
+

@@ -36,6 +36,8 @@
 extern const void kernel_start;
 extern const void kernel_end;
 
+extern void enable_sse;
+
 void serial_irq_handler()
 {
 	char c = serial_read(DEBUG_PORT);
@@ -110,13 +112,13 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	ext2_fs_t fs;
 
 	if (ata_init(&root_dev, ATA_PRIMARY_MASTER, true)) {
-		kdebug("[kernel] root device: primary master\r\n");
+		kdebug("[kernel] root device: %s\r\n", ata_device_tree(true, true));
 	} else if (ata_init(&root_dev, ATA_PRIMARY_SLAVE, false)) {
-		kdebug("[kernel] root device: primary slave\r\n");
+		kdebug("[kernel] root device: %s\r\n", ata_device_tree(true, false));
 	} else if (ata_init(&root_dev, ATA_SECONDARY_MASTER, true)) {
-		kdebug("[kernel] root device: secondary master\r\n");
+		kdebug("[kernel] root device: %s\r\n", ata_device_tree(false, true));
 	} else if (ata_init(&root_dev, ATA_SECONDARY_SLAVE, false)) {
-		kdebug("[kernel] root device: secondary slave\r\n");
+		kdebug("[kernel] root device: %s\r\n", ata_device_tree(false, false));
 	} else {
         	kpanic("no ata root device");
 	}
@@ -124,8 +126,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	vfs_probe(root_dev);
 
 	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
-        vfs_read("/test.bmp", file_buf);
-        bmp_parse(file_buf);
+        vfs_read("/arial.ttf", file_buf);
 
 	pci_scan();
 

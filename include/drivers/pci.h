@@ -17,8 +17,12 @@ typedef struct {
 	uint16_t vendor_id;
 	uint16_t device_id;
 
+	char* description;
+
 	uint8_t class_id;
 	uint8_t subclass_id;
+	uint8_t prog_if;
+	uint8_t revision_id;
 
 	uint32_t io_base;
 	uint32_t mem_base;
