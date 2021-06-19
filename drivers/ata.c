@@ -90,7 +90,7 @@ uint8_t ata_pio_wait_bsy(ata_dev_t dev)
             	asm volatile ("nop");
             	asm volatile ("nop");
 
-		#ifdef ATA_DEBUG_BUSY
+		#ifdef DEBUG_ATA_BUSY
 			ata_device_debug(dev, "busy");
 		#endif
 
@@ -140,7 +140,7 @@ uint8_t ata_pio_wait_drq(ata_dev_t dev)
 	uint8_t status;
 
         while(!(status & (1 << 3))) {
-		#ifdef ATA_DEBUG_WAIT_DRQ
+		#ifdef DEBUG_ATA_WAIT_DRQ
 			ata_device_debug(dev, "waiting drq");
 		#endif
 

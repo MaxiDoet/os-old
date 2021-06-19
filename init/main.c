@@ -126,7 +126,9 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	vfs_probe(root_dev);
 
 	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
-        vfs_read("/arial.ttf", file_buf);
+        vfs_read("/audio.wav", file_buf);
+
+	//kdebug("\e[0;33mTest\r\n");
 
 	pci_scan();
 

@@ -8,6 +8,7 @@
 #include "../libc/include/mm.h"
 
 #include "../include/drivers/rtl8139.h"
+#include "../include/drivers/ac97.h"
 
 uint32_t pci_read_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset)
 {
@@ -63,7 +64,7 @@ pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_
 	pci_dev_descriptor dev;
 
 	dev.bus = bus;
-	dev.device = bus;
+	dev.device = device;
 	dev.function = func;
 
 	dev.vendor_id = pci_read_dword(bus, device, func, 0x00);
@@ -102,7 +103,7 @@ pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_
 				break;
 		}
 	} else {
-		bar.address = (uint8_t*)(bar_value & ~0x3);
+		bar.io_base = (uint32_t)(bar_value & ~0x3);
 	}
 
 	return bar;
@@ -127,17 +128,10 @@ void pci_scan()
 				for(bar_num = 0; bar_num < 6; bar_num++) {
 					pci_bar_descriptor bar = pci_get_bar_descriptor(bus_num, slot_num, function_num, bar_num);
 
-					if (bar.address && (bar.type == PCI_BAR_LAYOUT_IO)) {
-						dev.io_base = (uint32_t) bar.address;
-					}
-
-					if (bar.address && (bar.type == PCI_BAR_LAYOUT_MEMORYMAPPING)) {
-						dev.mem_base = (uint32_t) bar.address;
-					}
-
+					dev.bars[bar_num] = bar;
 				}
 
-				kdebug("[pci] Bus: %d Slot: %d Func: %d Subclass: %x Prog IF: %x Vendor: %x Device: %x ", bus_num, slot_num, function_num, dev.subclass_id, dev.prog_if, dev.vendor_id, dev.device_id);
+				kdebug("[pci] Bus: %d Slot: %d Func: %d Vendor: %x Device: %x ", bus_num, slot_num, function_num, dev.vendor_id, dev.device_id);
 
 				switch(dev.class_id) {
 					case 0x00:
@@ -349,8 +343,26 @@ void pci_scan()
 				if (dev.vendor_id == 0x10EC && dev.device_id == 0x8139) {
 					rtl8139_init(dev);
 				}
+
+				// AC97
+				if (dev.vendor_id == 0x8086 && dev.device_id == 0x2415) {
+					ac97_init(dev);
+				}
 			}
 
 		}
 	}
+}
+
+void pci_enable_bus_mastering(pci_dev_descriptor dev)
+{
+	// Enable bus mastering
+	kdebug("bm: slot: %d\r\n", dev.device);
+        uint16_t command = pci_read_word(dev.bus, dev.device, dev.function, 0x04);
+        if (!(command & (1 << 2))) {
+                command |= (1 << 2);
+                pci_write_word(dev.bus, dev.device, dev.function, 0x04, command);
+                kdebug("[pci] Bus: %d Slot: %d Func: %d: enabled bus mastering\r\n", dev.bus, dev.device, dev.function);
+        }
+
 }

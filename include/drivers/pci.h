@@ -10,6 +10,12 @@ enum pci_bar_layout_type {
 };
 
 typedef struct {
+	uint32_t io_base;
+	uint32_t size;
+	enum pci_bar_layout_type type;
+} pci_bar_descriptor;
+
+typedef struct {
 	uint16_t bus;
 	uint16_t device;
 	uint16_t function;
@@ -24,26 +30,20 @@ typedef struct {
 	uint8_t prog_if;
 	uint8_t revision_id;
 
-	uint32_t io_base;
-	uint32_t mem_base;
+	pci_bar_descriptor bars[6];
 
 	uint16_t command;
 	uint8_t irq;
 
 } pci_dev_descriptor;
 
-typedef struct {
-	uint8_t* address;
-	uint32_t size;
-	enum pci_bar_layout_type type;
-} pci_bar_descriptor;
-
-uint32_t pci_read_config_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset);
-uint16_t pci_read_config_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset);
+uint32_t pci_read_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset);
+uint16_t pci_read_word(uint16_t bus, uint16_t device, uint16_t func, uint16_t offset);
 void pci_write_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint32_t value);
 void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint16_t value);
 pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func);
 pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum);
 void pci_scan();
+void pci_enable_bus_mastering(pci_dev_descriptor dev);
 
 #endif

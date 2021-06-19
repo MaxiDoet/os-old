@@ -13,9 +13,9 @@
 
 #include "../config.h"
 
-#include "../apps/desktop/font.h"
 #include "../apps/desktop/wallpaper.h"
 #include "../apps/desktop/cursor.h"
+#include "../apps/desktop/logo.h"
 
 #include "../lib/gui/context.h"
 #include "../lib/gui/direct.h"
@@ -88,8 +88,8 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	main_context.fb_pitch = pitch;
 	main_context.fb = fb;
 
-	cursor_x = 0;
-	cursor_y = 0;
+	cursor_x = main_context.width / 2;
+	cursor_y = main_context.height / 2;
 
 	window test;
 	test.x = 70;
@@ -101,6 +101,15 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 
 	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);
+
+	for (int i=0; i < 1000; i++) {
+		draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x000);
+
+		draw_string(main_context, width / 2 - (10 * strlen("Welcome")), height / 2, "Welcome", 0xffff);
+
+		desktop_swap_fb();
+
+	}
 
 	while(1) {
 		// Background

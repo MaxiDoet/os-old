@@ -13,6 +13,7 @@ void draw_rounded_rectangle(context ctx, int x, int y, int w, int h, int r, int 
 void draw_circle(context ctx, int x0, int y0, int radius, int color);
 void draw_circle_filled(context ctx, int x0, int y0, int radius, int color);
 void draw_monochrome_bitmap(context ctx, int x, int y, int *bitmap, int color);
+void draw_char(context ctx, int x, int y, char c, int color);
 void draw_string(context ctx, int x, int y, char* str, int color);
 void draw_image(context ctx, int x, int y, int w, int h, int data[]);
 void draw_image_transparent(context ctx, int x, int y, int w, int h, int data[]);

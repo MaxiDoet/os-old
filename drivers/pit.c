@@ -5,7 +5,7 @@
 #include "../include/drivers/pit.h"
 #include "../include/kernel/io.h"
 
-void beep(uint32_t freq)
+void pit_beep(uint32_t freq)
 {
 	uint32_t divisor;
 	uint8_t tmp;

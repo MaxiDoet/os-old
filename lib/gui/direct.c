@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #include "direct.h"
+#include "font.h"
 
 void draw_pixel(context ctx, int x, int y, int color)
 {
@@ -202,12 +203,25 @@ void draw_monochrome_bitmap(context ctx, int x, int y, int *bitmap, int color)
         }
 }
 
+void draw_char(context ctx, int x, int y, char c, int color)
+{
+	for(int i=0; i < 32; i++) {
+                for(int j=0; j < 32+2; j++) {
+                        if(font[c][j+i*32] == 1) {
+                                draw_pixel(ctx, x+j, y+i, color);
+                        } else {
+                                continue;
+                        }
+                }
+        }
+}
+
 void draw_string(context ctx, int x, int y, char* str, int color)
 {
         int j=0;
         for(int i=0; str[i] != '\0'; i++) {
-                draw_monochrome_bitmap(ctx, x+j, y, ctx.font[str[i]], color);
-                j+=10;
+		draw_char(ctx, x+j, y, str[i], color);
+                j+=15;
         }
 }
 
