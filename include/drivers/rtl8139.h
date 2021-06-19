@@ -5,6 +5,7 @@
 
 // Registers
 #define REG_CR 0x37
+#define REG_CAPR 0x38
 #define REG_IMR 0x3C
 #define REG_ISR 0x3E
 #define REG_TCR 0x40

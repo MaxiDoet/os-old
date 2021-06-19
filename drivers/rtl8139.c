@@ -9,18 +9,14 @@
 #include "../include/kernel/kernel.h"
 #include "../libc/include/string.h"
 #include "../include/kernel/irq.h"
+#include "../include/kernel/ethernet.h"
+#include "../include/kernel/arp.h"
 
 pci_dev_descriptor dev;
 uint16_t *rx_buffer;
 uint16_t rx_buffer_offset;
 uint16_t *tx_buffers[4];
 int tx_buffer_current;
-
-typedef struct etherframe_header {
-	uint64_t dst_mac : 48;
-	uint64_t src_mac : 48;
-	uint16_t ether_type;
-} __attribute__((packed)) etherframe_header;
 
 void rtl8139_handle_rx();
 
@@ -34,27 +30,45 @@ void rtl8139_irq_handler()
 	bool rok = inw(dev.bars[0].io_base + REG_ISR) & (1 << 0); // Receive ok
 
 	// Clear isr
-	outw(dev.bars[0].io_base + REG_ISR, 0x5);
+	outw(dev.bars[0].io_base + REG_ISR, 0x1);
 
 	if (rok) {
 		rtl8139_handle_rx(dev);
+	}
+
+	if (tok) {
+		// Handle tx
 	}
 }
 
 void rtl8139_handle_rx()
 {
 	while (!(inb(dev.bars[0].io_base + REG_CR) & CR_BUFE)) {
-		uint16_t *header = (uint16_t *) ((uint32_t) rx_buffer + rx_buffer_offset);
-		kdebug("RX Header: %x\r\n", *header);
+		uint16_t *buffer = (uint16_t *) ((uint32_t) rx_buffer + rx_buffer_offset);
+		uint16_t length = *(buffer + 1);
+
+		rx_buffer_offset += length + 4;
+		rx_buffer_offset = (rx_buffer_offset + 3) & ~0x3;
+		outw(dev.bars[0].io_base + REG_CAPR, rx_buffer_offset - 0x10);
 
 		for (int i=0; i < 100; i++) {
-			kdebug("%x ", *header++);
+			kdebug("%x ", *(buffer + i));
 		}
 
+
 		// Check packet
-		if ((*header & 1) == 0) {
-			kdebug("Invalid packet!\r\n");
-			return;
+		if (*buffer & (1 << 0)) {
+			kdebug("rok! length: %x\r\n", length);
+
+			etherframe_header *frame_header = (etherframe_header *) (buffer + 2);
+			kdebug("ether_type: %x dst_mac: %x\r\n", frame_header->ether_type, frame_header->dst_mac);
+
+			if (frame_header->ether_type == ETHERTYPE_ARP) {
+				arp_packet *packet = (arp_packet *) ((uint32_t) frame_header + 14);
+
+				kdebug("hw: %x nw: %x\r\n", packet->hardwareaddress_type, packet->networkaddress_type);
+				kdebug("arp: hardwareaddress_type: %s networkaddress_type: %s\r\n", ((packet->hardwareaddress_type == 0x100) ? "MAC" : "Unknown"), ((packet->networkaddress_type == 0x8) ? "IPv4" : "Unknown"));
+			}
 		}
 	}
 }
@@ -123,6 +137,7 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 		kdebug("%x%s", mac[i], ((i < 5) ? ":" : "\r\n"));
 	}
 
+	/*
 	// Test packet
 	tx_buffers[0] = (uint16_t *) 0x00030000;
 	tx_buffers[1] = (uint16_t *) 0x00040000;
@@ -140,4 +155,5 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	header.ether_type = 0x0806;
 
 	rtl8139_send((uint16_t *) &header, sizeof(etherframe_header));
+	*/
 }
