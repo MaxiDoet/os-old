@@ -14,6 +14,8 @@ void vfs_probe(ata_dev_t dev)
 {
 	root_dev = dev;
 
+	if (!root_dev.ready) return;
+
 	// Look for mbr
 	uint16_t *mbr_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
 	ata_pio_read(root_dev, 0, 1, mbr_buf);
@@ -32,5 +34,7 @@ void vfs_probe(ata_dev_t dev)
 
 uint8_t vfs_read(char* path, uint16_t *buf)
 {
+	if (!root_dev.ready) return 0;
+
 	return ext2_read_file(&root_dev, &root_fs, path, buf);
 }

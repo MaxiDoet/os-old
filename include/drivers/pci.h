@@ -45,5 +45,6 @@ pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_
 pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum);
 void pci_scan();
 void pci_enable_bus_mastering(pci_dev_descriptor dev);
+uint8_t pci_find_irq(pci_dev_descriptor dev);
 
 #endif

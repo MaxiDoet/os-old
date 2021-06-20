@@ -12,6 +12,7 @@ typedef struct {
 	uint16_t command_port;
 	uint16_t control_port;
 	bool master;
+	bool ready;
 } ata_dev_t;
 
 #define ATA_SECTOR_SIZE 512

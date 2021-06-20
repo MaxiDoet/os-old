@@ -21,11 +21,13 @@
 #include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
+#include "../include/drivers/rtl8139.h"
 #include "../include/kernel/ext2.h"
 #include "../include/kernel/mbr.h"
 #include "../include/kernel/vfs.h"
 #include "../include/kernel/io.h"
 #include "../include/kernel/smbios.h"
+#include "../libc/include/string.h"
 
 #include "../apps/desktop/desktop.h"
 
@@ -119,8 +121,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		kdebug("[kernel] root device: %s\r\n", ata_device_tree(false, true));
 	} else if (ata_init(&root_dev, ATA_SECONDARY_SLAVE, false)) {
 		kdebug("[kernel] root device: %s\r\n", ata_device_tree(false, false));
-	} else {
-        	kpanic("no ata root device");
 	}
 
 	vfs_probe(root_dev);

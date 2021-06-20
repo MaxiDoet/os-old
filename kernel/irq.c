@@ -13,13 +13,32 @@ void *irq_routines[16] = {
 	0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void irq_install_handler(int irq, void (*handler))
+bool irq_is_used(int irq)
 {
+	if (irq_routines[irq] != 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+uint8_t irq_install_handler(int irq, void (*handler))
+{
+	if (irq_is_used(irq)) {
+		#ifdef DEBUG_IRQ
+			kdebug("[irq] irq %d is already used\r\n", irq);
+		#endif
+
+		return 0;
+	}
+
 	irq_routines[irq] = handler;
 
 	#ifdef DEBUG_IRQ_INSTALL
 		kdebug("[irq] installed handler for irq %d\r\n", irq);
 	#endif
+
+	return 1;
 }
 
 void irq_uninstall_handler(int irq)

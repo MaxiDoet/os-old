@@ -23,8 +23,10 @@ uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 	dev->command_port = port_base + 0x7;
 	dev->control_port = port_base + 0x206;
 	dev->master = master;
+	dev->ready = false;
 
 	uint8_t status;
+	uint32_t timeout;
 
 	outb(dev->device_select_port, master ? 0xA0 : 0xB0);
 	outb(dev->control_port, 0);
@@ -41,15 +43,23 @@ uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 	status = inb(dev->command_port);
 	if (status == 0) return 0;
 
+	timeout = 1000;
 	while (status & (1 << 7)) {
 		status = inb(dev->command_port);
+
+		timeout--;
+		if (timeout < 1) return 0;
 	}
 
 	// Wait for data
 	status = inb(dev->command_port);
 
+	timeout = 1000;
 	while ((!status & (1 << 3)) && (!status & (1 << 0))) {
 		status = inb(dev->command_port);
+
+		timeout--;
+		if (timeout < 1) return 0;
 	}
 
 	if (status & (1 << 0)) return 0;
@@ -61,6 +71,7 @@ uint8_t ata_init(ata_dev_t *dev, uint16_t port_base, bool master)
 		info[i] = inw(dev->data_port);
 	}
 
+	dev->ready = true;
 	return 1;
 }
 

@@ -5,6 +5,7 @@
 #include "../include/drivers/pci.h"
 #include "../include/kernel/io.h"
 #include "../include/kernel/kernel.h"
+#include "../include/kernel/irq.h"
 #include "../libc/include/mm.h"
 
 #include "../include/drivers/rtl8139.h"
@@ -356,8 +357,6 @@ void pci_scan()
 
 void pci_enable_bus_mastering(pci_dev_descriptor dev)
 {
-	// Enable bus mastering
-	kdebug("bm: slot: %d\r\n", dev.device);
         uint16_t command = pci_read_word(dev.bus, dev.device, dev.function, 0x04);
         if (!(command & (1 << 2))) {
                 command |= (1 << 2);
@@ -365,4 +364,18 @@ void pci_enable_bus_mastering(pci_dev_descriptor dev)
                 kdebug("[pci] Bus: %d Slot: %d Func: %d: enabled bus mastering\r\n", dev.bus, dev.device, dev.function);
         }
 
+}
+
+uint8_t pci_find_irq(pci_dev_descriptor dev)
+{
+	if (!irq_is_used(dev.irq)) return dev.irq;
+
+	for (int i=0; i < 16; i++) {
+		kdebug("i: %d\r\n", i);
+		if (!irq_is_used(i)) {
+			return i;
+		}
+	}
+
+	return -1;
 }

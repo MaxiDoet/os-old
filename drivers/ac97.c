@@ -10,17 +10,19 @@
 #include "../include/kernel/vfs.h"
 #include "../libc/include/mm.h"
 
+#include "../audio.h"
+
 pci_dev_descriptor dev;
 
 struct buf_desc {
 	uint32_t addr;
 	uint16_t length;
-	unsigned int reserved : 14;
- 	unsigned int bup : 1;
- 	unsigned int ioc : 1;
+ 	int reserved : 14;
+	unsigned int bup : 1;
+	unsigned int ioc : 1;
 } __attribute__((packed));
 
-struct buf_desc buf_descriptors[8];
+struct buf_desc buf_descriptors[32];
 
 void ac97_irq_handler()
 {
@@ -31,23 +33,18 @@ void ac97_init(pci_dev_descriptor pci_dev)
 {
 	dev = pci_dev;
 
+	// Enable interrupts
+	/*
+	uint8_t irq = pci_find_irq(dev);
+	if (irq == -1) return;
+	*/
 	irq_install_handler(dev.irq, ac97_irq_handler);
 
-	// Enable bus mastering
-	uint16_t command = pci_read_word(dev.bus, dev.device, dev.function, 0x04);
-	if (!(command & (1 << 2))) {
-                command |= (1 << 2);
-                pci_write_word(dev.bus, dev.device, dev.function, 0x04, command);
-                kdebug("[ac97] enabled pci bus mastering\r\n");
-        }
+	pci_enable_bus_mastering(dev);
 
 	// Reset
 	outl(dev.bars[1].io_base + NABM_GLOBAL_CTL, 0x3);
 	outw(dev.bars[0].io_base + NAM_RESET, 0);
-
-	// Read card capabilities
-	uint32_t status = inl(dev.bars[1].io_base + NABM_GLOBAL_STS);
-	kdebug("Status: %x\r\n", status);
 
 	// Set master volume
 	outw(dev.bars[0].io_base + NAM_MASTER_VOL, 0);
@@ -58,26 +55,24 @@ void ac97_init(pci_dev_descriptor pci_dev)
 	outb(dev.bars[1].io_base + 0x1B, 0x2);
 
 	while(inb(dev.bars[1].io_base + 0x1B) == 0x2) {
-		kdebug("Waiting for reset!\r\n");
 	}
 
-	kdebug("Reset done!\r\n");
+	kdebug("[ac97] reset done\r\n");
 
-	uint16_t *file_buf = (uint16_t *) malloc(mm, 10000);
-        vfs_read("/audio.bin", file_buf);
+	int i=0;
+	int current_descriptor;
+	bool running = true;
+	for (int i=0; i < 10; i++) {
+		buf_descriptors[i].addr = (uint32_t) &audio_bin[i * 256000];
+		buf_descriptors[i].length = 0xFFFE;
+		buf_descriptors[i].ioc = 0;
 
-	for (int j=0; j < 10000; j++) {
-		kdebug("%x ", file_buf[j]);
-	}
-
-	int final;
-	for (int i = 0; (i < 8); i++) {
-		buf_descriptors[i].addr = (uint32_t) &file_buf;
-		buf_descriptors[i].ioc = 1;
-		buf_descriptors[i].length = 1000;
+		if (i == 9) {
+			buf_descriptors[i].ioc = 1;
+		}
 	}
 
 	outl(dev.bars[1].io_base + 0x10, (uint32_t) &buf_descriptors);
-	outb(dev.bars[1].io_base + 0x15, 8);
+	outb(dev.bars[1].io_base + 0x15, 10);
 	outb(dev.bars[1].io_base + 0x1B, 0x1);
 }
