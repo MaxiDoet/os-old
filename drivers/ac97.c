@@ -29,35 +29,36 @@ void ac97_irq_handler()
 	kdebug("[ac97] irq!\r\n");
 }
 
+void ac97_reset(pci_dev_descriptor pci_dev)
+{
+	// Reset
+	outl(pci_dev.bars[1].io_base + NABM_GLOBAL_CTL, 0x3);
+	outw(pci_dev.bars[0].io_base + NAM_RESET, 0);
+
+	// Set master volume
+	outw(pci_dev.bars[0].io_base + NAM_MASTER_VOL, 0);
+	// Set PCM output volume
+	outw(pci_dev.bars[0].io_base + NAM_PCM_VOL, 0);
+
+	// Reset output channel
+	outb(pci_dev.bars[1].io_base + NABM_PCM_OUTPUT + CHANNEL_BUFFER_CNT, 0x2);
+
+	while(inb(pci_dev.bars[1].io_base + NABM_PCM_OUTPUT + CHANNEL_BUFFER_CNT) == 0x2) {
+	}
+
+	kdebug("[ac97] reset done\r\n");
+}
+
 void ac97_init(pci_dev_descriptor pci_dev)
 {
 	dev = pci_dev;
 
 	// Enable interrupts
-	/*
-	uint8_t irq = pci_find_irq(dev);
-	if (irq == -1) return;
-	*/
 	irq_install_handler(dev.irq, ac97_irq_handler);
 
 	pci_enable_bus_mastering(dev);
 
-	// Reset
-	outl(dev.bars[1].io_base + NABM_GLOBAL_CTL, 0x3);
-	outw(dev.bars[0].io_base + NAM_RESET, 0);
-
-	// Set master volume
-	outw(dev.bars[0].io_base + NAM_MASTER_VOL, 0);
-	// Set PCM output volume
-	outw(dev.bars[0].io_base + NAM_PCM_VOL, 0);
-
-	// Reset output channel
-	outb(dev.bars[1].io_base + 0x1B, 0x2);
-
-	while(inb(dev.bars[1].io_base + 0x1B) == 0x2) {
-	}
-
-	kdebug("[ac97] reset done\r\n");
+	ac97_reset(dev);
 
 	int i=0;
 	int current_descriptor;
@@ -72,7 +73,7 @@ void ac97_init(pci_dev_descriptor pci_dev)
 		}
 	}
 
-	outl(dev.bars[1].io_base + 0x10, (uint32_t) &buf_descriptors);
-	outb(dev.bars[1].io_base + 0x15, 10);
-	outb(dev.bars[1].io_base + 0x1B, 0x1);
+	outl(dev.bars[1].io_base + NABM_PCM_OUTPUT + CHANNEL_BUFFER_DSC_ADDR, (uint32_t) &buf_descriptors);
+	outb(dev.bars[1].io_base + NABM_PCM_OUTPUT + CHANNEL_LAST_VALID_ENTRY, 10);
+	outb(dev.bars[1].io_base + NABM_PCM_OUTPUT + CHANNEL_BUFFER_CNT, 0x1);
 }

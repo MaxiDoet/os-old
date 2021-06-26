@@ -232,10 +232,6 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	outw(dev.bars[0].io_base + REG_IMR, 0xFFFF);
 
 	// Install irq handler
-	/*
-	uint8_t irq = pci_find_irq(dev);
-        if (irq == -1) return;
-	*/
         irq_install_handler(dev.irq, rtl8139_irq_handler);
 
 	// Read MAC
