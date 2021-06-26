@@ -10,10 +10,8 @@ gcc $GCCPARAMS -c drivers/vgacon.c -o drivers/vgacon.o
 gcc $GCCPARAMS -c drivers/rtc.c -o drivers/rtc.o
 gcc $GCCPARAMS -c drivers/pci.c -o drivers/pci.o
 gcc $GCCPARAMS -c drivers/serial.c -o drivers/serial.o
-gcc $GCCPARAMS -c drivers/bga.c -o drivers/bga.o
 gcc $GCCPARAMS -c drivers/keyboard.c -o drivers/keyboard.o
 gcc $GCCPARAMS -c drivers/mouse.c -o drivers/mouse.o
-gcc $GCCPARAMS -c drivers/sb16.c -o drivers/sb16.o
 gcc $GCCPARAMS -c drivers/pit.c -o drivers/pit.o
 gcc $GCCPARAMS -c drivers/ac97.c -o drivers/ac97.o
 gcc $GCCPARAMS -c drivers/ata.c -o drivers/ata.o
@@ -60,7 +58,7 @@ gcc $GCCPARAMS -c apps/desktop/desktop.c -o apps/desktop/desktop.o
 ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/io.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/vfs.o kernel/fs/ext2.o \
 boot/boot.o \
 init/main.o \
-drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/bga.o drivers/keyboard.o drivers/mouse.o drivers/sb16.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \
+drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/keyboard.o drivers/mouse.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \
 libc/string.o libc/mm.o \
 apps/desktop/desktop.o \
 lib/libbmp.o lib/gui/direct.o lib/gui/window.o
