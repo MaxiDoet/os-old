@@ -8,8 +8,9 @@ A simple 32bit os written in C
  - PIT
  - RTC
  - ATA PIO
- - SoundBlaster 16
+ - Intel AC97
  - SMBIOS
+ - RTL8139
 
 ## Building
  1. Clone this repository ``` git clone https://github.com/TheHeroCraft1579/os``` 
@@ -23,19 +24,17 @@ A simple 32bit os written in C
   <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
  </p>
  <p>
-  Multitasking
-  <img src="https://progress-bar-theherocraft1579.herokuapp.com/40">
- </p>
  <p>
-  Networking
-  <img src="https://progress-bar-theherocraft1579.herokuapp.com/0">
+  Network Driver / Stack
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
  </p>
  <p>
   Filesystem / ATA Driver
-  <img src="https://progress-bar-theherocraft1579.herokuapp.com/40">
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/50">
  </p>
  <p>
-  Memory Management
+  Desktop / GUI
   <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
  </p>
+
  
