@@ -30,10 +30,6 @@ echo w # Write changes
 # Setup loop device
 losetup -f -P $output_file
 
-if [ $fs_type = "fat" ]; then
-        mkfs.fat -F $fat_type -n $fat_name -s $fat_secs_per_cluster -r $fat_root_entries /dev/loop0p1
-fi
-
 if [ $fs_type = "ext2" ]; then
 	mkfs.ext2 /dev/loop0p1
 fi
