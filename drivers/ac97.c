@@ -10,7 +10,7 @@
 #include "../include/kernel/vfs.h"
 #include "../libc/include/mm.h"
 
-#include "../audio.h"
+//#include "../audio.h"
 
 pci_dev_descriptor dev;
 
@@ -64,7 +64,7 @@ void ac97_init(pci_dev_descriptor pci_dev)
 	int current_descriptor;
 	bool running = true;
 	for (int i=0; i < 10; i++) {
-		buf_descriptors[i].addr = (uint32_t) &audio_bin[i * 256000];
+		//buf_descriptors[i].addr = (uint32_t) &audio_bin[i * 256000];
 		buf_descriptors[i].length = 0xFFFE;
 		buf_descriptors[i].ioc = 0;
 

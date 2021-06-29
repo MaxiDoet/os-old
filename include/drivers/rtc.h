@@ -7,6 +7,5 @@
 uint8_t rtc_read(uint8_t offset);
 void rtc_write(uint8_t offset, uint8_t val);
 uint8_t rtc_bcd_decode(uint8_t bcd);
-void rtc_print_time_date();
 
 #endif
