@@ -103,9 +103,7 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	mouse_add_callback(mouse_handler);
 
 	for (int i=0; i < 1000; i++) {
-		draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x000);
-
-		draw_string(main_context, width / 2 - (10 * strlen("Welcome")), height / 2, "Welcome", 0xffff);
+		draw_image(main_context, 0, 0, 99, 99, logo);
 
 		desktop_swap_fb();
 
