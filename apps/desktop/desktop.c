@@ -103,7 +103,7 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	mouse_add_callback(mouse_handler);
 
 	for (int i=0; i < 1000; i++) {
-		draw_image(main_context, 0, 0, 99, 99, logo);
+		draw_image_transparent(main_context, main_context.width / 2 - 50, main_context.height / 2 - 50, 100, 100, logo);
 
 		desktop_swap_fb();
 
