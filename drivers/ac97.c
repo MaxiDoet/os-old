@@ -10,8 +10,6 @@
 #include "../include/kernel/vfs.h"
 #include "../libc/include/mm.h"
 
-//#include "../audio.h"
-
 pci_dev_descriptor dev;
 
 struct buf_desc {

@@ -129,7 +129,9 @@ void keyboard_init() {
 		inb(0x60);
 	}
 
-	// Activate controller
+	/* Activate controller
+	   Warning: QEMU just puts the controler in a broken state
+	*/
 	//keyboard_send(0xF4);
 
 	irq_install_handler(1, keyboard_irq_handler);

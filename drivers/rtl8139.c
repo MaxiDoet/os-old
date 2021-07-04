@@ -19,15 +19,11 @@ uint16_t *tx_buffers[4];
 int tx_buffer_current;
 
 void rtl8139_handle_rx();
-void rtl8139_send(uint16_t *data, uint32_t len);
 bool init_done = false;
 
 /* Some networking test code */
 uint8_t mac[6];
 uint8_t ip[4];
-uint8_t mac_cache[100][6];
-uint8_t ip_cache[100][4];
-uint8_t cache_index;
 
 void send_frame(uint8_t dst_mac[6], ethertype type, uint16_t *data, uint16_t size)
 {
@@ -121,20 +117,12 @@ void rtl8139_handle_rx()
 			if (frame_header->ether_type == ETHERTYPE_ARP) {
 				arp_packet *packet = (arp_packet *) ((uint32_t) frame_header + sizeof(etherframe_header));
 
+				arp_handle_packet(packet);
+
+				/*
 				// ARP request
 				if (packet->operation_type == 0x0100) {
 					kdebug("arp request: hardwareaddress_type: %s protocol_type: %s\r\n", ((packet->hardwareaddress_type == 0x100) ? "MAC" : "Unknown"), ((packet->protocol_type == 0x8) ? "IPv4" : "Unknown"));
-
-					/*
-					// Send reply
-					uint16_t *buf = (uint16_t *) malloc(mm, sizeof(etherframe_header) + sizeof(arp_packet));
-					memset(buf, 0x00, sizeof(etherframe_header) + sizeof(arp_packet));
-
-					etherframe_header *header = (etherframe_header *) buf;
-					memset(header->dst_mac, 0xFF, 6);
-					memcpy(header->src_mac, &mac, 6);
-					header->ether_type = ETHERTYPE_ARP;
-					*/
 
 					arp_packet *reply_packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
 					reply_packet->hardwareaddress_type = 0x0100;
@@ -167,6 +155,7 @@ void rtl8139_handle_rx()
 					memcpy(&ip_cache[cache_index], packet->src_ip, 4);
 					cache_index++;
 				}
+				*/
 			}
 		}
 	}

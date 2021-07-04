@@ -62,5 +62,6 @@
 #define RCR_WRAP (1 << 7)
 
 void rtl8139_init(pci_dev_descriptor dev);
+void rtl8139_send(uint16_t *data, uint32_t len);
 
 #endif
