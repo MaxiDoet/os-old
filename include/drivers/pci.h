@@ -23,6 +23,7 @@ typedef struct {
 	uint16_t vendor_id;
 	uint16_t device_id;
 
+	char* class_description;
 	char* description;
 
 	uint8_t class_id;

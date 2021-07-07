@@ -18,7 +18,6 @@
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
 #include "../include/drivers/rtc.h"
-#include "../include/drivers/sb16.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
 #include "../include/drivers/rtl8139.h"
@@ -54,6 +53,11 @@ void serial_irq_handler()
 	}
 }
 
+void timer_irq_handler()
+{
+	kdebug("[timer] timer irq!\r\n");
+}
+
 void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
@@ -83,6 +87,8 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	size_t heap_size = 1000000;
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
 	mm_init(heap_start, heap_size);
+
+	irq_install_handler(0, timer_irq_handler);
 
 	// Detect system hardware
 	kdebug("[kernel] SMBIOS Version: ");
@@ -128,12 +134,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		kdebug("not present\r\n");
 	}
 
-	/* Doesn't work on copy.sh!
-	if(sb16_probe() == 0) {
-		sb16_init();
-	}
-	*/
-
 	kdebug("[kernel] ATA init\r\n");
 	ata_dev_t root_dev;
 	ext2_fs_t fs;
@@ -152,8 +152,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
         vfs_read("/audio.wav", file_buf);
-
-	//kdebug("\e[0;33mTest\r\n");
 
 	pci_scan();
 

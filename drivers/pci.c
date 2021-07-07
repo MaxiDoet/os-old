@@ -136,36 +136,36 @@ void pci_scan()
 
 				switch(dev.class_id) {
 					case 0x00:
-						dev.description = "Unclassified PCI Device";
+						dev.class_description = "Unclassified PCI Device";
 						break;
 					case 0x01:
 						switch(dev.subclass_id) {
 							case 0x00:
-								dev.description = "SCSI Bus Controller";
+								dev.class_description = "SCSI Bus Controller";
 								break;
 							case 0x01:
-								dev.description = "IDE Controller";
+								dev.class_description = "IDE Controller";
 								break;
 							case 0x02:
-								dev.description = "Floppy Disk Controller";
+								dev.class_description = "Floppy Disk Controller";
 								break;
 							case 0x04:
-								dev.description = "RAID Controller";
+								dev.class_description = "RAID Controller";
 								break;
 							case 0x05:
-								dev.description = "ATA Controller";
+								dev.class_description = "ATA Controller";
 								break;
 							case 0x06:
-								dev.description = "Serial ATA Controller";
+								dev.class_description = "Serial ATA Controller";
 								break;
 							case 0x07:
-								dev.description = "Serial Attached SCSI Controller";
+								dev.class_description = "Serial Attached SCSI Controller";
 								break;
 							case 0x08:
-								dev.description = "NVM Controller";
+								dev.class_description = "NVM Controller";
 								break;
 							default:
-								dev.description = "Mass Storage Controller";
+								dev.class_description = "Mass Storage Controller";
 								break;
 						}
 
@@ -173,56 +173,56 @@ void pci_scan()
 					case 0x02:
 						switch(dev.subclass_id) {
 							case 0x00:
-								dev.description = "Ethernet Controller";
+								dev.class_description = "Ethernet Controller";
 								break;
 							default:
-								dev.description = "Network Controller";
+								dev.class_description = "Network Controller";
 								break;
 						}
 
 						break;
 					case 0x03:
-						dev.description = "Display Controller";
+						dev.class_description = "Display Controller";
 						break;
 					case 0x04:
 						switch(dev.subclass_id) {
 							case 0x00:
-								dev.description = "Multimedia Video Controller";
+								dev.class_description = "Multimedia Video Controller";
 								break;
 							case 0x01:
-								dev.description = "Multimedia Audio Controller";
+								dev.class_description = "Multimedia Audio Controller";
 								break;
 							case 0x03:
-								dev.description = "Audio Device";
+								dev.class_description = "Audio Device";
 								break;
 							default:
-								dev.description = "Multimedia Controller";
+								dev.class_description = "Multimedia Controller";
 								break;
 						}
 
 						break;
 					case 0x05:
-						dev.description = "Memory Controller";
+						dev.class_description = "Memory Controller";
 						break;
 					case 0x06:
 						switch(dev.subclass_id) {
 							case 0x00:
-								dev.description = "Host Bridge";
+								dev.class_description = "Host Bridge";
 								break;
 							case 0x01:
-								dev.description = "ISA Bridge";
+								dev.class_description = "ISA Bridge";
 								break;
 							case 0x02:
-								dev.description = "EISA Bridge";
+								dev.class_description = "EISA Bridge";
 								break;
 							case 0x04:
-								dev.description = "PCI-to-PCI Bridge";
+								dev.class_description = "PCI-to-PCI Bridge";
 								break;
 							case 0x09:
-								dev.description = "PCI-to-PCI Bridge";
+								dev.class_description = "PCI-to-PCI Bridge";
 								break;
 							default:
-								dev.description = "Bridge Device";
+								dev.class_description = "Bridge Device";
 								break;
 						}
 
@@ -230,13 +230,13 @@ void pci_scan()
 					case 0x07:
 						switch(dev.subclass_id) {
 							case 0x00:
-								dev.description = "Serial Controller";
+								dev.class_description = "Serial Controller";
 								break;
 							case 0x01:
-								dev.description = "Parallel Controller";
+								dev.class_description = "Parallel Controller";
 								break;
 							default:
-								dev.description = "Simple Communication Controller";
+								dev.class_description = "Simple Communication Controller";
 								break;
 						}
 
@@ -244,108 +244,106 @@ void pci_scan()
 					case 0x08:
 						switch(dev.subclass_id) {
 							case 0x00:
-								dev.description = "PIC";
+								dev.class_description = "PIC";
 								break;
 							case 0x01:
-								dev.description = "DMA Controller";
+								dev.class_description = "DMA Controller";
 								break;
 							case 0x02:
-								dev.description = "Timer";
+								dev.class_description = "Timer";
 								break;
 							case 0x03:
-								dev.description = "RTC Controller";
+								dev.class_description = "RTC Controller";
 								break;
 							default:
-								dev.description = "Base System Peripheral";
+								dev.class_description = "Base System Peripheral";
 								break;
 						}
 
 						break;
 					case 0x09:
-						dev.description = "Input Device Controller";
+						dev.class_description = "Input Device Controller";
 						break;
 					case 0x0A:
-						dev.description = "Docking Station";
+						dev.class_description = "Docking Station";
 						break;
 					case 0x0B:
-						dev.description = "Processor";
+						dev.class_description = "Processor";
 						break;
 					case 0x0C:
 						switch(dev.subclass_id) {
 							case 0x03:
 								switch(dev.prog_if) {
 									case 0x00:
-										dev.description = "UHCI Controller";
+										dev.class_description = "UHCI Controller";
 										break;
 									case 0x10:
-										dev.description = "OHCI Controller";
+										dev.class_description = "OHCI Controller";
 										break;
 									case 0x20:
-										dev.description = "EHCI Controller";
+										dev.class_description = "EHCI Controller";
 										break;
 									case 0x30:
-										dev.description = "XHCI Controller";
+										dev.class_description = "XHCI Controller";
 										break;
 									case 0xFE:
-										dev.description = "USB Device";
+										dev.class_description = "USB Device";
 										break;
 									default:
-										dev.description = "USB Controller";
+										dev.class_description = "USB Controller";
 										break;
 								}
 								break;
 							default:
-								dev.description = "Serial Bus Controller";
+								dev.class_description = "Serial Bus Controller";
 								break;
 						}
 
 						break;
 					case 0x0D:
-						dev.description = "Wireless Controller";
+						dev.class_description = "Wireless Controller";
 						break;
 					case 0x0E:
-						dev.description = "Intelligent Controller";
+						dev.class_description = "Intelligent Controller";
 						break;
 					case 0x0F:
-						dev.description = "Satellite Communication Controller";
+						dev.class_description = "Satellite Communication Controller";
 						break;
 					case 0x10:
-						dev.description = "Encryption Controller";
+						dev.class_description = "Encryption Controller";
 						break;
 					case 0x11:
-						dev.description = "Signal Processing Controller";
+						dev.class_description = "Signal Processing Controller";
 						break;
 					case 0x12:
-						dev.description = "Processing Accelerator";
+						dev.class_description = "Processing Accelerator";
 						break;
 					case 0x13:
-						dev.description = "Non-Essential Instrumentation";
+						dev.class_description = "Non-Essential Instrumentation";
 						break;
 					case 0x14:
-						dev.description = "Reserved";
+						dev.class_description = "Reserved";
 						break;
 					case 0x40:
-						dev.description = "Co-Processor";
+						dev.class_description = "Co-Processor";
 						break;
 					case 0x41:
-						dev.description = "Reserved";
+						dev.class_description = "Reserved";
 						break;
 					case 0xFF:
-						dev.description = "Unassigned Class";
+						dev.class_description = "Unassigned Class";
 						break;
 					default:
-						dev.description = "Unassigned Class";
+						dev.class_description = "Unassigned Class";
 						break;
 				}
-				kdebug(dev.description);
-				kdebug("\r\n");
 
-				// RTL8139
+				kdebug("%s\r\n", dev.class_description);
+
 				if (dev.vendor_id == 0x10EC && dev.device_id == 0x8139) {
 					rtl8139_init(dev);
 				}
 
-				// AC97
 				if (dev.vendor_id == 0x8086 && dev.device_id == 0x2415) {
 					ac97_init(dev);
 				}
