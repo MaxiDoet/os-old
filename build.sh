@@ -38,6 +38,8 @@ gcc $GCCPARAMS -c kernel/io.c -o kernel/io.o
 gcc $GCCPARAMS -c kernel/gdt.c -o kernel/gdt.o
 gcc $GCCPARAMS -c kernel/idt.c -o kernel/idt.o
 gcc $GCCPARAMS -c kernel/irq.c -o kernel/irq.o
+gcc $GCCPARAMS -c kernel/platform/platform.c -o kernel/platform/platform.o
+gcc $GCCPARAMS -c kernel/platform/smbios.c -o kernel/platform/smbios.o
 gcc $GCCPARAMS -c kernel/panic.c -o kernel/panic.o
 gcc $GCCPARAMS -c kernel/mem/pmm.c -o kernel/mem/pmm.o
 gcc $GCCPARAMS -c kernel/net/ethernet.c -o kernel/net/ethernet.o
@@ -57,7 +59,7 @@ gcc $GCCPARAMS -c apps/desktop/desktop.c -o apps/desktop/desktop.o
 #libc/string/memcmp.o libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o libc/mm.o \
 
 # Linking
-ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/io.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/vfs.o kernel/fs/ext2.o kernel/net/ethernet.o kernel/net/arp.o \
+ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/io.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/platform/platform.o kernel/platform/smbios.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/vfs.o kernel/fs/ext2.o kernel/net/ethernet.o kernel/net/arp.o \
 boot/boot.o \
 init/main.o \
 drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/keyboard.o drivers/mouse.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \

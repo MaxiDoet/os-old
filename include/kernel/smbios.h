@@ -39,27 +39,8 @@ typedef struct smbios_structure_header {
 	uint16_t handle;
 } __attribute__((packed)) smbios_structure_header;
 
-int smbios_get_int(size_t offset, smbios_structure_header *header, int index)
-{
-	uint8_t *p = (uint8_t *) offset + index;
-
-	return *p;
-}
-
-char* smbios_get_string(size_t offset, smbios_structure_header *header, int index)
-{
-	uint8_t *string_table = (uint8_t *) offset + header->length;
-	char* s = (char *) string_table;
-
-	for (int i=0; i < index; i++) {
-		while (*s != '\0') {
-			s++;
-		}
-
-		s++;
-	}
-
-	return s;
-}
+smbios_entry_point *smbios_get_entry_point();
+int smbios_get_int(size_t offset, smbios_structure_header *header, int index);
+char* smbios_get_string(size_t offset, smbios_structure_header *header, int index);
 
 #endif
