@@ -53,11 +53,6 @@ void serial_irq_handler()
 	}
 }
 
-void timer_irq_handler()
-{
-	kdebug("[timer] timer irq!\r\n");
-}
-
 void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
@@ -87,8 +82,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	size_t heap_size = 1000000;
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
 	mm_init(heap_start, heap_size);
-
-	irq_install_handler(0, timer_irq_handler);
 
 	// Detect system hardware
 	kdebug("[kernel] SMBIOS Version: ");
