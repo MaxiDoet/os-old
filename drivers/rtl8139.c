@@ -21,44 +21,6 @@ int tx_buffer_current;
 void rtl8139_handle_rx();
 bool init_done = false;
 
-/* Some networking test code */
-uint8_t mac[6];
-uint8_t ip[4];
-
-void send_frame(uint8_t dst_mac[6], ethertype type, uint16_t *data, uint16_t size)
-{
-	uint16_t *buf = (uint16_t *) malloc(mm, sizeof(etherframe_header) + sizeof(arp_packet));
-	memset(buf, 0x00, sizeof(etherframe_header) + size);
-
-	etherframe_header *header = (etherframe_header *) buf;
-	memcpy(header->dst_mac, &dst_mac, 6);
-	memcpy(header->src_mac, &mac, 6);
-	header->ether_type = type;
-
-	memcpy(buf + sizeof(etherframe_header) - 7, data, size);
-
-	rtl8139_send(buf, sizeof(etherframe_header) + size);
-}
-
-void request_mac(uint8_t ip[4])
-{
-	arp_packet *packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
-	memset((uint16_t *) packet, 0x00, sizeof(arp_packet));
-	packet->hardwareaddress_type = 0x0100;
-	packet->protocol_type = 0x0008;
-	packet->hardwareaddress_length = 6;
-	packet->networkaddress_length = 4;
-	packet->operation_type = 0x0100;
-
-	memcpy(packet->src_mac, &mac, 6);
-	memcpy(packet->src_ip, &ip, 4);
-	memset(packet->dst_mac, 0xFF, 6);
-	memcpy(packet->dst_ip, ip, 4);
-
-	uint8_t broadcast_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-	send_frame(broadcast_mac, ETHERTYPE_ARP, (uint16_t *) packet, sizeof(arp_packet));
-}
-
 void rtl8139_irq_handler()
 {
 	if (!init_done) {
@@ -118,44 +80,6 @@ void rtl8139_handle_rx()
 				arp_packet *packet = (arp_packet *) ((uint32_t) frame_header + sizeof(etherframe_header));
 
 				arp_handle_packet(packet);
-
-				/*
-				// ARP request
-				if (packet->operation_type == 0x0100) {
-					kdebug("arp request: hardwareaddress_type: %s protocol_type: %s\r\n", ((packet->hardwareaddress_type == 0x100) ? "MAC" : "Unknown"), ((packet->protocol_type == 0x8) ? "IPv4" : "Unknown"));
-
-					arp_packet *reply_packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
-					reply_packet->hardwareaddress_type = 0x0100;
-					reply_packet->protocol_type = 0x0008;
-					reply_packet->hardwareaddress_length = 6;
-					reply_packet->networkaddress_length = 4;
-					reply_packet->operation_type = 0x0200;
-
-					memcpy(reply_packet->src_mac, &mac, 6);
-					memcpy(reply_packet->src_ip, &ip, 4);
-					memcpy(reply_packet->dst_mac, packet->src_mac, 6);
-					memcpy(reply_packet->dst_ip, packet->src_ip, 4);
-
-					uint8_t broadcast_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-					send_frame(broadcast_mac, ETHERTYPE_ARP, (uint16_t *) reply_packet, sizeof(arp_packet));
-
-				} else if (packet->operation_type == 0x0200) {
-					kdebug("arp reply: ip: ");
-
-					for (int i=0; i < 4; i++) {
-						kdebug("%d%s", packet->src_ip[i], ((i < 3) ? "." : " mac: "));
-					}
-
-					for (int i=0; i < 6; i++) {
-                                                kdebug("%x%s", packet->src_mac[i], ((i < 5) ? ":" : "\r\n"));
-                                        }
-
-					// ARP reply
-					memcpy(&mac_cache[cache_index], packet->src_mac, 6);
-					memcpy(&ip_cache[cache_index], packet->src_ip, 4);
-					cache_index++;
-				}
-				*/
 			}
 		}
 	}
@@ -224,17 +148,17 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
         irq_install_handler(dev.irq, rtl8139_irq_handler);
 
 	// Read MAC
+	uint8_t mac[6];
 	kdebug("[rtl8139] MAC: ");
 	for (int i=0; i < 6; i++) {
 		mac[i] = inb(dev.bars[0].io_base + i);
 		kdebug("%x%s", mac[i], ((i < 5) ? ":" : "\r\n"));
 	}
 
-	// Set static ip
-	ip[0] = 10;
-	ip[1] = 0;
-	ip[2] = 2;
-	ip[3] = 14;
+	// Set static ip and mac
+	uint8_t static_ip[4] = {10, 0, 2, 14};
+	arp_set_ip(static_ip);
+	arp_set_mac(mac);
 
 	// Test packet
 	tx_buffers[0] = (uint16_t *) 0x00030000;
@@ -251,28 +175,5 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 
 	// Default qemu gateway
 	uint8_t gateway_ip[4] = {10, 0, 2, 2};
-	request_mac(gateway_ip);
-
-	/*
-	// Broadcast arp
-	kdebug("broadcast arp\r\n");
-
-	arp_packet *reply_packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
-	reply_packet->hardwareaddress_type = 0x0100;
-	reply_packet->protocol_type = 0x0008;
-	reply_packet->hardwareaddress_length = 6;
-	reply_packet->networkaddress_length = 4;
-	reply_packet->operation_type = 0x0200;
-
-	memcpy(reply_packet->src_mac, &mac, 6);
-	memcpy(reply_packet->src_ip, &ip, 4);
-	memcpy(reply_packet->dst_mac, packet->src_mac, 6);
-	memcpy(reply_packet->dst_ip, packet->src_ip, 4);
-
-	for (int i=0; i < sizeof(etherframe_header) + sizeof(arp_packet); i++) {
-		kdebug("%x ", *(buf + i));
-	}
-
-	rtl8139_send(buf, sizeof(etherframe_header) + sizeof(arp_packet));
-	*/
+	arp_request_mac(gateway_ip);
 }

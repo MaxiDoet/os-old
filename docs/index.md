@@ -9,8 +9,12 @@ A simple 32bit os written in C
  - RTC
  - ATA PIO
  - Intel AC97
- - SMBIOS
  - RTL8139
+
+## Features
+ - SMBIOS detection
+ - Demo desktop
+ - Working ext2 fs (read only)
 
 ## Building
  1. Clone this repository ``` git clone https://github.com/TheHeroCraft1579/os``` 
@@ -26,7 +30,7 @@ A simple 32bit os written in C
  <p>
  <p>
   Network Driver / Stack
-  <img src="https://progress-bar-theherocraft1579.herokuapp.com/30">
+  <img src="https://progress-bar-theherocraft1579.herokuapp.com/40">
  </p>
  <p>
   Filesystem / ATA Driver
