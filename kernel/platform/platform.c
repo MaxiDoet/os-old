@@ -1,8 +1,10 @@
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
 #include "../include/kernel/platform.h"
 #include "../include/kernel/smbios.h"
+#include "../include/kernel/kernel.h"
 
 bool is_qemu=false;
 
@@ -28,7 +30,7 @@ void platform_init()
 			}
 
 			smbios_structure_header *header = (smbios_structure_header *) offset;
-		
+
 			switch(header->type) {
 				case 1:
 					if(smbios_get_string(offset, header, 0) == "QEMU") is_qemu=true;
