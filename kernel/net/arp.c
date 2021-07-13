@@ -60,7 +60,9 @@ void arp_handle_packet(arp_packet *packet)
 			// Reply
 			kdebug("[arp] reply from: ");
 			print_ip(packet->src_ip);
-			kdebug("to: ");
+			kdebug(" ");
+			print_mac(packet->src_mac);
+			kdebug(" to: ");
 			print_ip(ip);
 			kdebug("\r\n");
 
@@ -104,4 +106,45 @@ void arp_reply(arp_packet *packet)
 	memcpy(reply_packet->dst_ip, packet->src_ip, 4);
 
 	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint16_t *) reply_packet, sizeof(arp_packet));
+}
+
+void arp_broadcast_mac(uint8_t addr[4])
+{
+	arp_packet *packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
+
+	packet->hardwareaddress_type = 0x0100;
+	packet->protocol_type = 0x0008;
+	packet->hardwareaddress_length = 6;
+	packet->networkaddress_length = 4;
+	packet->operation_type = 0x0200;
+
+	memcpy(packet->src_mac, &mac, 6);
+	memcpy(packet->src_ip, &ip, 4);
+	memcpy(packet->dst_mac, arp_get_mac(addr), 6);
+	memcpy(packet->dst_ip, addr, 4);
+
+	ethernet_send_frame(mac, arp_get_mac(addr), ETHERTYPE_ARP, (uint16_t *) packet, sizeof(arp_packet));
+}
+
+uint8_t *arp_get_mac(uint8_t addr[4])
+{
+	for (int i=0; i < cache_index; i++) {
+		if (ip_cache[i] == addr) {
+			return mac_cache[i];
+		}
+	}
+
+	arp_request_mac(addr);
+
+	uint8_t *result = 0;
+	while (result == 0) {
+		for (int i=0; i < cache_index; i++) {
+			if (ip_cache[i] == addr) {
+				result = mac_cache[i];
+				break;
+			}
+		}
+	}
+
+	return result;
 }

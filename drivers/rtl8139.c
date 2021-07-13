@@ -183,4 +183,5 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	// Default qemu gateway
 	uint8_t gateway_ip[4] = {10, 0, 2, 2};
 	arp_request_mac(gateway_ip);
+	//arp_broadcast_mac(gateway_ip);
 }
