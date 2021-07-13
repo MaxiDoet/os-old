@@ -2,7 +2,7 @@
 #define _ethernet_h
 
 typedef enum {
-	ETHERTYPE_IP4 = 0x800,
+	ETHERTYPE_IPV4 = 0x800,
 	ETHERTYPE_ARP = 0x608
 } ethertype;
 

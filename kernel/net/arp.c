@@ -15,6 +15,10 @@ static uint8_t mac_cache[100][6];
 static uint8_t ip_cache[100][4];
 static int cache_index;
 
+uint8_t broadcast_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+void arp_reply(arp_packet *packet);
+
 void print_mac(uint8_t addr[6])
 {
 	for (int i=0; i < 6; i++) {
@@ -44,15 +48,22 @@ void arp_handle_packet(arp_packet *packet)
 	switch(packet->operation_type) {
 		case 0x0100:
 			// Request
-			kdebug("arp request from: ");
+			kdebug("[arp] request from: ");
 			print_mac(packet->src_mac);
+			kdebug(" to: ");
+			print_ip(packet->dst_ip);
 			kdebug("\r\n");
+
+			arp_reply(packet);
 			break;
 		case 0x0200:
 			// Reply
-			kdebug("arp reply from: ");
+			kdebug("[arp] reply from: ");
 			print_ip(packet->src_ip);
+			kdebug("to: ");
+			print_ip(ip);
 			kdebug("\r\n");
+
 			memcpy(&mac_cache[cache_index], packet->src_mac, 6);
 			memcpy(&ip_cache[cache_index], packet->src_ip, 4);
 			break;
@@ -62,7 +73,6 @@ void arp_handle_packet(arp_packet *packet)
 void arp_request_mac(uint8_t addr[4])
 {
 	arp_packet *packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
-	memset((uint16_t *) packet, 0x00, sizeof(arp_packet));
 
 	packet->hardwareaddress_type = 0x0100;
 	packet->protocol_type = 0x0008;
@@ -75,9 +85,23 @@ void arp_request_mac(uint8_t addr[4])
 	memset(packet->dst_mac, 0xFF, 6);
 	memcpy(packet->dst_ip, addr, 4);
 
-	uint8_t broadcast_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-	kdebug("arp requesting mac: ");
-	print_ip(addr);
-	kdebug("\r\n");
 	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint16_t *) packet, sizeof(arp_packet));
+}
+
+void arp_reply(arp_packet *packet)
+{
+	arp_packet *reply_packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
+
+	reply_packet->hardwareaddress_type = 0x0100;
+	reply_packet->protocol_type = 0x0008;
+	reply_packet->hardwareaddress_length = 6;
+	reply_packet->networkaddress_length = 4;
+	reply_packet->operation_type = 0x0200;
+
+	memcpy(reply_packet->src_mac, &mac, 6);
+	memcpy(reply_packet->src_ip, &ip, 4);
+	memcpy(reply_packet->dst_mac, packet->src_mac, 6);
+	memcpy(reply_packet->dst_ip, packet->src_ip, 4);
+
+	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint16_t *) reply_packet, sizeof(arp_packet));
 }
