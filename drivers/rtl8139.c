@@ -78,16 +78,7 @@ void rtl8139_handle_rx()
                         }
 
 			uint32_t *packet = (uint32_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
-
-			switch (frame_header->ether_type) {
-				case ETHERTYPE_ARP: ;
-					arp_handle_packet((arp_packet *) packet);
-					break;
-				case ETHERTYPE_IPV4: ;
-					ip_handle_packet((ip_packet *) packet);
-					break;
-			}
-
+			ethernet_handle_frame(buffer + 2);
 		}
 	}
 }
@@ -163,7 +154,7 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	}
 
 	// Set static ip and mac
-	uint8_t static_ip[4] = {10, 0, 2, 14};
+	uint8_t static_ip[4] = {10, 0, 2, 15};
 	arp_set_ip(static_ip);
 	arp_set_mac(mac);
 
@@ -182,6 +173,6 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 
 	// Default qemu gateway
 	uint8_t gateway_ip[4] = {10, 0, 2, 2};
-	arp_request_mac(gateway_ip);
-	//arp_broadcast_mac(gateway_ip);
+	//arp_request_mac(gateway_ip);
+	arp_broadcast_mac(gateway_ip);
 }

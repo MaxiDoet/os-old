@@ -13,5 +13,6 @@ typedef struct etherframe_header {
 } __attribute__((packed)) etherframe_header;
 
 void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type, uint16_t *data, uint32_t size);
+void ethernet_handle_frame(uint16_t *buffer);
 
 #endif
