@@ -28,10 +28,14 @@ context main_context;
 
 static void mouse_handler(struct mouse_event event)
 {
-	cursor_x += event.x * 2;
-	cursor_y -= event.y * 2;
+	int movement_x = event.x * 2;
+	int movement_y = event.y * 2;
 
-	// Collision
+	// Update cursor position
+	cursor_x += movement_x;
+	cursor_y -= movement_y;
+
+	// Check for collision
 	if (cursor_x <= 0) cursor_x = 0;
 	if (cursor_x >= main_context.width - 8) cursor_x = main_context.width - 8;
 	if (cursor_y <= 0) cursor_y = 0;
@@ -41,6 +45,11 @@ static void mouse_handler(struct mouse_event event)
 		if (!windows[i].grabbed && event.button1_pressed && cursor_x >= windows[i].x-10 && cursor_x <= windows[i].x-10 + windows[i].width && cursor_y >= windows[i].y-10 && cursor_y <= windows[i].y-10 + 20) {
 			windows[i].grabbed = true;
 			windows[i].focused = true;
+		}
+
+		if (windows[i].grabbed) {
+			windows[i].x += movement_x;
+			windows[i].y -= movement_y;
 		}
 
 		if (windows[i].grabbed && !event.button1_pressed) {
@@ -59,27 +68,10 @@ static void desktop_swap_fb()
 	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((main_context.width * main_context.height * 4) / 2));
 }
 
-/*
-void desktop_draw_cursor(int data[])
-{
-	for (int i=0; i < 19; i++) {
-		for (int j=0; j < 12; j++) {
-			if (data[j*i] == 0) {
-				draw_pixel(main_context, j + cursor_x, i + cursor_y, 0);
-			} else if (data[j*i] == 1) {
-				draw_pixel(main_context, j + cursor_x, i + cursor_y, 0xFFFFF);
-			} else {
-				continue;
-			}
-		}
-	}
-}
-*/
-
 void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 {
 	bb = (void *) (unsigned long) fbaddr;
-	fb = (void *) (unsigned long) 0x0B4534B;
+	fb = (void *) (unsigned long) malloc(mm, 800 * 600);
 
 	main_context.x = 0;
 	main_context.y = 0;
@@ -102,13 +94,6 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);
 
-	for (int i=0; i < 1000; i++) {
-		draw_image_transparent(main_context, main_context.width / 2 - 215 / 2, main_context.height / 2 - 160 / 2, 215, 160, logo);
-
-		desktop_swap_fb();
-
-	}
-
 	while(1) {
 		// Background
 		#ifdef DESKTOP_WALLPAPER
@@ -121,11 +106,6 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 			if (windows[i].width == 0 || windows[i].height == 0) continue;
 
 			draw_window(main_context, windows[i]);
-
-			if (windows[i].grabbed) {
-				windows[i].x = cursor_x;
-				windows[i].y = cursor_y;
-			}
 
 			if (windows[i].x + windows[i].width >= main_context.width) {
 				windows[i].x = main_context.width - windows[i].width;

@@ -101,11 +101,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	}
 
 	vfs_probe(root_dev);
-
-	uint16_t *file_buf = (uint16_t *) malloc(mm, 1000);
-        vfs_read("/test.txt", file_buf);
-	kdebug("File: %s\r\n", (char *) file_buf);
-
 	pci_scan();
 
 	keyboard_init();
