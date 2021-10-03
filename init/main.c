@@ -37,8 +37,6 @@
 extern const void kernel_start;
 extern const void kernel_end;
 
-extern void enable_sse;
-
 void serial_irq_handler()
 {
 	char c = serial_read(DEBUG_PORT);

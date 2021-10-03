@@ -17,11 +17,11 @@
 #include "../apps/desktop/cursor.h"
 #include "../apps/desktop/logo.h"
 
-#include "../lib/gui/context.h"
-#include "../lib/gui/direct.h"
-#include "../lib/gui/window.h"
+#include <gui/context.h>
+#include <gui/direct.h>
+#include <gui/window.h>
 
-window windows[10];
+static window *windows[10];
 static int cursor_x;
 static int cursor_y;
 context main_context;
@@ -37,24 +37,37 @@ static void mouse_handler(struct mouse_event event)
 
 	// Check for collision
 	if (cursor_x <= 0) cursor_x = 0;
-	if (cursor_x >= main_context.width - 8) cursor_x = main_context.width - 8;
+	if (cursor_x >= main_context.width) cursor_x = main_context.width;
 	if (cursor_y <= 0) cursor_y = 0;
-	if (cursor_y >= main_context.height - 1) cursor_y = main_context.height - 1;
+	if (cursor_y >= main_context.height) cursor_y = main_context.height;
 
 	for (int i=0; i < 10; i++) {
-		if (!windows[i].grabbed && event.button1_pressed && cursor_x >= windows[i].x-10 && cursor_x <= windows[i].x-10 + windows[i].width && cursor_y >= windows[i].y-10 && cursor_y <= windows[i].y-10 + 20) {
-			windows[i].grabbed = true;
-			windows[i].focused = true;
+		if (windows[i] == NULL) continue;
+
+		if (!windows[i]->grabbed && event.button1_pressed && cursor_x >= windows[i]->x-10 && cursor_x <= windows[i]->x-10 + windows[i]->width && cursor_y >= windows[i]->y-10 && cursor_y <= windows[i]->y-10 + 20) {
+			windows[i]->grabbed = true;
+			windows[i]->focused = true;
 		}
 
-		if (windows[i].grabbed) {
-			windows[i].x += movement_x;
-			windows[i].y -= movement_y;
+		if (windows[i]->grabbed) {
+			windows[i]->x += movement_x;
+			windows[i]->y -= movement_y;
 		}
 
-		if (windows[i].grabbed && !event.button1_pressed) {
-			windows[i].grabbed = false;
+		if (windows[i]->grabbed && !event.button1_pressed) {
+			windows[i]->grabbed = false;
 		}
+
+		if (windows[i]->x + windows[i]->width >= main_context.width) {
+			windows[i]->x = main_context.width - windows[i]->width;
+		}
+
+		if (windows[i]->y + windows[i]->height >= main_context.height) {
+			windows[i]->y = main_context.height - windows[i]->height;
+		}
+
+		if (windows[i]->x <= 0) windows[i]->x = 0;
+		if (windows[i]->y <= 0) windows[i]->y = 0;
 	}
 }
 
@@ -89,7 +102,7 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 	test.width = 400;
 	test.height = 300;
 
-	windows[0] = test;
+	windows[0] = &test;
 
 	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);
@@ -103,17 +116,8 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 		#endif
 
 		for (int i=0; i < 10; i++) {
-			if (windows[i].width == 0 || windows[i].height == 0) continue;
-
+			if (windows[i] == NULL) continue;
 			draw_window(main_context, windows[i]);
-
-			if (windows[i].x + windows[i].width >= main_context.width) {
-				windows[i].x = main_context.width - windows[i].width;
-			}
-
-			if (windows[i].y + windows[i].height >= main_context.height) {
-				windows[i].y = main_context.height - windows[i].height;
-			}
 		}
 
 		// Cursor

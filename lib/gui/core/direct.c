@@ -1,7 +1,7 @@
 #include <stdint.h>
 
-#include "direct.h"
-#include "font.h"
+#include <gui/direct.h>
+#include <gui/font.h>
 
 void draw_pixel(context ctx, int x, int y, int color)
 {
@@ -84,43 +84,6 @@ void draw_rectangle(context ctx, int x, int y, int w, int h, int size, int color
                 draw_filled_rectangle(ctx, x, y, size, h, color);
                 draw_filled_rectangle(ctx, x+w, y, size, h+size, color);
         }
-}
-
-void e(context ctx, short x0, short y0, short r, int cornername, int delta, int color)
-{
-        short f     = 1 - r;
-        short ddF_x = 1;
-        short ddF_y = -2 * r;
-        short x     = 0;
-        short y     = r;
-
-  while (x<y) {
-    if (f >= 0) {
-      y--;
-      ddF_y += 2;
-      f     += ddF_y;
-    }
-    x++;
-    ddF_x += 2;
-    f     += ddF_x;
-
-    if (cornername & 0x1) {
-      draw_vertical_line(ctx, x0+x, y0-y, 2*y+1+delta, color);
-      draw_vertical_line(ctx, x0+y, y0-x, 2*x+1+delta, color);
-    }
-    if (cornername & 0x2) {
-      draw_vertical_line(ctx, x0-x, y0-y, 2*y+1+delta, color);
-      draw_vertical_line(ctx, x0-y, y0-x, 2*x+1+delta, color);
-    }
-  }
-}
-
-void draw_rounded_rectangle(context ctx, int x, int y, int w, int h, int r, int color) {
-  draw_filled_rectangle(ctx, x+r, y, w-2*r, h, color);
-
-  // draw four corners
-  e(ctx, x+w-r-1, y+r, r, 1, h-2*r-1, color);
-  e(ctx, x+r    , y+r, r, 2, h-2*r-1, color);
 }
 
 void draw_circle(context ctx, int x0, int y0, int radius, int color)

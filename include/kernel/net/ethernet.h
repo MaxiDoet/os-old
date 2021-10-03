@@ -3,6 +3,7 @@
 
 typedef enum {
 	ETHERTYPE_IPV4 = 0x800,
+	ETHERTYPE_IPV6 = 0xdd86,
 	ETHERTYPE_ARP = 0x608
 } ethertype;
 

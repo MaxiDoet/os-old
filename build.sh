@@ -1,4 +1,4 @@
-GCCPARAMS="-m32 -Iinclude -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast"
+GCCPARAMS="-m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast"
 ASPARAMS="-f elf"
 LDPARAMS="-melf_i386"
 
@@ -29,7 +29,7 @@ gcc $GCCPARAMS -c libc/mm.c -o libc/mm.o
 # Build lib
 gcc $GCCPARAMS -c lib/libbmp.c -o lib/libbmp.o
 
-gcc $GCCPARAMS -c lib/gui/direct.c -o lib/gui/direct.o
+gcc $GCCPARAMS -c lib/gui/core/direct.c -o lib/gui/core/direct.o
 gcc $GCCPARAMS -c lib/gui/window.c -o lib/gui/window.o
 
 # Build kernel
@@ -66,7 +66,7 @@ init/main.o \
 drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/keyboard.o drivers/mouse.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \
 libc/string.o libc/mm.o \
 apps/desktop/desktop.o \
-lib/libbmp.o lib/gui/direct.o lib/gui/window.o
+lib/libbmp.o lib/gui/core/direct.o lib/gui/window.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin

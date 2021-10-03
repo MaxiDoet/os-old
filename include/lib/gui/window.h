@@ -16,6 +16,6 @@ typedef struct window {
 	bool grabbed;
 } window;
 
-void draw_window(context ctx, window win);
+void draw_window(context ctx, window *win);
 
 #endif
