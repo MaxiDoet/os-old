@@ -60,14 +60,15 @@ void arp_handle_packet(arp_packet *packet)
 			// Reply
 			kdebug("[arp] reply from: ");
 			print_ip(packet->src_ip);
-			kdebug(" ");
+			kdebug(" (");
 			print_mac(packet->src_mac);
-			kdebug(" to: ");
+			kdebug(") to: ");
 			print_ip(ip);
 			kdebug("\r\n");
 
 			memcpy(&mac_cache[cache_index], packet->src_mac, 6);
 			memcpy(&ip_cache[cache_index], packet->src_ip, 4);
+			cache_index++;
 			break;
 	}
 }
@@ -123,10 +124,10 @@ void arp_broadcast_mac(uint8_t addr[4])
 	memcpy(packet->dst_mac, arp_get_mac(addr), 6);
 	memcpy(packet->dst_ip, addr, 4);
 
-	ethernet_send_frame(mac, arp_get_mac(addr), ETHERTYPE_ARP, (uint16_t *) packet, sizeof(arp_packet));
+	ethernet_send_frame(mac, arp_resolve_mac(addr), ETHERTYPE_ARP, (uint16_t *) packet, sizeof(arp_packet));
 }
 
-uint8_t *arp_get_mac(uint8_t addr[4])
+uint8_t *arp_resolve_mac(uint8_t addr[4])
 {
 	for (int i=0; i < cache_index; i++) {
 		if (ip_cache[i] == addr) {
@@ -136,15 +137,26 @@ uint8_t *arp_get_mac(uint8_t addr[4])
 
 	arp_request_mac(addr);
 
-	uint8_t *result = 0;
+	uint8_t result[6];
 	while (result == 0) {
 		for (int i=0; i < cache_index; i++) {
-			if (ip_cache[i] == addr) {
-				result = mac_cache[i];
-				break;
+			for (int ip_index=0; ip_index < 4; ip_index++) {
+				if (ip_cache[cache_index][ip_index] != addr[ip_index]) {
+					break;
+				}
+
+				if (cache_index == 4) {
+					return mac_cache[cache_index];
+				}
 			}
 		}
 	}
+}
 
-	return result;
+uint8_t *arp_get_ip() {
+	return ip;
+}
+
+uint8_t *arp_get_mac() {
+	return mac;
 }

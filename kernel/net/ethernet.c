@@ -34,10 +34,7 @@ void ethernet_handle_frame(uint16_t *buffer)
 			arp_handle_packet((arp_packet *) packet);
 			break;
 		case ETHERTYPE_IPV4: ;
-			ip_handle_packet((ip_packet *) packet);
-			break;
-		case ETHERTYPE_IPV6: ;
-			ip_handle_packet((ip_packet *) packet);
+			ip_handle_packet((void *) packet);
 			break;
 	}
 }
