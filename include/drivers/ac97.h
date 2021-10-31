@@ -16,27 +16,32 @@
 #define NAM_EXT_FRONT_RATE 0x2C
 
 /* NABM Registers */
-#define NABM_PCM_INPUT 0x00
-#define NABM_PCM_OUTPUT 0x10
-#define NABM_MIC_INPUT 0x20
-#define NABM_GLOBAL_CTL 0x2C
-#define NABM_GLOBAL_STS 0x30
-#define NABM_BUFFER_CTN 0x0B
+#define PI 0x00
+#define PO 0x10
+#define MIC 0x20
+#define GLOB_CNT 0x2C
+#define GLOB_STA 0x30
 
-/* Channel registers */
-#define CHANNEL_BUFFER_DSC_ADDR 0x00
-#define CHANNEL_CUR_ENTRY_VAL 0x04
-#define CHANNEL_LAST_VALID_ENTRY 0x05
-#define CHANNEL_TRANSFER_STS 0x06
-#define CHANNEL_CUR_IDX_PROC_SAMPLES 0x08
-#define CHANNEL_PRCSD_ENTRY 0x0A
-#define CHANNEL_BUFFER_CNT 0x0B
+/* Channel Control Registers */
+#define BDBAR 0x00
+#define CIV 0x04
+#define LVI 0x05
+#define SR 0x06
+#define PICB 0x08
+#define PIV 0x0A
+#define CR 0x0B
 
-/* NABM_GLOBAL_CTL */
-#define CTL_GIE (1 << 0)
-#define CTL_COLD_RESET (1 << 1)
-#define CTL_WARM_RESET (1 << 2)
-#define CTK_SHUDOWN (1 << 3)
+/* CR */
+#define RPBM (1 << 0)
+#define RR (1 << 1)
+#define LVBIE (1 << 2)
+#define FEIE (1 << 3)
+#define IOCE (1 << 4)
+
+/* GLOB_CNT */
+#define GIE (1 << 0)
+#define COLD_RESET (1 << 1)
+#define WARM_RESET (1 << 2)
 
 void ac97_init(pci_dev_descriptor pci_dev);
 
