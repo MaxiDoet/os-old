@@ -10,7 +10,7 @@
 
 void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type, uint16_t *data, uint32_t size)
 {
-	uint16_t *buf = (uint16_t *) malloc(mm, sizeof(etherframe_header) + size);
+	uint16_t *buf = (uint16_t *) malloc(sizeof(etherframe_header) + size);
 	memset(buf, 0x00, sizeof(etherframe_header) + size);
 
 	etherframe_header *header = (etherframe_header *) buf;

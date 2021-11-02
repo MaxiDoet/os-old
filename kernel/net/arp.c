@@ -75,7 +75,7 @@ void arp_handle_packet(arp_packet *packet)
 
 void arp_request_mac(uint8_t addr[4])
 {
-	arp_packet *packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
+	arp_packet *packet = (arp_packet *) malloc(sizeof(arp_packet));
 
 	packet->hardwareaddress_type = 0x0100;
 	packet->protocol_type = 0x0008;
@@ -93,7 +93,7 @@ void arp_request_mac(uint8_t addr[4])
 
 void arp_reply(arp_packet *packet)
 {
-	arp_packet *reply_packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
+	arp_packet *reply_packet = (arp_packet *) malloc(sizeof(arp_packet));
 
 	reply_packet->hardwareaddress_type = 0x0100;
 	reply_packet->protocol_type = 0x0008;
@@ -111,7 +111,7 @@ void arp_reply(arp_packet *packet)
 
 void arp_broadcast_mac(uint8_t addr[4])
 {
-	arp_packet *packet = (arp_packet *) malloc(mm, sizeof(arp_packet));
+	arp_packet *packet = (arp_packet *) malloc(sizeof(arp_packet));
 
 	packet->hardwareaddress_type = 0x0100;
 	packet->protocol_type = 0x0008;

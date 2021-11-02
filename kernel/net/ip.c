@@ -30,7 +30,7 @@ uint16_t ip_calculate_checksum(ip_packet_header *header) {
 }
 
 void ip_send_packet(uint8_t *dst_ip, void *data, int len) {
-	void *packet = (void *) malloc(mm, sizeof(ip_packet_header) + len);
+	void *packet = (void *) malloc(sizeof(ip_packet_header) + len);
 	ip_packet_header *header = (ip_packet_header *) packet;
 
 	header->version = IP_IPV4;

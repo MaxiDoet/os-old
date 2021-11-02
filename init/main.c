@@ -30,8 +30,6 @@
 
 #include "../apps/desktop/desktop.h"
 
-#include "../lib/include/libbmp.h"
-
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
 extern const void kernel_start;

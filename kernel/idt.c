@@ -9,14 +9,16 @@
 #include "../include/kernel/irq.h"
 #include "../include/kernel/kernel.h"
 
-void idt_set_gate(unsigned int pos, uint32_t base,
-   uint16_t selector, uint8_t type_attributes)
+struct idt_description idt_desc;
+struct idt_entry idt[IDT_ENTRIES];
+
+void idt_set_gate(unsigned int pos, uint32_t base, uint16_t selector, uint8_t type_attributes)
 {
-    idt[pos].base_lower = base & 0xffff;
-    idt[pos].selector = selector;
-    idt[pos].unused = 0x0;
-    idt[pos].type_attributes = type_attributes;
-    idt[pos].base_higher = (base >> 16) & 0xffff;
+	idt[pos].base_lower = base & 0xffff;
+	idt[pos].selector = selector;
+	idt[pos].unused = 0x0;
+	idt[pos].type_attributes = type_attributes;
+	idt[pos].base_higher = (base >> 16) & 0xffff;
 }
 
 extern void int_handler_0();

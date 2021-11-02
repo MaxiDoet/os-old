@@ -27,8 +27,6 @@ gcc $GCCPARAMS -c libc/string.c -o libc/string.o
 gcc $GCCPARAMS -c libc/mm.c -o libc/mm.o
 
 # Build lib
-gcc $GCCPARAMS -c lib/libbmp.c -o lib/libbmp.o
-
 gcc $GCCPARAMS -c lib/gui/core/direct.c -o lib/gui/core/direct.o
 gcc $GCCPARAMS -c lib/gui/window.c -o lib/gui/window.o
 
@@ -66,7 +64,7 @@ init/main.o \
 drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/keyboard.o drivers/mouse.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \
 libc/string.o libc/mm.o \
 apps/desktop/desktop.o \
-lib/libbmp.o lib/gui/core/direct.o lib/gui/window.o
+lib/gui/core/direct.o lib/gui/window.o
 
 mkdir -p isodir/boot/grub
 cp myos.bin isodir/boot/myos.bin

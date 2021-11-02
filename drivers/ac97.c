@@ -12,7 +12,7 @@
 
 #include "../include/drivers/audio.h"
 
-pci_dev_descriptor dev;
+static pci_dev_descriptor dev;
 
 struct buf_desc {
 	uint32_t addr;

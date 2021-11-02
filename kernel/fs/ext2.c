@@ -41,7 +41,7 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 	uint32_t block_index = bg_index % fs->inodes_per_block;
 
 	// Read bgdt
-	uint16_t *bgdt_buf = (uint16_t *) malloc(mm, fs->block_size);
+	uint16_t *bgdt_buf = (uint16_t *) malloc(fs->block_size);
 	ext2_read_block(dev, fs, 2, bgdt_buf);
 	ext2_bg_descriptor *descriptor = (ext2_bg_descriptor *) bgdt_buf;
 
@@ -50,7 +50,7 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 		descriptor++;
 	}
 
-	uint16_t *block_buf = (uint16_t *) malloc(mm, fs->block_size);
+	uint16_t *block_buf = (uint16_t *) malloc(fs->block_size);
 	ext2_read_block(dev, fs, descriptor->inode_table_start + block, block_buf);
 	ext2_inode *inode_temp = (ext2_inode *) block_buf;
 
@@ -72,7 +72,7 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 	uint32_t result;
 	size_t current = strsplit(path, '/');
 	char* filename = (char *) path + 1; // Remove slash
-	ext2_dir_entry *dir = (ext2_dir_entry *) malloc(mm, sizeof(ext2_dir_entry));
+	ext2_dir_entry *dir = (ext2_dir_entry *) malloc(sizeof(ext2_dir_entry));
 
 	if (current == 1) {
 		// Root is always inode 2
@@ -83,7 +83,7 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 			dir = (ext2_dir_entry *) root_buf;
 
 			while(dir->inode != 0) {
-				char* name = (char *) malloc(mm, dir->name_length + 1);
+				char* name = (char *) malloc(dir->name_length + 1);
 				memcpy(name, &dir->name_reserved, dir->name_length);
 				name[dir->name_length] = '\0';
 				if (strcmp(name, filename) == 0) {
@@ -119,7 +119,7 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
 			return 0;
 		}
 
-		uint16_t *block_buf = (uint16_t *) malloc(mm, fs->block_size);
+		uint16_t *block_buf = (uint16_t *) malloc(fs->block_size);
 		ext2_read_block(dev, fs, block, block_buf);
 		memcpy(buf + i*(fs->block_size), block_buf, fs->block_size);
 	}
@@ -129,7 +129,7 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
 
 uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 {
-	uint16_t *sb_buf = (uint16_t *) malloc(mm, 1024);
+	uint16_t *sb_buf = (uint16_t *) malloc(1024);
 
         ata_pio_read(*dev, entry.start_sector + 2, 2, sb_buf);
 	ext2_superblock *sb = (ext2_superblock *) sb_buf;
@@ -145,8 +145,8 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 	kdebug("ext2 info: sb_start: %d inodes_per_group: %d bgdt_start: %d\r\n", entry.start_sector + 2, sb->inodes_per_group, fs->start_sector + block_to_sector(2));
 
 	// Init buffers
-	if (!inode_buf) inode_buf = (ext2_inode *) malloc(mm, sizeof(ext2_inode));
-        if (!root_buf) root_buf = (uint16_t *) malloc(mm, fs->block_size);
+	if (!inode_buf) inode_buf = (ext2_inode *) malloc(sizeof(ext2_inode));
+        if (!root_buf) root_buf = (uint16_t *) malloc(fs->block_size);
 
 	return 1;
 }

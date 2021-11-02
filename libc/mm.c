@@ -4,29 +4,27 @@
 
 #include "../libc/include/mm.h"
 
+static mm_t mm;
+
 void mm_init(size_t start, size_t size)
 {
-	mm_t manager;
-
 	if (size < sizeof(mm_chunk)) {
-		manager.first_chunk = 0;
+		mm.first_chunk = 0;
 	} else {
-		manager.first_chunk = (mm_chunk*) start;
+		mm.first_chunk = (mm_chunk*) start;
 
-		manager.first_chunk->allocated = false;
-		manager.first_chunk->next_chunk = 0;
-		manager.first_chunk->previous_chunk = 0;
-		manager.first_chunk->size = size - sizeof(mm_chunk);
+		mm.first_chunk->allocated = false;
+		mm.first_chunk->next_chunk = 0;
+		mm.first_chunk->previous_chunk = 0;
+		mm.first_chunk->size = size - sizeof(mm_chunk);
 	}
-
-	mm = manager;
 }
 
-void* malloc(mm_t manager, size_t size)
+void* malloc(size_t size)
 {
 	mm_chunk* result = 0;
 
-	for (mm_chunk* chunk = manager.first_chunk; chunk != 0 && result == 0; chunk = chunk->next_chunk) {
+	for (mm_chunk* chunk = mm.first_chunk; chunk != 0 && result == 0; chunk = chunk->next_chunk) {
 		if (chunk->size > size && !chunk->allocated) {
 			result = chunk;
 		}
@@ -56,7 +54,7 @@ void* malloc(mm_t manager, size_t size)
 	return (void*)(((size_t)result) + sizeof(mm_chunk));
 }
 
-void free(mm_t manager, void* ptr)
+void free(void* ptr)
 {
 
 }

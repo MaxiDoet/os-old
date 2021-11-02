@@ -4,6 +4,8 @@
 #include "../include/drivers/vgacon.h"
 #include "../include/drivers/vga-color.h"
 
+uint16_t* vgacon_mem;
+
 void vgacon_init()
 {
 	vgacon_width=80;

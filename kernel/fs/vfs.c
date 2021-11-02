@@ -17,7 +17,7 @@ void vfs_probe(ata_dev_t dev)
 	if (!root_dev.ready) return;
 
 	// Look for mbr
-	uint16_t *mbr_buf = (uint16_t *) malloc(mm, ATA_SECTOR_SIZE);
+	uint16_t *mbr_buf = (uint16_t *) malloc(ATA_SECTOR_SIZE);
 	ata_pio_read(root_dev, 0, 1, mbr_buf);
 	mbr_t *mbr = (mbr_t *) mbr_buf;
 

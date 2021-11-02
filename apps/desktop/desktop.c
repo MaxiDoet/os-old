@@ -26,6 +26,9 @@ static int cursor_x;
 static int cursor_y;
 context main_context;
 
+static void *fb;
+static void *bb;
+
 static void mouse_handler(struct mouse_event event)
 {
 	int movement_x = event.x * 2;
@@ -84,7 +87,7 @@ static void desktop_swap_fb()
 void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 {
 	bb = (void *) (unsigned long) fbaddr;
-	fb = (void *) (unsigned long) malloc(mm, 800 * 600);
+	fb = (void *) (unsigned long) malloc(800 * 600);
 
 	main_context.x = 0;
 	main_context.y = 0;

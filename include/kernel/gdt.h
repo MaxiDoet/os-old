@@ -19,8 +19,8 @@ struct gdt_description {
     uint32_t base;
 } __attribute__((packed));
 
-struct gdt_entry gdt[GDT_ENTRIES];
-struct gdt_description gdt_desc;
+//struct gdt_entry gdt[GDT_ENTRIES];
+//struct gdt_description gdt_desc;
 
 void gdt_setup();
 

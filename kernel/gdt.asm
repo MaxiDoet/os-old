@@ -1,6 +1,7 @@
 section .text
 extern gdt_desc
 global gdt_install
+
 gdt_install:
     cli
     lgdt [gdt_desc]
