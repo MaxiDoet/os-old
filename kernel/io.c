@@ -36,4 +36,3 @@ uint32_t inl(uint16_t port)
         __asm__ volatile("inl %1, %0" : "=a" (result) : "Nd" (port));
         return result;
 }
-

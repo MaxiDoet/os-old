@@ -11,6 +11,7 @@ enum pci_bar_layout_type {
 
 typedef struct {
 	uint32_t io_base;
+	uint32_t mem_base;
 	uint32_t size;
 	enum pci_bar_layout_type type;
 } pci_bar_descriptor;

@@ -10,6 +10,7 @@
 
 #include "../include/drivers/rtl8139.h"
 #include "../include/drivers/ac97.h"
+#include "../include/drivers/hda.h"
 
 uint32_t pci_read_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset)
 {
@@ -98,13 +99,11 @@ pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_
 	if (bar.type == PCI_BAR_LAYOUT_MEMORYMAPPING) {
 		switch((bar_value >> 1) & 0x03) {
 			case 0:
-			case 1:
-			case 2:
-				// Not implemented yet!
+				bar.mem_base = (bar_value & ~0xF);
 				break;
 		}
 	} else {
-		bar.io_base = (uint32_t)(bar_value & ~0x3);
+		bar.io_base = (uint32_t) (bar_value & 0xFFFFFFFC);
 	}
 
 	return bar;
@@ -346,6 +345,10 @@ void pci_scan()
 
 				if (dev.vendor_id == 0x8086 && dev.device_id == 0x2415) {
 					ac97_init(dev);
+				}
+
+				if (dev.vendor_id == 0x8086 && (dev.device_id == 0x2668 || dev.device_id == 0x293E)) {
+					hda_init(dev);
 				}
 			}
 

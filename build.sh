@@ -16,6 +16,7 @@ gcc $GCCPARAMS -c drivers/pit.c -o drivers/pit.o
 gcc $GCCPARAMS -c drivers/ac97.c -o drivers/ac97.o
 gcc $GCCPARAMS -c drivers/ata.c -o drivers/ata.o
 gcc $GCCPARAMS -c drivers/rtl8139.c -o drivers/rtl8139.o
+gcc $GCCPARAMS -c drivers/hda.c -o drivers/hda.o
 
 # Build libc
 #gcc $GCCPARAMS -c libc/string/memcmp.c -o libc/string/memcmp.o
@@ -61,7 +62,7 @@ gcc $GCCPARAMS -c apps/desktop/desktop.c -o apps/desktop/desktop.o
 ld $LDPARAMS -T linker.ld -o myos.bin kernel/debug.o kernel/io.o kernel/gdt.o kernel/idt.o kernel/irq.o kernel/platform/platform.o kernel/platform/smbios.o kernel/panic.o kernel/mem/pmm.o kernel/idt_asm.o kernel/gdt_asm.o kernel/fs/vfs.o kernel/fs/ext2.o kernel/net/ethernet.o kernel/net/arp.o kernel/net/ip.o \
 boot/boot.o \
 init/main.o \
-drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/keyboard.o drivers/mouse.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o \
+drivers/vgacon.o drivers/rtc.o drivers/pci.o drivers/serial.o drivers/keyboard.o drivers/mouse.o drivers/pit.o drivers/ac97.o drivers/ata.o drivers/rtl8139.o drivers/hda.o \
 libc/string.o libc/mm.o \
 apps/desktop/desktop.o \
 lib/gui/core/direct.o lib/gui/window.o
