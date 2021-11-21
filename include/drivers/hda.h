@@ -15,6 +15,11 @@ typedef struct hda_rirb_entry_t {
 	uint32_t response_ex;
 } __attribute__((packed)) hda_rirb_entry_t;
 
+typedef struct hda_widget_t {
+	int codec;
+	int nid;
+} hda_widget_t;
+
 typedef struct hda_dev_t {
 	uint32_t mem_base;
 	uint16_t gcap;
@@ -31,6 +36,10 @@ typedef struct hda_dev_t {
 	uint64_t *rirb;
 	uint16_t rirb_rp;
 	int rirb_size;
+
+	// Output
+	hda_widget_t output;
+	int output_channels;
 } hda_dev_t;
 
 #define HDA_GCAP 0x00
@@ -55,6 +64,7 @@ typedef struct hda_dev_t {
 #define HDA_RIRBCTL 0x5C
 #define HDA_RIRBSTS 0x5D
 #define HDA_RIRBSIZE 0x5E
+#define HDA_SD0FMT 0x92
 
 /* GCTL */
 #define HDA_CRST (1 << 0)
@@ -83,7 +93,11 @@ typedef struct hda_dev_t {
 #define HDA_RIRBOIS (1 << 2)
 
 /* Verbs */
-#define HDA_VERB_GET_PARAMETER 0xF00
+#define HDA_VERB_GET_PARAMETER 0xF0000
+#define HDA_VERB_SET_FORMAT 0x20000
+#define HDA_VERB_SET_POWER_STATE 0x70500
+#define HDA_VERB_SET_STREAM_CHANNEL 0x70600
+#define HDA_VERB_GET_CONFIG 0xF1C00
 
 /* GET_PARAMETER parameters */
 #define HDA_VERB_PARAMETER_VENDOR_ID 0x00
@@ -93,6 +107,60 @@ typedef struct hda_dev_t {
 #define HDA_VERB_PARAMETER_AUDIO_FUNCTION_GROUP_CAP 0x08
 #define HDA_VERB_PARAMETER_AUDIO_WIDGET_CAP 0x09
 #define HDA_VERB_PARAMETER_SAMPLE_SIZE 0x0A
+
+/* HDA_FG_TYPE */
+#define HDA_FG_TYPE_AUDIO 0x01
+#define HDA_FG_TYPE_MODEM 0x02
+
+/* HDA_WIDGET_CAP */
+#define HDA_WIDGET_CAP_STEREO (1 << 0)
+#define HDA_WIDGET_CAP_AMP_IN (1 << 1)
+#define HDA_WIDGET_CAP_AMP_OUT (1 << 2)
+#define HDA_WIDGET_CAP_POWER_CNTRL (1 << 10)
+
+/* HDA_WIDGET_TYPE */
+#define HDA_WIDGET_TYPE_OUTPUT 0x0
+#define HDA_WIDGET_TYPE_INPUT 0x1
+#define HDA_WIDGET_TYPE_MIXER 0x2
+#define HDA_WIDGET_TYPE_SELECTOR 0x3
+#define HDA_WIDGET_TYPE_PIN 0x4
+#define HDA_WIDGET_TYPE_POWER 0x5
+#define HDA_WIDGET_TYPE_VOLUME_KNOB 0x6
+#define HDA_WIDGET_TYPE_BEEP 0x7
+
+/* HDA_WIDGET_CONNECTIVITY */
+#define HDA_WIDGET_CONNECTIVITY_JACK 0x0
+#define HDA_WIDGET_CONNECTIVITY_MISSING 0x1
+#define HDA_WIDGET_CONNECTIVITY_FIXED 0x2
+#define HDA_WIDGET_CONNECTIVITY_BOTH 0x3
+
+/* HDA_WIDGET_LOCATION */
+#define HDA_WIDGET_LOCATION_EXTERNAL 0x0
+#define HDA_WIDGET_LOCATION_INTERNAL 0x1
+#define HDA_WIDGET_LOCATION_SEPARATE 0x2
+#define HDA_WIDGET_LOCATION_OTHER 0x3
+
+#define HDA_WIDGET_LOCATION_NA 0x0
+#define HDA_WIDGET_LOCATION_REAR 0x1
+#define HDA_WIDGET_LOCATION_FRONT 0x2
+#define HDA_WIDGET_LOCATION_LEFT 0x3
+#define HDA_WIDGET_LOCATION_RIGHT 0x4
+#define HDA_WIDGET_LOCATION_TOP 0x5
+#define HDA_WIDGET_LOCATION_BOTTOM 0x6
+#define HDA_WIDGET_LOCATION_SPECIAL 0x7
+
+/* HDA_WIDGET_DEFAULT */
+#define HDA_WIDGET_DEFAULT_LINEOUT 0x0
+#define HDA_WIDGET_DEFAULT_SPEAKER 0x1
+#define HDA_WIDGET_DEFAULT_HPOUT 0x2
+#define HDA_WIDGET_DEFAULT_CD 0x3
+#define HDA_WIDGET_DEFAULT_SPDIFOUT 0x4
+#define HDA_WIDGET_DEFAULT_MODEMLINE 0x6
+#define HDA_WIDGET_DEFAULT_MODEMHANDSET 0x7
+#define HDA_WIDGET_DEFAULT_LINEIN 0x8
+#define HDA_WIDGET_DEFAULT_AUX 0x9
+#define HDA_WIDGET_DEFAULT_MICIN 0xA
+#define HDA_WIDGET_DEFAULT_SPDIFIN 0xC
 
 hda_dev_t hda_init(pci_dev_descriptor pci_dev);
 
