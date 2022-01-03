@@ -64,6 +64,9 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	// For debug commands
 	irq_install_handler(4, serial_irq_handler);
 
+	// Init PIT
+	pit_init();
+
 	kdebug("[kernel\e[0;37m] GDT init\r\n");
 	gdt_setup();
 	kdebug("[kernel\e[0;37m] IDT init\r\n");

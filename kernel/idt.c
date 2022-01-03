@@ -259,7 +259,7 @@ void int_handler(struct cpu_state* state)
 	if (state->intr < 20) {
 
 		// Kernel Exception
-        	kdebug("[kernel] ");
+        	kdebug("[kernel] Exception: ");
 
         	switch(state->intr) {
                 	case 0x00:
@@ -324,6 +324,8 @@ void int_handler(struct cpu_state* state)
                         	kpanic("SIMD Floating Point");
                         	break;
 		}
+
+		kdebug("\r\n");
 
 	} else if (state->intr > 31){
 		// IRQ
