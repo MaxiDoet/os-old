@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../include/kernel/kernel.h"
 #include "../libc/include/string.h"
 #include "../libc/include/mm.h"
 #include "../include/kernel/net/ethernet.h"
@@ -25,7 +26,17 @@ void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type,
 
 void ethernet_handle_frame(uint16_t *buffer)
 {
-	etherframe_header *frame_header = (etherframe_header *) buffer;
+	etherframe_header *frame_header = (etherframe_header *) (buffer + 2);
+
+	kdebug("[net] ether_type: %x dst_mac: ", frame_header->ether_type);
+
+	for (int i=0; i < 6; i++) {
+		kdebug("%x%s", frame_header->dst_mac[i], ((i < 5) ? ":" : " src_mac: "));
+	}
+
+	for (int i=0; i < 6; i++) {
+		kdebug("%x%s", frame_header->src_mac[i], ((i < 5) ? ":" : "\r\n"));
+	}
 
 	uint32_t *packet = (uint32_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
 
@@ -38,3 +49,4 @@ void ethernet_handle_frame(uint16_t *buffer)
 			break;
 	}
 }
+

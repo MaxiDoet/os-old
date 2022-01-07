@@ -54,7 +54,10 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	multiboot_info_t *mbi;
 	mbi = (multiboot_info_t *) mbi_addr;
 
-	int debug_port;
+	kdebug("[kernel\e[0;37m] GDT init\r\n");
+        gdt_setup();
+        kdebug("[kernel\e[0;37m] IDT init\r\n");
+        idt_install();
 
 	// Init serial debug
 	serial_init(DEBUG_PORT);
@@ -66,11 +69,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	// Init PIT
 	pit_init();
-
-	kdebug("[kernel\e[0;37m] GDT init\r\n");
-	gdt_setup();
-	kdebug("[kernel\e[0;37m] IDT init\r\n");
-	idt_install();
 
 	//kdebug("[kernel] PMM init\r\n");
 	//pmm_init(mbi);

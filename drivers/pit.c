@@ -23,7 +23,7 @@ void pit_set_freq(uint16_t freq)
 
 void pit_irq_handler()
 {
-	//pit_ticks++;
+	pit_ticks++;
 	pit_set_freq(10);
 }
 
@@ -43,9 +43,7 @@ void pit_init()
 	outb(PIT_MODE_PORT, 0xD |  // Mode: Rate generator
 			    0x30); // Access mode: lobyte/hibyte
 
-	//pit_set_freq(10);
-	pit_set_divisor(65535);
-
-	//pit_sleep(1);
+	pit_set_freq(10);
+	//pit_set_divisor(65535);
 }
 

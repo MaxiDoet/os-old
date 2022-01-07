@@ -30,8 +30,6 @@ void rtl8139_irq_handler()
 
 	uint16_t int_mask = inw(dev.bars[0].io_base + REG_IMR);
 	uint16_t int_status = inw(dev.bars[0].io_base + REG_ISR);
-	kdebug("[rtl8139] IRQ! int_mask: %x int_status: %x\r\n", int_mask, int_status);
-
 	bool tok = inw(dev.bars[0].io_base + REG_ISR) & (1 << 2); // Transmit ok
 	bool rok = inw(dev.bars[0].io_base + REG_ISR) & (1 << 0); // Receive ok
 
@@ -57,35 +55,22 @@ void rtl8139_handle_rx()
 		rx_buffer_offset = (rx_buffer_offset + 3) & ~0x3;
 		outw(dev.bars[0].io_base + REG_CAPR, rx_buffer_offset - 0x10);
 
+		kdebug("[rtl8139] rx: ");
 		for (int i=0; i < length; i++) {
 			kdebug("%x ", *(buffer + i));
 		}
-
+		kdebug("\r\n");
 
 		// Check packet
 		if (*buffer & (1 << 0)) {
-			kdebug("rok! length: %x\r\n", length);
-
-			etherframe_header *frame_header = (etherframe_header *) (buffer + 2);
-			kdebug("ether_type: %x dst_mac: ", frame_header->ether_type);
-
-			for (int i=0; i < 6; i++) {
-				kdebug("%x%s", frame_header->dst_mac[i], ((i < 5) ? ":" : " src_mac: "));
-			}
-
-			for (int i=0; i < 6; i++) {
-                                kdebug("%x%s", frame_header->src_mac[i], ((i < 5) ? ":" : "\r\n"));
-                        }
-
-			uint32_t *packet = (uint32_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
-			ethernet_handle_frame(buffer + 2);
+			ethernet_handle_frame(buffer);
 		}
 	}
 }
 
 void rtl8139_send(uint16_t *data, uint32_t len)
 {
-	kdebug("Sending packet (%d bytes):\r\n", len);
+	kdebug("[rtl8139] tx (%d bytes): ", len);
 	for (int i=0; i < len; i++) {
 		kdebug("%x ", *(data + i));
 	}
@@ -173,6 +158,6 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 
 	// Default qemu gateway
 	uint8_t gateway_ip[4] = {10, 0, 2, 2};
-	//arp_request_mac(gateway_ip);
-	arp_broadcast_mac(gateway_ip);
+	arp_request_mac(gateway_ip);
+	//arp_broadcast_mac(gateway_ip);
 }
