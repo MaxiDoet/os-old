@@ -2,9 +2,9 @@
 #define _ethernet_h
 
 typedef enum {
-	ETHERTYPE_IPV4 = 0x008,
-	ETHERTYPE_IPV6 = 0xdd86,
-	ETHERTYPE_ARP = 0x608
+	ETHERTYPE_IPV4 = 0x800,
+	ETHERTYPE_IPV6 = 0x86DD,
+	ETHERTYPE_ARP = 0x806
 } ethertype;
 
 typedef struct etherframe_header {
@@ -14,6 +14,6 @@ typedef struct etherframe_header {
 } __attribute__((packed)) etherframe_header;
 
 void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type, uint16_t *data, uint32_t size);
-void ethernet_handle_frame(uint16_t *buffer);
+void ethernet_handle_frame(uint16_t *buffer, uint16_t length);
 
 #endif

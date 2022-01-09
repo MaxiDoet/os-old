@@ -8,6 +8,7 @@
 #include "../include/drivers/rtl8139.h"
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/net/ip.h"
+#include "../include/kernel/net/swap.h"
 
 void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type, uint16_t *data, uint32_t size)
 {
@@ -17,16 +18,17 @@ void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type,
 	etherframe_header *header = (etherframe_header *) buf;
 	memcpy(header->dst_mac, dst_mac, 6);
 	memcpy(header->src_mac, src_mac, 6);
-	header->ether_type = type;
+	header->ether_type = net_swap_word(type);
 
 	memcpy(buf + sizeof(etherframe_header) - 7, data, size);
 
 	rtl8139_send(buf, sizeof(etherframe_header) + size);
 }
 
-void ethernet_handle_frame(uint16_t *buffer)
+void ethernet_handle_frame(uint16_t *buffer, uint16_t length)
 {
 	etherframe_header *frame_header = (etherframe_header *) (buffer + 2);
+	frame_header->ether_type = net_swap_word(frame_header->ether_type);
 
 	kdebug("[net] ether_type: %x dst_mac: ", frame_header->ether_type);
 

@@ -63,7 +63,7 @@ void rtl8139_handle_rx()
 
 		// Check packet
 		if (*buffer & (1 << 0)) {
-			ethernet_handle_frame(buffer);
+			ethernet_handle_frame(buffer, length);
 		}
 	}
 }
