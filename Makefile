@@ -33,6 +33,7 @@ os.iso: os.bin
 clean:
 	rm -f $(obj_files)
 	rm -f *.iso*
+	rm -fr isodir
 	rm -f os.bin
 
 run: os.iso

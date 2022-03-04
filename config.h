@@ -1,4 +1,4 @@
-#define BUILD_INFO "++++++++++++++++++++++++++++++++++\r\n+  Kernel built on October 3 2021  +\r\n++++++++++++++++++++++++++++++++++\r\n"
+#define BUILD_INFO "++++++++++++++++++++++++++++++++++\r\n+  Kernel built on February 4th 2022  +\r\n++++++++++++++++++++++++++++++++++\r\n"
 
 /* Debug */
 #define DEBUG_PORT 0x3F8
