@@ -6,6 +6,7 @@ gdt_install:
     cli
     lgdt [gdt_desc]
     jmp 08h:reload_cs
+
 reload_cs:
     mov eax, 10h
     mov ds, eax
