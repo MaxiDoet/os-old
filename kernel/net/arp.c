@@ -43,8 +43,10 @@ void arp_set_ip(uint8_t addr[4])
 	memcpy(&ip, addr, 4);
 }
 
-void arp_handle_packet(arp_packet *packet)
+void arp_handle_packet(uint16_t *buffer)
 {
+	arp_packet *packet = (arp_packet *) buffer;
+
 	switch(packet->operation_type) {
 		case 0x0100:
 			// Request

@@ -40,14 +40,14 @@ void ethernet_handle_frame(uint16_t *buffer, uint16_t length)
 		kdebug("%x%s", frame_header->src_mac[i], ((i < 5) ? ":" : "\r\n"));
 	}
 
-	uint32_t *packet = (uint32_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
+	uint16_t *packet = (uint16_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
 
 	switch(frame_header->ether_type) {
 		case ETHERTYPE_ARP: ;
-			arp_handle_packet((arp_packet *) packet);
+			arp_handle_packet(packet);
 			break;
 		case ETHERTYPE_IPV4: ;
-			ip_handle_packet((void *) packet);
+			ip_handle_packet(packet);
 			break;
 	}
 }

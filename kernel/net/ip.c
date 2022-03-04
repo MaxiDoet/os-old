@@ -8,9 +8,12 @@
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/kernel.h"
 
-void ip_handle_packet(ip_packet_header *header)
+void ip_handle_packet(uint16_t *buffer)
 {
-	kdebug("[ip] version: %d protcol: %x\r\n", header->version, header->protocol);
+	ip_packet_header *header = (ip_packet_header *) buffer;
+
+	//header->version = (header->version >> 4) & 0xF;
+	kdebug("[ip] version: %d\r\n", header->version);
 }
 
 uint16_t ip_calculate_checksum(ip_packet_header *header) {

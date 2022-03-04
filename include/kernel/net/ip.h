@@ -17,7 +17,7 @@ typedef struct ip_packet_header {
 	uint8_t dst_ip[4];
 } __attribute__((packed)) ip_packet_header;
 
-void ip_handle_packet(ip_packet_header *header);
+void ip_handle_packet(uint16_t *buffer);
 void ip_send_packet(uint8_t *dst_ip, void *data, int len);
 
 #endif
