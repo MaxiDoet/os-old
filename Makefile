@@ -5,7 +5,7 @@ ASFLAGS = -f elf
 LD = ld
 LDFLAGS = -melf_i386
 
-QEMU = /home/dev/qemu/build/qemu-system-i386
+QEMU = qemu-system-i386
 
 QEMUFLAGS = -boot d -hda hdd.img -machine type=q35 -device rtl8139,netdev=net0 -netdev user,id=net0,hostfwd=tcp::5555-:22
 #QEMUFLAGS = -boot d -hda hdd.img -machine type=q35 -device AC97

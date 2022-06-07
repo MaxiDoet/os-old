@@ -131,7 +131,7 @@ void pci_scan()
 					dev.bars[bar_num] = bar;
 				}
 
-				kdebug("[pci] Bus: %d Slot: %d Func: %d Vendor: %x Device: %x ", bus_num, slot_num, function_num, dev.vendor_id, dev.device_id);
+				kdebug("[pci] Bus: %d Slot: %d Func: %d Vendor: %x Device: %x | ", bus_num, slot_num, function_num, dev.vendor_id, dev.device_id);
 
 				switch(dev.class_id) {
 					case 0x00:
