@@ -1,0 +1,43 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/dev/os'
+nasm -f elf boot/boot.asm -o boot/boot.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c lib/gui/core/direct.c -o lib/gui/core/direct.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c lib/gui/window.c -o lib/gui/window.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c libc/mm.c -o libc/mm.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c libc/string.c -o libc/string.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/fs/vfs.c -o kernel/fs/vfs.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/fs/ext2.c -o kernel/fs/ext2.o
+nasm -f elf kernel/int_handler.asm -o kernel/int_handler.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/irq.c -o kernel/irq.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/net/ethernet.c -o kernel/net/ethernet.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/net/arp.c -o kernel/net/arp.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/net/ip.c -o kernel/net/ip.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/platform/platform.c -o kernel/platform/platform.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/platform/smbios.c -o kernel/platform/smbios.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/io.c -o kernel/io.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/debug.c -o kernel/debug.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/idt.c -o kernel/idt.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/panic.c -o kernel/panic.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/gdt.c -o kernel/gdt.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c kernel/mem/pmm.c -o kernel/mem/pmm.o
+nasm -f elf kernel/gdt_setup.asm -o kernel/gdt_setup.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c apps/desktop/desktop.c -o apps/desktop/desktop.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/keyboard.c -o drivers/keyboard.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/mouse.c -o drivers/mouse.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/vgacon.c -o drivers/vgacon.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/hda.c -o drivers/hda.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/pci.c -o drivers/pci.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/ata.c -o drivers/ata.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/rtl8139.c -o drivers/rtl8139.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/ac97.c -o drivers/ac97.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/rtc.c -o drivers/rtc.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/pit.c -o drivers/pit.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/serial.c -o drivers/serial.o
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c init/main.c -o init/main.o
+ld -T linker.ld -melf_i386 boot/boot.o lib/gui/core/direct.o lib/gui/window.o libc/mm.o libc/string.o kernel/fs/vfs.o kernel/fs/ext2.o kernel/int_handler.o kernel/irq.o kernel/net/ethernet.o kernel/net/arp.o kernel/net/ip.o kernel/platform/platform.o kernel/platform/smbios.o kernel/io.o kernel/debug.o kernel/idt.o kernel/panic.o kernel/gdt.o kernel/mem/pmm.o kernel/gdt_setup.o apps/desktop/desktop.o drivers/keyboard.o drivers/mouse.o drivers/vgacon.o drivers/hda.o drivers/pci.o drivers/ata.o drivers/rtl8139.o drivers/ac97.o drivers/rtc.o drivers/pit.o drivers/serial.o init/main.o -o os.bin
+mkdir -p isodir/boot/grub
+cp os.bin isodir/boot/os.bin
+cp grub.cfg isodir/boot/grub/grub.cfg
+grub-mkrescue -o os.iso isodir
+make: Leaving directory '/home/dev/os'
+ 

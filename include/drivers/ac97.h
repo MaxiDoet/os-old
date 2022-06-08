@@ -35,8 +35,15 @@
 #define RPBM (1 << 0)
 #define RR (1 << 1)
 #define LVBIE (1 << 2)
-#define FEIE (1 << 3)
-#define IOCE (1 << 4)
+#define IOCE (1 << 3)
+#define FEIE (1 << 4)
+
+/* SR */
+#define DMAS (1 << 0)
+#define EOT (1 << 1)
+#define LBI (1 << 2)
+#define IOCI (1 << 3)
+#define FEI (1 << 4)
 
 /* GLOB_CNT */
 #define GIE (1 << 0)

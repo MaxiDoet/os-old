@@ -361,8 +361,8 @@ void pci_enable_bus_mastering(pci_dev_descriptor dev)
         uint16_t command = pci_read_word(dev.bus, dev.device, dev.function, 0x04);
         if (!(command & (1 << 2))) {
                 command |= (1 << 2);
-                pci_write_word(dev.bus, dev.device, dev.function, 0x04, command);
-                kdebug("[pci] Bus: %d Slot: %d Func: %d: enabled bus mastering\r\n", dev.bus, dev.device, dev.function);
+				pci_write_word(dev.bus, dev.device, dev.function, 0x04, command);
+                kdebug("[pci] Bus: %d Slot: %d Func: %d | Enabled bus mastering\r\n", dev.bus, dev.device, dev.function);
         }
 
 }
