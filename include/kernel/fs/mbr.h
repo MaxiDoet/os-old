@@ -1,5 +1,5 @@
-#ifndef _mbr_h
-#define _mbr_h
+#ifndef _fs_mbr_h
+#define _fs_mbr_h
 
 /* Note: Add hidden partition types */
 

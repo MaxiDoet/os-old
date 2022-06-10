@@ -14,17 +14,17 @@
 
 uint32_t pci_read_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset)
 {
-        uint32_t address;
+    uint32_t address;
 	uint32_t tmp;
 
-        uint32_t lbus = (uint32_t) bus;
-        uint32_t ldevice = (uint32_t) device;
-        uint32_t lfunc = (uint32_t) func;
+    uint32_t lbus = (uint32_t) bus;
+    uint32_t ldevice = (uint32_t) device;
+    uint32_t lfunc = (uint32_t) func;
 
-        address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
-        outl(PCI_CONFIG_ADDRESS, address); // Select address
+    address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
+    outl(PCI_CONFIG_ADDRESS, address); // Select address
 	tmp = inl(PCI_CONFIG_DATA);
-        return tmp;
+    return tmp;
 }
 
 uint16_t pci_read_word(uint16_t bus, uint16_t device, uint16_t func, uint16_t offset)
@@ -37,28 +37,28 @@ uint16_t pci_read_word(uint16_t bus, uint16_t device, uint16_t func, uint16_t of
 
 void pci_write_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint32_t value)
 {
-        uint32_t address;
+    uint32_t address;
 
-        uint32_t lbus = (uint32_t) bus;
-        uint32_t ldevice = (uint32_t) device;
-        uint32_t lfunc = (uint32_t) func;
+    uint32_t lbus = (uint32_t) bus;
+    uint32_t ldevice = (uint32_t) device;
+    uint32_t lfunc = (uint32_t) func;
 
-        address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
-        outl(PCI_CONFIG_ADDRESS, address); // Select address
-        outl(PCI_CONFIG_DATA, value);
+    address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
+    outl(PCI_CONFIG_ADDRESS, address); // Select address
+    outl(PCI_CONFIG_DATA, value);
 }
 
 void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint16_t value)
 {
-        uint32_t address;
+    uint32_t address;
 
-        uint32_t lbus = (uint32_t) bus;
-        uint32_t ldevice = (uint32_t) device;
-        uint32_t lfunc = (uint32_t) func;
+    uint32_t lbus = (uint32_t) bus;
+    uint32_t ldevice = (uint32_t) device;
+    uint32_t lfunc = (uint32_t) func;
 
-        address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
-        outl(PCI_CONFIG_ADDRESS, address); // Select address
-        outl(PCI_CONFIG_DATA, (uint16_t) value);
+    address = (uint32_t)((lbus << 16) | (ldevice << 11) | (lfunc << 8) | (offset & 0xFC) | (uint32_t) 0x80000000);
+    outl(PCI_CONFIG_ADDRESS, address); // Select address
+    outl(PCI_CONFIG_DATA, (uint16_t) value);
 }
 
 pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func)
@@ -354,29 +354,4 @@ void pci_scan()
 
 		}
 	}
-}
-
-void pci_enable_bus_mastering(pci_dev_descriptor dev)
-{
-        uint16_t command = pci_read_word(dev.bus, dev.device, dev.function, 0x04);
-        if (!(command & (1 << 2))) {
-                command |= (1 << 2);
-				pci_write_word(dev.bus, dev.device, dev.function, 0x04, command);
-                kdebug("[pci] Bus: %d Slot: %d Func: %d | Enabled bus mastering\r\n", dev.bus, dev.device, dev.function);
-        }
-
-}
-
-uint8_t pci_find_irq(pci_dev_descriptor dev)
-{
-	if (!irq_is_used(dev.irq)) return dev.irq;
-
-	for (int i=0; i < 16; i++) {
-		kdebug("i: %d\r\n", i);
-		if (!irq_is_used(i)) {
-			return i;
-		}
-	}
-
-	return -1;
 }

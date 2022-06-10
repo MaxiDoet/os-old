@@ -2,8 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/kernel/ext2.h"
-#include "../include/kernel/mbr.h"
+#include "../include/kernel/fs/ext2.h"
+#include "../include/kernel/fs/mbr.h"
 #include "../include/drivers/ata.h"
 #include "../include/kernel/kernel.h"
 #include "../libc/include/mm.h"
@@ -25,7 +25,7 @@ void ext2_read_block(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block, uint16_t *bu
 		kdebug("attempted to read invalid block\r\n");
 	}
 
-	ata_pio_read(*dev, fs->start_sector + block_to_sector(block), 2, buf);
+	ata_pio_read(dev, fs->start_sector + block_to_sector(block), 2, buf);
 }
 
 void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *buf)
@@ -131,7 +131,7 @@ uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs)
 {
 	uint16_t *sb_buf = (uint16_t *) malloc(1024);
 
-        ata_pio_read(*dev, entry.start_sector + 2, 2, sb_buf);
+    ata_pio_read(dev, entry.start_sector + 2, 2, sb_buf);
 	ext2_superblock *sb = (ext2_superblock *) sb_buf;
 	if (sb->signature != EXT2_SIGNATURE) return -1;
 

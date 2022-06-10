@@ -21,9 +21,9 @@
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
 #include "../include/drivers/rtl8139.h"
-#include "../include/kernel/ext2.h"
-#include "../include/kernel/mbr.h"
-#include "../include/kernel/vfs.h"
+#include "../include/kernel/fs/ext2.h"
+#include "../include/kernel/fs/mbr.h"
+#include "../include/kernel/fs/vfs.h"
 #include "../include/kernel/io.h"
 #include "../include/kernel/platform.h"
 #include "../libc/include/string.h"
@@ -55,9 +55,9 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	mbi = (multiboot_info_t *) mbi_addr;
 
 	kdebug("[kernel\e[0;37m] GDT init\r\n");
-        gdt_setup();
-        kdebug("[kernel\e[0;37m] IDT init\r\n");
-        idt_install();
+    gdt_setup();
+    kdebug("[kernel\e[0;37m] IDT init\r\n");
+    idt_install();
 
 	// Init serial debug
 	serial_init(DEBUG_PORT);
@@ -87,6 +87,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	ata_dev_t root_dev;
 	ext2_fs_t fs;
 
+	/*
 	if (ata_init(&root_dev, ATA_PRIMARY_MASTER, true)) {
 		kdebug("[kernel] root device: %s\r\n", ata_device_tree(true, true));
 	} else if (ata_init(&root_dev, ATA_PRIMARY_SLAVE, false)) {
@@ -96,8 +97,11 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	} else if (ata_init(&root_dev, ATA_SECONDARY_SLAVE, false)) {
 		kdebug("[kernel] root device: %s\r\n", ata_device_tree(false, false));
 	}
+	*/
 
-	vfs_probe(root_dev);
+	ata_init(&root_dev, true, true);
+
+	vfs_probe(&root_dev);
 	pci_scan();
 
 	keyboard_init();

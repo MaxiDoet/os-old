@@ -104,7 +104,10 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 		// Wait until reset is done
 	}
 
-	pci_enable_bus_mastering(dev);
+	/* Enable bus mastering */
+	uint16_t command = pci_read_word(dev.bus, dev.device, dev.function, PCI_REGISTER_COMMAND);
+	command |= PCI_COMMAND_BUSMASTER;
+	pci_write_word(dev.bus, dev.device, dev.function, PCI_REGISTER_COMMAND, command);
 
 	// Setup rx buffer
 	rx_buffer = (uint16_t *) 0x00070000;
@@ -128,7 +131,7 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	outw(dev.bars[0].io_base + REG_IMR, 0xFFFF);
 
 	// Install irq handler
-        irq_install_handler(dev.irq, rtl8139_irq_handler);
+    irq_install_handler(dev.irq, rtl8139_irq_handler);
 
 	// Read MAC
 	uint8_t mac[6];

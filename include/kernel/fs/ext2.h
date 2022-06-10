@@ -1,8 +1,8 @@
-#ifndef _ext2_h
-#define _ext2_h
+#ifndef _fs_ext2_h
+#define _fs_ext2_h
 
 #include "../include/drivers/ata.h"
-#include "../include/kernel/mbr.h"
+#include "../include/kernel/fs/mbr.h"
 
 #define EXT2_SIGNATURE 0xEF53
 

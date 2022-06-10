@@ -4,8 +4,16 @@
 #define PCI_CONFIG_ADDRESS 0xCF8
 #define PCI_CONFIG_DATA 0xCFC
 
+/* Registers */
+#define PCI_REGISTER_COMMAND 0x04
+
+/* Command register */
+#define PCI_COMMAND_IO 			(1 << 0)
+#define PCI_COMMAND_MMIO		(1 << 1)
+#define PCI_COMMAND_BUSMASTER	(1 << 2)
+
 enum pci_bar_layout_type {
-	PCI_BAR_LAYOUT_MEMORYMAPPING,
+	PCI_BAR_LAYOUT_MEMORYMAPPING = 0,
 	PCI_BAR_LAYOUT_IO
 };
 
@@ -46,7 +54,5 @@ void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offse
 pci_dev_descriptor pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func);
 pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum);
 void pci_scan();
-void pci_enable_bus_mastering(pci_dev_descriptor dev);
-uint8_t pci_find_irq(pci_dev_descriptor dev);
 
 #endif

@@ -104,24 +104,24 @@ void hda_init_corb(hda_dev_t *dev)
 void hda_init_rirb(hda_dev_t *dev)
 {
 	// Stop RIRB
-        hda_cb(dev, HDA_RIRBCTL, HDA_RIRBRUN);
+    hda_cb(dev, HDA_RIRBCTL, HDA_RIRBRUN);
 
-        uint8_t rirbsize = hda_rb(dev, HDA_RIRBSIZE);
+    uint8_t rirbsize = hda_rb(dev, HDA_RIRBSIZE);
 
-        kdebug("[hda] RIRBSIZE: ");
-        switch(rirbsize >> 4) {
-                case 0:
-                        kdebug("2 entries (16 Byte)");
+    kdebug("[hda] RIRBSIZE: ");
+    switch(rirbsize >> 4) {
+        case 0:
+        	kdebug("2 entries (16 Byte)");
 			rirbsize |= 0x0;
 			dev->rirb_size = 2;
 			break;
-                case 2:
-                        kdebug("16 entries (128 Byte)");
+        case 2:
+            kdebug("16 entries (128 Byte)");
 			rirbsize |= 0x1;
 			dev->rirb_size = 16;
-                        break;
-                case 4:
-                        kdebug("256 entries (2 Kbyte)");
+            break;
+    	case 4:
+            kdebug("256 entries (2 Kbyte)");
 			rirbsize |= 0x2;
 			dev->rirb_size = 256;
                         break;
@@ -129,18 +129,18 @@ void hda_init_rirb(hda_dev_t *dev)
         kdebug("\r\n");
 
 	// Set RIRBSIZE
-        hda_wb(dev, HDA_RIRBSIZE, rirbsize);
+    hda_wb(dev, HDA_RIRBSIZE, rirbsize);
 
 	// Allocate RIRB
-        //dev->rirb = (uint64_t *) malloc(8 * dev->rirb_size);
+    //dev->rirb = (uint64_t *) malloc(8 * dev->rirb_size);
 	dev->rirb = (uint64_t *) 0xA20000;
 
 	// Reset RIRBWP
-        hda_sw(dev, HDA_RIRBWP, HDA_RIRBWPRST);
+    hda_sw(dev, HDA_RIRBWP, HDA_RIRBWPRST);
 
-        // Set RIRBBASE registers
-       	hda_wl(dev, HDA_RIRBLBASE, (uint32_t) 0xA20000 & 0xFFFFFFFF);
-        hda_wl(dev, HDA_RIRBUBASE, (uint32_t) 0x00000000);
+    // Set RIRBBASE registers
+    hda_wl(dev, HDA_RIRBLBASE, (uint32_t) 0xA20000 & 0xFFFFFFFF);
+    hda_wl(dev, HDA_RIRBUBASE, (uint32_t) 0x00000000);
 
 	// Set RINTCNT register
 	hda_ww(dev, HDA_RINTCNT, 0x42);
@@ -360,11 +360,13 @@ hda_dev_t hda_init(pci_dev_descriptor pci_dev)
 
 	uint16_t statests = hda_rw(&dev, HDA_STATESTS);
 
-	// Enable pci bus mastering
-	pci_enable_bus_mastering(pci_dev);
+	/* Enable bus mastering */
+	uint16_t command = pci_read_word(pci_dev.bus, pci_dev.device, pci_dev.function, PCI_REGISTER_COMMAND);
+	command |= PCI_COMMAND_BUSMASTER;
+	pci_write_word(pci_dev.bus, pci_dev.device, pci_dev.function, PCI_REGISTER_COMMAND, command);
 
 	// Enable wake events
-        hda_ww(&dev, HDA_WAKEEN, 0xFFFF);
+    hda_ww(&dev, HDA_WAKEEN, 0xFFFF);
 
 	// Enable interrupts
 	irq_install_handler(pci_dev.irq, hda_irq_handler);

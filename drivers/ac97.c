@@ -7,7 +7,7 @@
 #include "../include/drivers/ac97.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
-#include "../include/kernel/vfs.h"
+#include "../include/kernel/fs/vfs.h"
 #include "../libc/include/mm.h"
 
 #include "../include/drivers/audio.h"
@@ -77,7 +77,7 @@ void ac97_play(uint8_t *data, uint32_t size) {
 
 		if (available >= 0x20000) {
 			buf_descriptors[i].length = 0xFFFE;
-			buf_descriptors[i].bup = 1;
+			buf_descriptors[i].bup = 0;
 			available -= 0x20000;
 		} else {
 			buf_descriptors[i].length = available >> 1;
@@ -95,19 +95,20 @@ void ac97_play(uint8_t *data, uint32_t size) {
 	}
 
 	outl(dev.bars[1].io_base + PO + BDBAR, (uint32_t) buf_descriptors);
-	outb(dev.bars[1].io_base + PO + LVI, last);
+	outb(dev.bars[1].io_base + PO + LVI, last - 1);
 
 	// Start playback
 	outb(dev.bars[1].io_base + PO + CR, RPBM | IOCE | LVBIE | FEIE); // Start DMA; Enable IOC interrupt; Enable Last Buffer Entry interrupt
-
-	// Clear status reg
-	//outw(dev.bars[1].io_base + PO + SR, 0x1C);
 }
 
 void ac97_init(pci_dev_descriptor pci_dev)
 {
 	dev = pci_dev;
-	pci_enable_bus_mastering(pci_dev);
+
+	/* Enable bus mastering */
+	uint16_t command = pci_read_word(dev.bus, dev.device, dev.function, PCI_REGISTER_COMMAND);
+	command |= PCI_COMMAND_BUSMASTER;
+	pci_write_word(dev.bus, dev.device, dev.function, PCI_REGISTER_COMMAND, command);
 
 	ac97_reset(pci_dev);
 
@@ -119,7 +120,6 @@ void ac97_init(pci_dev_descriptor pci_dev)
 	/* Read capabilities */
 	uint8_t channel_capabilities = (inl(pci_dev.bars[1].io_base + GLOB_STA) >> 20) & 0x2;
 	uint8_t sample_capabilities = (inl(pci_dev.bars[1].io_base + GLOB_STA) >> 22) & 0x2;
-
 	uint8_t channel_count = 2;
 
 	if (channel_capabilities == 1) {
@@ -131,10 +131,6 @@ void ac97_init(pci_dev_descriptor pci_dev)
 	}
 
 	kdebug("[ac97] Channels: %d Samples: %s\r\n", channel_count, (sample_capabilities == 1) ? "16bit, 20bit" : "16bit");
-
-	// Todo: We may need to clear the transfer status register
-	uint8_t status = inw(pci_dev.bars[1].io_base + PO + SR);
-	kdebug("Status: %x\n", status);
 
 	ac97_play(audio_wav, audio_wav_len);
 }
