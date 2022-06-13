@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Jun  9 12:33:16 2022
+# Make data base, printed on Mon Jun 13 20:01:07 2022
 
 # Variables
 
@@ -25,7 +25,7 @@ SNAP_INSTANCE_KEY =
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-b00cf6ee-2234-479a-8a7d-44680cb8fbf3.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-a29d70a4-0b7a-4df9-b534-a79d7a0871df.sock
 # environment
 LC_NAME = de_DE.UTF-8
 # environment
@@ -43,7 +43,7 @@ QT_ACCESSIBILITY = 1
 # environment
 SNAP_INSTANCE_NAME = code
 # environment
-GDK_PIXBUF_MODULEDIR = /snap/code/97/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
+GDK_PIXBUF_MODULEDIR = /snap/code/98/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
@@ -61,11 +61,11 @@ VSCODE_LOG_STACK = false
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = /home/dev/.config/Code/CachedData/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
+VSCODE_CODE_CACHE_PATH = /home/dev/.config/Code/CachedData/4af164ea3a06f701fe3e89a2bcbb421d2026b68f
 # environment
 LANG = C
 # environment
-XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.DTGGN1
+XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.GO5TN1
 # default
 .LOADED := 
 # default
@@ -107,7 +107,7 @@ SNAP_REEXEC =
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_PID = 3223
+VSCODE_PID = 12571
 # environment
 XDG_SESSION_TYPE = wayland
 # automatic
@@ -115,7 +115,7 @@ XDG_SESSION_TYPE = wayland
 # environment
 BAMF_DESKTOP_FILE_HINT = /var/lib/snapd/desktop/applications/code_code.desktop
 # environment
-SESSION_MANAGER = local/dev-virtual-machine:@/tmp/.ICE-unix/1293,unix/dev-virtual-machine:/tmp/.ICE-unix/1293
+SESSION_MANAGER = local/dev-virtual-machine:@/tmp/.ICE-unix/1275,unix/dev-virtual-machine:/tmp/.ICE-unix/1275
 # automatic
 *F = $(notdir $*)
 # environment
@@ -135,7 +135,7 @@ GNOME_DESKTOP_SESSION_ID = this-is-deprecated
 # makefile
 SHELL = /bin/sh
 # makefile (from 'Makefile', line 12)
-QEMUFLAGS = -boot d -hda hdd.img -machine type=q35 -device AC97
+QEMUFLAGS = -boot d -hda hdd.img -device AC97
 # default
 MAKECMDGOALS := all
 # environment
@@ -167,11 +167,11 @@ SNAP_USER_COMMON = /home/dev/snap/code/common
 # environment
 LC_TIME = de_DE.UTF-8
 # environment
-SNAP = /snap/code/97
+SNAP = /snap/code/98
 # environment
-INVOCATION_ID = f6a9ee90578f4097a1f50cd078b03e73
+INVOCATION_ID = caf06737c70d49808894446e4e10fdf7
 # environment
-SNAP_REVISION = 97
+SNAP_REVISION = 98
 # environment
 SNAP_REAL_HOME = /home/dev
 # environment
@@ -207,7 +207,7 @@ SNAP_ARCH = amd64
 # makefile
 .DEFAULT_GOAL := all
 # environment
-SYSTEMD_EXEC_PID = 1336
+SYSTEMD_EXEC_PID = 1325
 # makefile (from 'Makefile', line 9)
 QEMU = ../qemu/build/qemu-system-i386
 # environment
@@ -221,19 +221,19 @@ MAKE_VERSION := 4.3
 # environment
 DISABLE_WAYLAND = 1
 # environment
-SNAP_DATA = /var/snap/code/97
+SNAP_DATA = /var/snap/code/98
 # environment
 SNAP_CONTEXT = J25q9FfvOTLIlBAQkkSXvpQpfunVFnTRc9UWewn4HWbI37XoCfaQ
 # makefile (from 'Makefile', line 6)
 LDFLAGS = -melf_i386
 # environment
-MANAGERPID = 1110
+MANAGERPID = 1098
 # environment
 LC_MEASUREMENT = de_DE.UTF-8
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 3132
+GIO_LAUNCHED_DESKTOP_FILE_PID = 12522
 # environment
-_ = /snap/code/97/usr/share/code/code
+_ = /snap/code/98/usr/share/code/code
 # environment
 LC_PAPER = de_DE.UTF-8
 # environment
@@ -243,7 +243,7 @@ CFLAGS = -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fn
 # environment
 GDK_PIXBUF_MODULE_FILE = /home/dev/snap/code/common/.cache/gdk-pixbuf-loaders.cache
 # environment
-JOURNAL_STREAM = 8:40448
+JOURNAL_STREAM = 8:44916
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -255,11 +255,11 @@ QT_IM_MODULE = ibus
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-382e5fbe-1.67.2-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-382e5fbe-1.68.0-main.sock
 # environment
 SNAP_NAME = code
 # environment
-GSETTINGS_SCHEMA_DIR = /snap/code/97/usr/share/glib-2.0/schemas
+GSETTINGS_SCHEMA_DIR = /snap/code/98/usr/share/glib-2.0/schemas
 # environment
 IM_CONFIG_PHASE = 1
 # default
@@ -267,7 +267,7 @@ IM_CONFIG_PHASE = 1
 # automatic
 <F = $(notdir $<)
 # environment
-SNAP_VERSION = c3511e6c
+SNAP_VERSION = 4af164ea
 # default
 SUFFIXES := 
 # makefile (from 'Makefile', line 5)
@@ -277,15 +277,15 @@ VSCODE_CLI = 1
 # environment
 ELECTRON_NO_ATTACH_CONSOLE = 1
 # environment
- 
 SNAP_COMMON = /var/snap/code/common
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
 # makefile (from 'Makefile', line 1)
 CC = gcc
 # environment
-SNAP_USER_DATA = /home/dev/snap/code/97
+SNAP_USER_DATA = /home/dev/snap/code/98
 # environment
+ 
 XDG_MENU_PREFIX = gnome-
 # environment
 GDMSESSION = ubuntu
@@ -294,7 +294,7 @@ LC_IDENTIFICATION = de_DE.UTF-8
 # environment
 SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd/void
 # variable set hash-table stats:
-# Load=141/1024=14%, Rehash=0, Collisions=6/177=3%
+# Load=141/1024=14%, Rehash=0, Collisions=6/172=3%
 
 # Pattern-specific Variable Values
 
@@ -308,6 +308,7 @@ SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd
 # kernel/mem (device 2051, inode 203): 4 files, no impossibilities so far.
 # boot (device 2051, inode 122): 4 files, no impossibilities.
 # kernel/net (device 2051, inode 205): 9 files, no impossibilities so far.
+# init (device 2051, inode 190): 4 files, no impossibilities.
 # kernel/fs (device 2051, inode 194): 6 files, no impossibilities so far.
 # apps/desktop (device 2051, inode 107): 10 files, no impossibilities so far.
 # . (device 2051, inode 59): 27 files, no impossibilities.
@@ -315,7 +316,7 @@ SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd
 # drivers (device 2051, inode 129): 23 files, no impossibilities so far.
 # libc (device 2051, inode 221): 7 files, no impossibilities so far.
 
-# 128 files, no impossibilities in 12 directories.
+# 132 files, no impossibilities in 13 directories.
 
 # Implicit Rules
 
@@ -333,7 +334,7 @@ SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd
 # Not a target:
 kernel/fs/vfs.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-06 21:07:10.399315934
+#  Last modified 2022-06-13 19:49:16.657576083
 #  File has been updated.
 #  Successfully updated.
 
@@ -347,7 +348,7 @@ apps/desktop/desktop.c:
 kernel/fs/vfs.o: kernel/fs/vfs.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/fs/vfs'
-#  Last modified 2022-06-08 19:44:02.956971836
+#  Last modified 2022-06-13 20:00:35.532499458
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -356,7 +357,7 @@ kernel/fs/vfs.o: kernel/fs/vfs.c
 kernel/fs/ext2.o: kernel/fs/ext2.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/fs/ext2'
-#  Last modified 2022-06-08 19:44:02.984971205
+#  Last modified 2022-06-13 20:00:35.560499091
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -365,7 +366,7 @@ kernel/fs/ext2.o: kernel/fs/ext2.c
 drivers/pci.o: drivers/pci.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/pci'
-#  Last modified 2022-06-08 19:44:03.256965087
+#  Last modified 2022-06-13 20:00:35.856495202
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -381,7 +382,7 @@ kernel/io.c:
 kernel/io.o: kernel/io.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/io'
-#  Last modified 2022-06-08 19:44:03.024970306
+#  Last modified 2022-06-13 20:00:35.604498512
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -404,7 +405,7 @@ lib/gui/window.c:
 kernel/mem/pmm.o: kernel/mem/pmm.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/mem/pmm'
-#  Last modified 2022-06-08 19:44:03.076969137
+#  Last modified 2022-06-13 20:00:35.668497673
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -413,29 +414,32 @@ kernel/mem/pmm.o: kernel/mem/pmm.c
 # Not a target:
 drivers/pci.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-08 14:16:26.606525218
+#  Last modified 2022-06-09 12:53:07.863519572
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-08 11:43:52.60047871
+#  Last modified 2022-06-13 20:01:05.812102212
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 drivers/ac97.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-08 19:48:54.947492568
+#  Last modified 2022-06-09 21:32:30.348102327
 #  File has been updated.
 #  Successfully updated.
 
-# Not a target:
-drivers/rtc.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+drivers/rtc.o: drivers/rtc.c
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'drivers/rtc'
+#  Last modified 2022-06-13 20:00:35.944494047
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 20):
+	$(CC) $(CFLAGS) $< -o $@
 
 # Not a target:
 kernel/net/arp.c:
@@ -468,7 +472,7 @@ drivers/keyboard.c:
 kernel/net/ip.o: kernel/net/ip.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/net/ip'
-#  Last modified 2022-06-08 19:44:03.008970666
+#  Last modified 2022-06-13 20:00:35.584498775
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -477,7 +481,7 @@ kernel/net/ip.o: kernel/net/ip.c
 apps/desktop/desktop.o: apps/desktop/desktop.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'apps/desktop/desktop'
-#  Last modified 2022-06-08 19:44:03.716954739
+#  Last modified 2022-06-13 20:00:36.38048832
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -486,7 +490,7 @@ apps/desktop/desktop.o: apps/desktop/desktop.c
 libc/mm.o: libc/mm.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'libc/mm'
-#  Last modified 2022-06-08 19:44:02.940972198
+#  Last modified 2022-06-13 20:00:35.512499721
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -512,7 +516,7 @@ boot/boot.asm:
 drivers/vgacon.o: drivers/vgacon.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/vgacon'
-#  Last modified 2022-06-08 19:44:03.160967247
+#  Last modified 2022-06-13 20:00:35.760496464
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -521,7 +525,7 @@ drivers/vgacon.o: drivers/vgacon.c
 boot/boot.o: boot/boot.asm
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'boot/boot'
-#  Last modified 2022-06-08 19:44:02.920972648
+#  Last modified 2022-06-13 20:00:35.492499985
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 23):
@@ -530,7 +534,7 @@ boot/boot.o: boot/boot.asm
 drivers/keyboard.o: drivers/keyboard.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/keyboard'
-#  Last modified 2022-06-08 19:44:03.104968506
+#  Last modified 2022-06-13 20:00:35.696497305
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -539,7 +543,7 @@ drivers/keyboard.o: drivers/keyboard.c
 drivers/mouse.o: drivers/mouse.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/mouse'
-#  Last modified 2022-06-08 19:44:03.132967875
+#  Last modified 2022-06-13 20:00:35.732496832
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -548,7 +552,7 @@ drivers/mouse.o: drivers/mouse.c
 kernel/platform/platform.o: kernel/platform/platform.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/platform/platform'
-#  Last modified 2022-06-08 19:44:03.004970756
+#  Last modified 2022-06-13 20:00:35.584498775
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -557,8 +561,7 @@ kernel/platform/platform.o: kernel/platform/platform.c
 drivers/hda.o: drivers/hda.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/hda'
- 
-#  Last modified 2022-06-08 19:44:03.312963826
+#  Last modified 2022-06-13 20:00:35.936494152
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -567,6 +570,7 @@ drivers/hda.o: drivers/hda.c
 # Not a target:
 kernel/panic.c:
 #  Implicit rule search has been done.
+ 
 #  Last modified 2022-06-06 21:07:10.399315934
 #  File has been updated.
 #  Successfully updated.
@@ -574,7 +578,7 @@ kernel/panic.c:
 drivers/rtl8139.o: drivers/rtl8139.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/rtl8139'
-#  Last modified 2022-06-08 19:44:03.296964188
+#  Last modified 2022-06-13 20:00:35.928494256
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -583,15 +587,18 @@ drivers/rtl8139.o: drivers/rtl8139.c
 # Not a target:
 drivers/ata.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-06 21:07:10.331316493
+#  Last modified 2022-06-12 16:26:28.992753344
 #  File has been updated.
 #  Successfully updated.
 
-# Not a target:
-init/main.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+init/main.o: init/main.c
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'init/main'
+#  Last modified 2022-06-13 20:00:35.984493522
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 20):
+	$(CC) $(CFLAGS) $< -o $@
 
 # Not a target:
 kernel/platform/smbios.c:
@@ -617,7 +624,7 @@ kernel/int_handler.asm:
 lib/gui/core/direct.o: lib/gui/core/direct.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'lib/gui/core/direct'
-#  Last modified 2022-06-08 19:44:03.188966616
+#  Last modified 2022-06-13 20:00:35.7804962
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -632,35 +639,50 @@ lib/gui/core/direct.o: lib/gui/core/direct.c
 kernel/gdt_setup.o: kernel/gdt_setup.asm
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/gdt_setup'
-#  Last modified 2022-06-08 19:44:03.068969316
+#  Last modified 2022-06-13 20:00:35.648497934
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 23):
 	$(AS) $(ASFLAGS) $< -o $@
+
+# Not a target:
+drivers/rtc.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-06-06 21:07:10.331316493
+#  File has been updated.
+#  Successfully updated.
 
 all: os.iso
 #  Command line target.
 #  Implicit rule search has been done.
 #  File does not exist.
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+#  Successfully updated.
 
 libc/string.o: libc/string.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'libc/string'
-#  Last modified 2022-06-08 19:44:02.960971748
+#  Last modified 2022-06-13 20:00:35.536499405
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
 	$(CC) $(CFLAGS) $< -o $@
 
 # Not a target:
-drivers/pit.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+init/main.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-06-13 19:13:49.562946233
+#  File has been updated.
+#  Successfully updated.
+
+drivers/pit.o: drivers/pit.c
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'drivers/pit'
+#  Last modified 2022-06-13 20:00:35.960493836
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 20):
+	$(CC) $(CFLAGS) $< -o $@
 
 # Not a target:
 kernel/mem/pmm.c:
@@ -686,7 +708,7 @@ kernel/gdt_setup.asm:
 lib/gui/window.o: lib/gui/window.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'lib/gui/window'
-#  Last modified 2022-06-08 19:44:02.936972288
+#  Last modified 2022-06-13 20:00:35.508499774
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -695,34 +717,16 @@ lib/gui/window.o: lib/gui/window.c
 drivers/ac97.o: drivers/ac97.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/ac97'
-#  Last modified 2022-06-08 19:44:07.84086225
+#  Last modified 2022-06-13 20:00:40.652432218
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := drivers/ac97.o
-# automatic
-# * := drivers/ac97
-# automatic
-# < := drivers/ac97.c
-# automatic
-# + := drivers/ac97.c
-# automatic
-# % := 
-# automatic
-# ^ := drivers/ac97.c
-# automatic
-# ? := drivers/ac97.c
-# automatic
-# | := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=2/15=13%
+#  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
 	$(CC) $(CFLAGS) $< -o $@
 
 kernel/platform/smbios.o: kernel/platform/smbios.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/platform/smbios'
-#  Last modified 2022-06-08 19:44:03.024970306
+#  Last modified 2022-06-13 20:00:35.604498512
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -731,7 +735,7 @@ kernel/platform/smbios.o: kernel/platform/smbios.c
 kernel/int_handler.o: kernel/int_handler.asm
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/int_handler'
-#  Last modified 2022-06-08 19:44:02.960971748
+#  Last modified 2022-06-13 20:00:35.536499405
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 23):
@@ -740,7 +744,7 @@ kernel/int_handler.o: kernel/int_handler.asm
 kernel/net/arp.o: kernel/net/arp.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/net/arp'
-#  Last modified 2022-06-08 19:44:03.036970037
+#  Last modified 2022-06-13 20:00:35.612498407
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -763,14 +767,14 @@ drivers/vgacon.c:
 # Not a target:
 drivers/rtl8139.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-06 21:07:10.331316493
+#  Last modified 2022-06-09 13:01:16.831648029
 #  File has been updated.
 #  Successfully updated.
 
 kernel/idt.o: kernel/idt.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/idt'
-#  Last modified 2022-06-08 19:44:03.252965176
+#  Last modified 2022-06-13 20:00:35.87649494
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -779,7 +783,7 @@ kernel/idt.o: kernel/idt.c
 kernel/irq.o: kernel/irq.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/irq'
-#  Last modified 2022-06-08 19:44:02.984971205
+#  Last modified 2022-06-13 20:00:35.560499091
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -799,11 +803,14 @@ kernel/net/ip.c:
 #  File has been updated.
 #  Successfully updated.
 
-# Not a target:
-drivers/serial.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+drivers/serial.o: drivers/serial.c
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'drivers/serial'
+#  Last modified 2022-06-13 20:00:35.972493679
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 20):
+	$(CC) $(CFLAGS) $< -o $@
 
 # Not a target:
 kernel/idt.c:
@@ -822,7 +829,7 @@ kernel/irq.c:
 kernel/net/ethernet.o: kernel/net/ethernet.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/net/ethernet'
-#  Last modified 2022-06-08 19:44:02.984971205
+#  Last modified 2022-06-13 20:00:35.564499039
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -831,7 +838,7 @@ kernel/net/ethernet.o: kernel/net/ethernet.c
 kernel/panic.o: kernel/panic.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/panic'
-#  Last modified 2022-06-08 19:44:03.048969766
+#  Last modified 2022-06-13 20:00:35.628498198
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -839,12 +846,9 @@ kernel/panic.o: kernel/panic.c
 
 os.iso: os.bin
 #  Implicit rule search has not been done.
- 
-#  Last modified 2022-06-08 19:44:07.948859835
+#  Last modified 2022-06-13 20:00:40.764430747
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+#  Successfully updated.
 #  recipe to execute (from 'Makefile', line 29):
 	mkdir -p isodir/boot/grub
 	cp os.bin isodir/boot/os.bin
@@ -854,8 +858,9 @@ os.iso: os.bin
 kernel/gdt.o: kernel/gdt.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/gdt'
-#  Last modified 2022-06-08 19:44:03.064969406
+#  Last modified 2022-06-13 20:00:35.644497987
 #  File has been updated.
+ 
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
 	$(CC) $(CFLAGS) $< -o $@
@@ -863,14 +868,14 @@ kernel/gdt.o: kernel/gdt.c
 # Not a target:
 drivers/hda.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-06 21:07:10.331316493
+#  Last modified 2022-06-09 13:00:14.440042396
 #  File has been updated.
 #  Successfully updated.
 
 kernel/debug.o: kernel/debug.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'kernel/debug'
-#  Last modified 2022-06-08 19:44:03.048969766
+#  Last modified 2022-06-13 20:00:35.632498146
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -886,7 +891,7 @@ libc/mm.c:
 drivers/ata.o: drivers/ata.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'drivers/ata'
-#  Last modified 2022-06-08 19:44:03.332963376
+#  Last modified 2022-06-13 20:00:35.912494467
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 20):
@@ -901,35 +906,47 @@ drivers/mouse.c:
 
 os.bin: boot/boot.o lib/gui/core/direct.o lib/gui/window.o libc/mm.o libc/string.o kernel/fs/vfs.o kernel/fs/ext2.o kernel/int_handler.o kernel/irq.o kernel/net/ethernet.o kernel/net/arp.o kernel/net/ip.o kernel/platform/platform.o kernel/platform/smbios.o kernel/io.o kernel/debug.o kernel/idt.o kernel/panic.o kernel/gdt.o kernel/mem/pmm.o kernel/gdt_setup.o apps/desktop/desktop.o drivers/keyboard.o drivers/mouse.o drivers/vgacon.o drivers/hda.o drivers/pci.o drivers/ata.o drivers/rtl8139.o drivers/ac97.o drivers/rtc.o drivers/pit.o drivers/serial.o init/main.o
 #  Implicit rule search has not been done.
-#  Last modified 2022-06-08 19:44:07.856861893
+#  Last modified 2022-06-13 20:00:40.668432007
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+#  Successfully updated.
 #  recipe to execute (from 'Makefile', line 26):
 	$(LD) -T linker.ld $(LDFLAGS) $^ -o os.bin
 
 # Not a target:
+drivers/pit.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-06-06 21:07:10.331316493
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
 kernel/fs/ext2.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-06 21:07:10.399315934
+#  Last modified 2022-06-13 19:42:34.410515818
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+drivers/serial.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-06-06 21:07:10.331316493
 #  File has been updated.
 #  Successfully updated.
 
 # files hash-table stats:
-# Load=72/1024=7%, Rehash=0, Collisions=6/214=3%
+# Load=76/1024=7%, Rehash=0, Collisions=9/230=4%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 220 / storage = 2528 B / avg = 11 B
-# current buf: size = 8162 B / used = 2528 B / count = 220 / avg = 11 B
+# strcache buffers: 1 (0) / strings = 230 / storage = 2648 B / avg = 11 B
+# current buf: size = 8162 B / used = 2648 B / count = 230 / avg = 11 B
 
-# strcache performance: lookups = 292 / hit rate = 24%
+# strcache performance: lookups = 309 / hit rate = 25%
 # hash-table stats:
-# Load=220/8192=3%, Rehash=0, Collisions=1/292=0%
-# Finished Make data base on Thu Jun  9 12:33:16 2022
+# Load=230/8192=3%, Rehash=0, Collisions=1/309=0%
+# Finished Make data base on Mon Jun 13 20:01:07 2022
 
  

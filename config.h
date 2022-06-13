@@ -7,8 +7,8 @@
 //#define DEBUG_IRQ_PRINT_ROUTINE
 //#define DEBUG_KEYBOARD_EVENT
 #define DEBUG_PCI
-#define DEBUG_ATA_BUSY
-#define DEBUG_ATA_WAIT_DRQ
+//#define DEBUG_ATA
+//#define DEBUG_EXT2
 #define DEBUG_NET_ARP
 
 #define PAGE_SIZE 4096

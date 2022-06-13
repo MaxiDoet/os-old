@@ -2,7 +2,7 @@
 #define _fs_ext2_h
 
 #include "../include/drivers/ata.h"
-#include "../include/kernel/fs/mbr.h"
+#include "../include/kernel/fs/gpt.h"
 
 #define EXT2_SIGNATURE 0xEF53
 
@@ -41,7 +41,7 @@ typedef struct ext2_bg_descriptor {
 	uint16_t unallocated_blocks_in_group;
 	uint16_t unallocated_inodes_in_group;
 	uint16_t directories_in_group;
-	uint16_t reserved[7];
+	uint8_t reserved[14];
 } __attribute__((packed)) ext2_bg_descriptor;
 
 enum ext2_inode_type {
@@ -88,12 +88,16 @@ typedef struct ext2_dir_entry {
 
 typedef struct ext2_fs_t {
 	uint32_t start_sector;
-	ext2_superblock *sb;
 	uint32_t block_size;
 	uint32_t inodes_per_block;
+	uint32_t block_groups_total;
+
+	ext2_bg_descriptor *bgdt;
+
+	ext2_superblock *sb;
 } ext2_fs_t;
 
-uint8_t ext2_probe(ata_dev_t *dev, mbr_table_entry entry, ext2_fs_t *fs);
+uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs);
 uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf);
 
 #endif

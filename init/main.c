@@ -76,7 +76,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	size_t heap_start = mbi->mem_upper + 10*1024*1024;
 	//size_t heap_size = mbi->mem_upper * 1024 - heap_size - 10*1024;
-	size_t heap_size = 1000000;
+	size_t heap_size = 10000000;
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
 	mm_init(heap_start, heap_size);
 
@@ -87,21 +87,22 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	ata_dev_t root_dev;
 	ext2_fs_t fs;
 
-	/*
-	if (ata_init(&root_dev, ATA_PRIMARY_MASTER, true)) {
-		kdebug("[kernel] root device: %s\r\n", ata_device_tree(true, true));
-	} else if (ata_init(&root_dev, ATA_PRIMARY_SLAVE, false)) {
-		kdebug("[kernel] root device: %s\r\n", ata_device_tree(true, false));
-	} else if (ata_init(&root_dev, ATA_SECONDARY_MASTER, true)) {
-		kdebug("[kernel] root device: %s\r\n", ata_device_tree(false, true));
-	} else if (ata_init(&root_dev, ATA_SECONDARY_SLAVE, false)) {
-		kdebug("[kernel] root device: %s\r\n", ata_device_tree(false, false));
+	if (ata_init(&root_dev, true, true)) {
+		kdebug("[kernel] root device: ATA->Primary Master\r\n");
+	} else if (ata_init(&root_dev, true, false)) {
+		kdebug("[kernel] root device: ATA->Primary Slave\r\n");
+	} else if (ata_init(&root_dev, false, true)) {
+		kdebug("[kernel] root device: ATA->Secondary Master\r\n");
+	} else if (ata_init(&root_dev, false, false)) {
+		kdebug("[kernel] root device: ATA->Secondary Slave\r\n");
 	}
-	*/
-
-	ata_init(&root_dev, true, true);
 
 	vfs_probe(&root_dev);
+
+	uint16_t *test_buf = (uint16_t *) malloc(1024);
+	vfs_read("/test.txt", test_buf);
+	kdebug("test: %s\r\n", (char *) test_buf);
+
 	pci_scan();
 
 	keyboard_init();

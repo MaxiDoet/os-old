@@ -7,10 +7,8 @@
 #include "../include/kernel/kernel.h"
 #include "../config.h"
 
-#define ATA_PRIMARY_MASTER 0x1F0
-#define ATA_PRIMARY_SLAVE 0x170
-#define ATA_SECONDARY_MASTER 0x1E8
-#define ATA_SECONDARY_SLAVE 0x168
+#define ATA_PRIMARY 	0x1F0
+#define ATA_SECONDARY 	0x1E8
 
 #define ATA_ERROR_AMNF 	(1 << 0)
 #define ATA_ERROR_TKZNF (1 << 1)
@@ -33,20 +31,24 @@
 #define ATA_COMMAND_READ_SECTORS 	0x20
 #define ATA_COMMAND_IDENTIFY 		0xEC
 
-#define ATA_REGISTER_DATA 			0x00
-#define ATA_REGISTER_ERROR			0x01
-#define ATA_REGISTER_FEATURES		0x01
-#define ATA_REGISTER_SECTOR_COUNT	0x02
-#define ATA_REGISTER_LBA_LOW		0x03
-#define ATA_REGISTER_LBA_MID		0x04
-#define ATA_REGISTER_LBA_HIGH		0x05
-#define ATA_REGISTER_SELECT			0x06
-#define ATA_REGISTER_STATUS			0x07
-#define ATA_REGISTER_COMMAND		0x07
-#define ATA_REGISTER_CONTROL		0x206
+#define ATA_CONTROL_SRST			(0 << 2)
+
+#define ATA_REGISTER_DATA 				0x00
+#define ATA_REGISTER_ERROR				0x01
+#define ATA_REGISTER_FEATURES			0x01
+#define ATA_REGISTER_SECTOR_COUNT		0x02
+#define ATA_REGISTER_LBA_LOW			0x03
+#define ATA_REGISTER_LBA_MID			0x04
+#define ATA_REGISTER_LBA_HIGH			0x05
+#define ATA_REGISTER_SELECT				0x06
+#define ATA_REGISTER_STATUS				0x07
+#define ATA_REGISTER_COMMAND			0x07
+#define ATA_REGISTER_PRIMARY_CONTROL	0x3F6
+#define ATA_REGISTER_SECONDARY_CONTROL	0x376
 
 void ata_device_debug(ata_dev_t *dev, char* msg)
 {
+	#ifdef DEBUG_ATA
 	char* prefix;
 
 	if (dev->primary && dev->master) {
@@ -60,6 +62,7 @@ void ata_device_debug(ata_dev_t *dev, char* msg)
 	}
 
 	kdebug("[ata] %s | %s\r\n", prefix, msg);
+	#endif
 }
 
 void ata_err_dump(ata_dev_t *dev, uint8_t status)
@@ -67,7 +70,6 @@ void ata_err_dump(ata_dev_t *dev, uint8_t status)
 	char* error_text;
 	uint8_t error;
 
-	// Error bit is set
 	if (status & (1 << 0)) {
 		uint8_t error = inb(dev->io_base + ATA_REGISTER_ERROR);
 
@@ -100,16 +102,13 @@ uint8_t ata_pio_wait_bsy(ata_dev_t *dev)
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
     while(status & ATA_STATUS_BSY) {
-		// Wait 400ns before reading the status register
 		asm volatile ("nop");
         asm volatile ("nop");
         asm volatile ("nop");
         asm volatile ("nop");
         asm volatile ("nop");
 
-		#ifdef DEBUG_ATA_BUSY
-		ata_device_debug(dev, "busy");
-		#endif
+		ata_device_debug(dev, "waiting busy");
 
 	    status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
@@ -126,9 +125,7 @@ uint8_t ata_pio_wait_drq(ata_dev_t *dev)
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
     while(!(status & ATA_STATUS_DRQ)) {
-		#ifdef DEBUG_ATA_WAIT_DRQ
 		ata_device_debug(dev, "waiting drq");
-		#endif
 
 		if (status & ATA_STATUS_ERR) {
 			ata_err_dump(dev, status);
@@ -140,29 +137,76 @@ uint8_t ata_pio_wait_drq(ata_dev_t *dev)
 	return status;
 }
 
+uint8_t ata_pio_wait_rdy(ata_dev_t *dev)
+{
+	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
+
+    while(!(status & ATA_STATUS_RDY)) {
+		ata_device_debug(dev, "waiting rdy");
+
+		if (status & ATA_STATUS_ERR) {
+			ata_err_dump(dev, status);
+		}
+
+		status = inb(dev->io_base + ATA_REGISTER_STATUS);
+	}
+	
+	return status;
+}
+
+void ata_pio_reset(ata_dev_t *dev)
+{
+	outb(dev->master ? ATA_REGISTER_PRIMARY_CONTROL : ATA_REGISTER_SECONDARY_CONTROL, ATA_CONTROL_SRST);
+	outb(dev->master ? ATA_REGISTER_PRIMARY_CONTROL : ATA_REGISTER_SECONDARY_CONTROL, 0);
+
+	ata_pio_wait_bsy(dev);
+	ata_pio_wait_rdy(dev);
+}
+
+void ata_pio_read(ata_dev_t *dev, uint32_t lba, uint8_t sector_count, uint16_t *buf)
+{
+	if (!dev->ready) return;
+
+	// Enable LBA mode and send upper LBA bits
+	outb(dev->io_base + ATA_REGISTER_SELECT, (dev->master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
+	ata_pio_wait_bsy(dev);
+
+	/* Set sector count and write LBA */
+	outb(dev->io_base + ATA_REGISTER_ERROR, 0);
+	outb(dev->io_base + ATA_REGISTER_SECTOR_COUNT, sector_count);
+	outb(dev->io_base + ATA_REGISTER_LBA_LOW, lba & 0x000000FF);
+	outb(dev->io_base + ATA_REGISTER_LBA_MID, (lba & 0x0000FF00) >> 8);
+	outb(dev->io_base + ATA_REGISTER_LBA_HIGH, (lba & 0x00FF0000) >> 16);
+	outb(dev->io_base + ATA_REGISTER_COMMAND, ATA_COMMAND_READ_SECTORS);
+
+	for (int i=0; i < sector_count; i++) {
+		ata_pio_wait_bsy(dev);
+		ata_pio_wait_drq(dev);
+
+		for (int j=0; j < 256; j++) {
+			buf[j] = inw(dev->io_base + ATA_REGISTER_DATA);
+		}
+
+		buf+=256;
+	}
+}
+
 uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 {
 	dev->primary = primary;
 	dev->master = master;
 
-	if (primary && master) {
-		dev->io_base = ATA_PRIMARY_MASTER;
-	} else if (primary && !master) {
-		dev->io_base = ATA_PRIMARY_SLAVE;
-	} else if (!primary && master) {
-		dev->io_base = ATA_SECONDARY_MASTER;
-	} else {
-		dev->io_base = ATA_SECONDARY_SLAVE;
-	}
+	dev->io_base = primary ? ATA_PRIMARY : ATA_SECONDARY;
 
 	dev->ready = false;
 
 	uint8_t status;
 	uint32_t timeout;
 
+	outb(dev->master ? ATA_REGISTER_PRIMARY_CONTROL : ATA_REGISTER_SECONDARY_CONTROL, 0);
+
 	// Select drive
 	outb(dev->io_base + ATA_REGISTER_SELECT, master ? 0xA0 : 0xB0);
-	outb(dev->io_base + ATA_REGISTER_CONTROL, 0);
 
 	// Reset
 	outb(dev->io_base + ATA_REGISTER_SELECT, master ? 0xA0 : 0xB0);
@@ -209,34 +253,6 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 
 	dev->ready = true;
 	return 1;
-}
-
-void ata_pio_read(ata_dev_t *dev, uint32_t lba, uint8_t sector_count, uint16_t *buf)
-{
-	if (!dev->ready) return;
-
-	// Enable LBA mode and send upper LBA bits
-	outb(dev->io_base + ATA_REGISTER_SELECT, (dev->master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
-	ata_pio_wait_bsy(dev);
-
-	/* Set sector count and write LBA */
-	outb(dev->io_base + ATA_REGISTER_ERROR, 0);
-	outb(dev->io_base + ATA_REGISTER_SECTOR_COUNT, sector_count);
-	outb(dev->io_base + ATA_REGISTER_LBA_LOW, lba & 0x000000FF);
-	outb(dev->io_base + ATA_REGISTER_LBA_MID, (lba & 0x0000FF00) >> 8);
-	outb(dev->io_base + ATA_REGISTER_LBA_HIGH, (lba & 0x00FF0000) >> 16);
-	outb(dev->io_base + ATA_REGISTER_COMMAND, ATA_COMMAND_READ_SECTORS);
-
-	for (int i=0; i < sector_count; i++) {
-		ata_pio_wait_bsy(dev);
-		ata_pio_wait_drq(dev);
-
-		for (int j=0; j < 256; j++) {
-			buf[j] = inw(dev->io_base + ATA_REGISTER_DATA);
-		}
-
-		buf+=256;
-	}
 }
 
 /*
