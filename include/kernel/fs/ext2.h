@@ -32,6 +32,17 @@ typedef struct ext2_superblock {
 	uint32_t major_version;
 	uint16_t user_use_reserved;
 	uint16_t group_use_reserved;
+
+	/* Extended Superblock */
+	uint32_t first_non_reserved_inode;
+	uint16_t inode_size;
+	uint16_t block_group;
+	uint32_t optional_features;
+	uint32_t required_features;
+	uint32_t read_only_features;
+	uint8_t fs_id[16];
+	uint8_t volume_name[16];
+	uint8_t last_mount_path[64];
 } __attribute__((packed)) ext2_superblock;
 
 typedef struct ext2_bg_descriptor {
@@ -91,6 +102,7 @@ typedef struct ext2_fs_t {
 	uint32_t block_size;
 	uint32_t inodes_per_block;
 	uint32_t block_groups_total;
+	uint16_t inode_size;
 
 	ext2_bg_descriptor *bgdt;
 

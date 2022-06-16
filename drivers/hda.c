@@ -27,7 +27,7 @@ void hda_reset(hda_dev_t *dev)
 	// Wait until hardware is in reset state
 	hda_wl(dev, HDA_GCTL, 0);
 	while (hda_rl(dev, HDA_GCTL) & HDA_CRST) {
-        };
+	};
 
 	// Wait until hardware is out of reset state
 	hda_wl(dev, HDA_GCTL, HDA_CRST);
@@ -75,14 +75,15 @@ void hda_init_corb(hda_dev_t *dev)
 	kdebug("\r\n");
 
 	// Set CORBSIZE
-        hda_wb(dev, HDA_CORBSIZE, corbsize);
+    hda_wb(dev, HDA_CORBSIZE, corbsize);
 
 	// Allocate CORB
-	//dev->corb = (uint32_t *) malloc(4 * dev->corb_size);
+	//dev->corb = (uint32_t *) malloc(sizeof(hda_corb_entry_t) * dev->corb_size);
 	dev->corb = (uint32_t *) 0xA1FD80;
 
 	// Set CORBBASE registers
-	//hda_wl(dev, HDA_CORBLBASE, (uint32_t) &dev->corb[0] & 0xFFFFFFFF);
+	//hda_wl(dev, HDA_CORBLBASE, (uint32_t) dev->corb & 0xFFFFFFFF);
+	//kdebug("%x\r\n", (uint32_t) dev->corb & 0xFFFFFFFF);
 	hda_wl(dev, HDA_CORBLBASE, (uint32_t) 0xA1FD80 & 0xFFFFFFFF);
 	hda_wl(dev, HDA_CORBUBASE, (uint32_t) 0x00000000);
 
@@ -92,7 +93,7 @@ void hda_init_corb(hda_dev_t *dev)
 	}
 	hda_cw(dev, HDA_CORBRP, HDA_CORBRPRST);
 	while (hda_rw(dev, HDA_CORBRP) & HDA_CORBRPRST) {
-        }
+    }
 
 	// Reset CORBWP
 	hda_ww(dev, HDA_CORBWP, 0x0000);
@@ -124,7 +125,7 @@ void hda_init_rirb(hda_dev_t *dev)
             kdebug("256 entries (2 Kbyte)");
 			rirbsize |= 0x2;
 			dev->rirb_size = 256;
-                        break;
+            break;
         }
         kdebug("\r\n");
 
@@ -139,7 +140,9 @@ void hda_init_rirb(hda_dev_t *dev)
     hda_sw(dev, HDA_RIRBWP, HDA_RIRBWPRST);
 
     // Set RIRBBASE registers
-    hda_wl(dev, HDA_RIRBLBASE, (uint32_t) 0xA20000 & 0xFFFFFFFF);
+    //hda_wl(dev, HDA_RIRBLBASE, (uint32_t) dev->rirb & 0xFFFFFFFF);
+	//kdebug("%x\r\n", (uint32_t) dev->rirb & 0xFFFFFFFF);
+	hda_wl(dev, HDA_RIRBLBASE, (uint32_t) 0xA20000 & 0xFFFFFFFF);
     hda_wl(dev, HDA_RIRBUBASE, (uint32_t) 0x00000000);
 
 	// Set RINTCNT register

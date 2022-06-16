@@ -37,7 +37,7 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 
 	uint32_t bg = (inode - 1) / fs->sb->inodes_per_group;
 	uint32_t bg_index = (inode - 1) % fs->sb->inodes_per_group;
-	uint32_t block = (bg_index * sizeof(ext2_inode)) / fs->block_size;
+	uint32_t block = (bg_index * fs->inode_size) / fs->block_size;
 	uint32_t block_index = bg_index % fs->inodes_per_block;
 
 	ext2_bg_descriptor *bg_descriptor = &fs->bgdt[bg];
@@ -114,6 +114,30 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
 		free(block_buf);
 	}
 
+	if (inode_buf->indirect_singly_block_ptr != 0) {
+		uint16_t entries_max = fs->block_size / sizeof(uint32_t);
+
+		uint16_t *block_list_buf = (uint16_t *) malloc(fs->block_size);
+		ext2_read_block(dev, fs, inode_buf->indirect_singly_block_ptr, block_list_buf);
+		uint32_t *block = (uint32_t *) block_list_buf;
+
+		for (int i=0; i < entries_max; i++) {
+			kdebug("block %d\r\n", block[i]);
+
+			if (block[i] == 0) {
+				// EOF
+				break;
+			}
+
+			uint16_t *block_buf = (uint16_t *) malloc(fs->block_size);
+			ext2_read_block(dev, fs, block[i], block_buf);
+			memcpy(buf + (12 * fs->block_size) + (i * fs->block_size), block_buf, fs->block_size);
+			free(block_buf);
+		}
+
+		kdebug("%d\r\n", *block_list_buf);
+	}
+
 	free(inode_buf);
 
 	return 1;
@@ -122,18 +146,27 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
 uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs)
 {
 	uint16_t *sb_buf = (uint16_t *) malloc(1024);
-
     ata_pio_read(dev, entry.start_lba + 2, 2, sb_buf);
+	
 	ext2_superblock *sb = (ext2_superblock *) sb_buf;
 	if (sb->signature != EXT2_SIGNATURE) return -1;
 
 	fs->start_sector = entry.start_lba;
 	fs->sb = sb;
+
+	fs->inode_size = 128;
+
+	if (sb->major_version >= 1) {
+		kdebug("[ext2] Using extended superblock\r\n");
+
+		fs->inode_size = sb->inode_size;
+	}
+
 	fs->block_size = (1024 << sb->block_size);
-	fs->inodes_per_block = fs->block_size / sizeof(ext2_inode);
+	fs->inodes_per_block = fs->block_size / fs->inode_size;
 	fs->block_groups_total = sb->blocks_total / sb->blocks_per_group;
 
-	kdebug("[ext2] ext2 info | Block Size: %d bytes\r\n", fs->block_size);
+	kdebug("[ext2] Block size: %d Inode size: %d\r\n", fs->block_size, fs->inode_size);
 
 	/* Read block group descriptor table */
 	uint8_t sector_count = (sizeof(ext2_bg_descriptor) * fs->block_groups_total) / ATA_SECTOR_SIZE + 1;

@@ -20,6 +20,7 @@
 #include "../include/drivers/rtc.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
+#include "../include/drivers/ac97.h"
 #include "../include/drivers/rtl8139.h"
 #include "../include/kernel/fs/ext2.h"
 #include "../include/kernel/fs/mbr.h"
@@ -29,6 +30,8 @@
 #include "../libc/include/string.h"
 
 #include "../apps/desktop/desktop.h"
+
+#include "../include/lib/wav.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
@@ -99,11 +102,37 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	vfs_probe(&root_dev);
 
+	pci_scan();
+
+	/*
 	uint16_t *test_buf = (uint16_t *) malloc(1024);
 	vfs_read("/test.txt", test_buf);
 	kdebug("test: %s\r\n", (char *) test_buf);
+	*/
 
-	pci_scan();
+	/*
+	uint16_t *test_buf = (uint16_t *) malloc(12288);
+	vfs_read("/music.wav", test_buf);
+	
+	wave_chunk_t *riff_chunk = (wave_chunk_t *) test_buf;
+
+	if (riff_chunk->chunk_id == WAVE_RIFF_SIGNATURE) {
+		kdebug("Found valid riff signature\r\n");
+	}
+
+	wave_format_chunk_t *format_header = (wave_format_chunk_t *) ((uint32_t) test_buf + sizeof(wave_chunk_t) + riff_chunk->chunk_size);
+
+	kdebug("Channels: %d Samplerate: %dhz Data length: %d\r\n", format_header->channels, format_header->samples_per_sec);
+
+	uint8_t *data = (uint8_t *) ((uint32_t) test_buf + 0x17F0);
+
+	for (int i=0; i < 10; i++) {
+		kdebug("%x ", *((uint8_t *) data + i));
+	}
+
+	ac97_play(data, 10000);
+	*/
+	//free(test_buf);
 
 	keyboard_init();
 	mouse_init();

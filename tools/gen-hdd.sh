@@ -1,7 +1,7 @@
 #!/bin/sh
 
 block_size=512
-blocks=51200
+blocks=102400
 output_file="hdd.img"
 fs_type="ext2"
 fs_code="20"

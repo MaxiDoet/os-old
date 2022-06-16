@@ -1,5 +1,11 @@
 make --dry-run --keep-going --print-directory
 make: Entering directory '/home/dev/os'
-make: Nothing to be done for 'all'.
+gcc -m32 -Iinclude -Iinclude/lib -nostdlib -fno-builtin -fno-exceptions -fno-leading-underscore -Wno-write-strings -Ofast -c drivers/ac97.c -o drivers/ac97.o
+ 
+ld -T linker.ld -melf_i386 boot/boot.o lib/gui/core/direct.o libc/mm.o libc/string.o kernel/fs/vfs.o kernel/fs/ext2.o kernel/int_handler.o kernel/irq.o kernel/net/ethernet.o kernel/net/arp.o kernel/net/ip.o kernel/platform/platform.o kernel/platform/smbios.o kernel/io.o kernel/debug.o kernel/idt.o kernel/panic.o kernel/gdt.o kernel/mem/pmm.o kernel/gdt_setup.o apps/desktop/desktop.o drivers/keyboard.o drivers/mouse.o drivers/vgacon.o drivers/hda.o drivers/pci.o drivers/ata.o drivers/rtl8139.o drivers/ac97.o drivers/rtc.o drivers/pit.o drivers/serial.o init/main.o -o os.bin
+mkdir -p isodir/boot/grub
+cp os.bin isodir/boot/os.bin
+cp grub.cfg isodir/boot/grub/grub.cfg
+grub-mkrescue -o os.iso isodir
 make: Leaving directory '/home/dev/os'
  

@@ -55,11 +55,6 @@ void vfs_probe(ata_dev_t *dev)
 	kdebug(" | Entries: %d Start: %d End: %d\r\n", gpt_table_header->table_entry_count, gpt_table_header->start_lba, gpt_table_header->last_lba);
 
 	uint8_t sector_count = (gpt_table_header->table_entry_count * gpt_table_header->table_entry_size) / ATA_SECTOR_SIZE + 1;
-	
-	/*
-	gpt_table_entry_t *gpt_table = (gpt_table_entry_t *) malloc(sector_count * ATA_SECTOR_SIZE);
-	ata_pio_read(dev, gpt_table_header->table_lba, sector_count, (uint16_t *) gpt_table);
-	*/
 
 	uint16_t *gpt_table_buf = (uint16_t *) malloc(sector_count * ATA_SECTOR_SIZE);
 	ata_pio_read(dev, gpt_table_header->table_lba, sector_count, gpt_table_buf);
