@@ -35,7 +35,7 @@ void draw_window(context ctx, window *win)
 	draw_filled_rectangle(ctx, win->x, win->y, win->width, 30, FRAME_COLOR);
 
 	// Window title
-	draw_string(ctx, win->x + 10, win->y, win->title, 0xFFFF);
+	//draw_string(ctx, win->x + 10, win->y, win->title, 0xFFFF);
 
 	// Content
 	draw_filled_rectangle(ctx, win->x, win->y + 20, win->width, win->height - 20, WINDOW_COLOR);

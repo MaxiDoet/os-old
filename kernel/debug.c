@@ -42,46 +42,38 @@ void kdebug(char* format, ...)
                         i++;
                         c=format[i];
 
-                        switch(c) {
-				case '%':
-					puts(DEBUG_PORT, "%");
-					break;
-                                case 'd':
-					prefix="";
-					base=10;
-                                        goto print_num;
-				case 's':
-					s = va_arg(args, char *);
-					puts(DEBUG_PORT, s);
-					break;
-				/*
-				case 'c':
-					cc = va_arg(args, int);
-					puts(DEBUG_PORT, cc + '\0');
-					break;
-				*/
-				case 'x':
-					prefix="";
-					base=16;
-                                        goto print_num;
+                    switch(c) {
+						case '%':
+							puts(DEBUG_PORT, "%");
+							break;
+                		case 'd':
+							prefix="";
+							base=10;
+                            goto print_num;
+						case 's':
+							s = va_arg(args, char *);
+							puts(DEBUG_PORT, s);
+							break;
+						case 'x':
+							prefix="";
+							base=16;
+                            goto print_num;
 
-				print_num:
-					puts(DEBUG_PORT, prefix);
+						print_num:
+							puts(DEBUG_PORT, prefix);
 
-					n = va_arg(args, long);
+							n = va_arg(args, long);
 
-					if (n==0) kdebug("0");
+							if (n==0) kdebug("0");
 
-                                        static char buf[32] = {0};
+                            static char buf[32] = {0};
 
-                                        int j = 30;
+                            int j = 30;
 
-                                        for(; n && j ; --j, n /= base)
-
-                                                buf[j] = "0123456789abcdef"[n % base];
-
-					puts(DEBUG_PORT, &buf[j+1]);
-                        }
+                            for(; n && j ; --j, n /= base)
+                            	buf[j] = "0123456789abcdef"[n % base];
+								puts(DEBUG_PORT, &buf[j+1]);
+                    }
                 } else {
                         serial_write(DEBUG_PORT, c);
                 }

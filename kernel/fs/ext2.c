@@ -17,15 +17,58 @@ uint32_t block_to_sector(uint32_t block)
 	return sector;
 }
 
-static uint16_t *root_buf;
+static uint8_t *root_buf;
 
-void ext2_read_block(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block, uint16_t *buf)
+void ext2_read_block(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block, uint8_t *buf)
 {
 	if (block > fs->sb->blocks_total) {
 		kdebug("[ext2] attempted to read invalid block\r\n");
 	}
 
-	ata_pio_read(dev, fs->start_sector + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, buf);
+	#ifdef DEBUG_EXT2
+	kdebug("[ext2] reading block %d (sector %d)\r\n", block, fs->start_sector + block_to_sector(block));
+	#endif
+
+	ata_pio_read(dev, fs->start_sector + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, (uint16_t *) buf);
+}
+
+void ext2_read_singly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, uint8_t *buf)
+{
+	uint16_t entries_max = fs->block_size / sizeof(uint32_t);
+
+	uint8_t *block_list_buf = (uint8_t *) malloc(fs->block_size);
+	ext2_read_block(dev, fs, block_ptr, block_list_buf);
+	uint32_t *block = (uint32_t *) block_list_buf;
+
+	for (int i=0; i < entries_max; i++) {
+		if (block[i] == 0) {
+			// EOF
+			return;
+		}
+
+		uint8_t *block_buf = (uint8_t *) malloc(fs->block_size);
+		ext2_read_block(dev, fs, block[i], block_buf);
+		memcpy(buf + (i * fs->block_size), block_buf, fs->block_size);
+		free(block_buf);
+	}
+}
+
+void ext2_read_doubly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, uint8_t *buf)
+{
+	uint16_t entries_max = fs->block_size / sizeof(uint32_t);
+
+	uint8_t *block_list_buf = (uint8_t *) malloc(fs->block_size);
+	ext2_read_block(dev, fs, block_ptr, block_list_buf);
+	uint32_t *block = (uint32_t *) block_list_buf;
+
+	for (int i=0; i < entries_max; i++) {
+		if (block[i] == 0) {
+			// EOF
+			return;
+		}
+
+		ext2_read_singly_linked(dev, fs, block[i], buf + i * (fs->block_size * fs->block_size / 4));
+	}
 }
 
 void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *buf)
@@ -42,7 +85,7 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 
 	ext2_bg_descriptor *bg_descriptor = &fs->bgdt[bg];
 
-	uint16_t *block_buf = (uint16_t *) malloc(fs->block_size);
+	uint8_t *block_buf = (uint8_t *) malloc(fs->block_size);
 	ext2_read_block(dev, fs, bg_descriptor->inode_table_start + block, block_buf);
 
 	ext2_inode *inode_temp = (ext2_inode *) block_buf;
@@ -89,7 +132,7 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 	free(dir);
 }
 
-uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
+uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
 {
 	uint32_t inode = ext2_find_inode(dev, fs, path);
 	if (inode == 0) return -1;
@@ -108,34 +151,18 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint16_t *buf)
 			return 0;
 		}
 
-		uint16_t *block_buf = (uint16_t *) malloc(fs->block_size);
+		uint8_t *block_buf = (uint8_t *) malloc(fs->block_size);
 		ext2_read_block(dev, fs, block, block_buf);
-		memcpy(buf + i*(fs->block_size), block_buf, fs->block_size);
+		memcpy(buf + (i * fs->block_size), block_buf, fs->block_size);
 		free(block_buf);
 	}
 
 	if (inode_buf->indirect_singly_block_ptr != 0) {
-		uint16_t entries_max = fs->block_size / sizeof(uint32_t);
+		ext2_read_singly_linked(dev, fs, inode_buf->indirect_singly_block_ptr, buf + (12 * fs->block_size));
+	}
 
-		uint16_t *block_list_buf = (uint16_t *) malloc(fs->block_size);
-		ext2_read_block(dev, fs, inode_buf->indirect_singly_block_ptr, block_list_buf);
-		uint32_t *block = (uint32_t *) block_list_buf;
-
-		for (int i=0; i < entries_max; i++) {
-			kdebug("block %d\r\n", block[i]);
-
-			if (block[i] == 0) {
-				// EOF
-				break;
-			}
-
-			uint16_t *block_buf = (uint16_t *) malloc(fs->block_size);
-			ext2_read_block(dev, fs, block[i], block_buf);
-			memcpy(buf + (12 * fs->block_size) + (i * fs->block_size), block_buf, fs->block_size);
-			free(block_buf);
-		}
-
-		kdebug("%d\r\n", *block_list_buf);
+	if (inode_buf->indirect_doubly_block_ptr != 0) {
+		ext2_read_doubly_linked(dev, fs, inode_buf->indirect_doubly_block_ptr, buf + (12 * fs->block_size) + (fs->block_size * fs->block_size / 4));
 	}
 
 	free(inode_buf);
@@ -174,7 +201,7 @@ uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs)
 	ata_pio_read(dev, entry.start_lba + block_to_sector(2), sector_count, (uint16_t *) fs->bgdt);
 
 	// Init buffers
-    if (!root_buf) root_buf = (uint16_t *) malloc(fs->block_size);
+    if (!root_buf) root_buf = (uint8_t *) malloc(fs->block_size);
 
 	return 1;
 }

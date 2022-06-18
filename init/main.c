@@ -32,6 +32,7 @@
 #include "../apps/desktop/desktop.h"
 
 #include "../include/lib/wav.h"
+//#include "../include/drivers/audio.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
@@ -79,7 +80,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	size_t heap_start = mbi->mem_upper + 10*1024*1024;
 	//size_t heap_size = mbi->mem_upper * 1024 - heap_size - 10*1024;
-	size_t heap_size = 10000000;
+	size_t heap_size = 1000000000;
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
 	mm_init(heap_start, heap_size);
 
@@ -132,6 +133,18 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	ac97_play(data, 10000);
 	*/
+
+	/*
+	uint16_t *test_buf = (uint16_t *) malloc(audio_wav_len);
+	memcpy(test_buf, audio_wav, audio_wav_len);
+	ac97_play(test_buf, audio_wav_len);
+	*/
+
+	uint8_t *test_buf = (uint8_t *) malloc(5758830);
+	//memset(test_buf, 0x00, 5758830);
+	vfs_read("/audio.wav", test_buf);
+	ac97_play(test_buf, 5758830);
+
 	//free(test_buf);
 
 	keyboard_init();

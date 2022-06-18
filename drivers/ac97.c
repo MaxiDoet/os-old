@@ -10,8 +10,6 @@
 #include "../include/kernel/fs/vfs.h"
 #include "../libc/include/mm.h"
 
-#include "../include/drivers/audio.h"
-
 /* NAM Registers */
 #define NAM_RESET 0x00
 #define NAM_MASTER_VOL 0x02
@@ -59,32 +57,51 @@
 #define COLD_RESET (1 << 1)
 #define WARM_RESET (1 << 2)
 
-static pci_dev_descriptor dev;
+#define MAX_ENTRY_SIZE 0xFFFE
+#define LAST_VALID_INDEX 32
 
-struct buf_desc {
+typedef struct buf_desc {
 	uint32_t addr;
 	uint16_t length;
  	int reserved : 14;
 	unsigned int bup : 1;
 	unsigned int ioc : 1;
-} __attribute__((packed));
+} __attribute__((packed)) buf_desc;
 
+static pci_dev_descriptor dev;
 struct buf_desc buf_descriptors[32];
+static uint8_t buf_descriptors_rp;
+static uint8_t buf_descriptors_wp;
 
 void ac97_irq_handler()
 {
 	uint16_t status = inw(dev.bars[1].io_base + PO + SR);
 
 	if (status & LBI) {
+		#ifdef AC97_DEBUG
 		kdebug("Last Buffer Entry interrupt\r\n");
+		#endif
+
+		buf_descriptors_rp = 0;
+		buf_descriptors_wp = 0;
 	}
 
 	if (status & IOCI) {
+		#ifdef AC97_DEBUG
 		kdebug("IOC interrupt\r\n");
+		#endif
+
+		buf_descriptors_rp = (buf_descriptors_rp + 1) % 32;
+
+		#ifdef AC97_DEBUG
+		kdebug("buf_descriptors_index: %d\r\n", buf_descriptors_rp);
+		#endif
 	}
 
 	if (status & FEI) {
+		#ifdef AC97_DEBUG
 		kdebug("FIFO error interrupt\r\n");
+		#endif
 	}
 
 	outw(dev.bars[1].io_base + PO + SR, 0x1C);
@@ -112,40 +129,59 @@ void ac97_reset(pci_dev_descriptor pci_dev)
 	kdebug("[ac97] reset done\r\n");
 }
 
-void ac97_play(uint8_t *data, uint32_t size) {
+void ac97_write_single_buffer(uint8_t *data, uint16_t size)
+{
+	if (size > MAX_ENTRY_SIZE) return;
+
+	buf_desc *desc = &buf_descriptors[buf_descriptors_wp];
+
+	desc->addr = (uint32_t) data;
+	desc->length = size;
+	desc->ioc = 1;
+
+	if (buf_descriptors_wp == LAST_VALID_INDEX) desc->bup = 1;
+
+	buf_descriptors_wp = (buf_descriptors_wp + 1) % LAST_VALID_INDEX;
+}
+
+void ac97_play(uint8_t *data, uint32_t size)
+{
 	uint32_t available = size;
+	uint32_t offset = 0;
 	uint8_t last = 0;
 
-	for (int i=0; i < 32; i++) {
-		buf_descriptors[i].addr = (uint32_t) &data[i * 0x20000];
-		buf_descriptors[i].ioc = 1;
+	while (available) {
+		uint16_t status = inw(dev.bars[1].io_base + PO + SR);
+		uint8_t control = inb(dev.bars[1].io_base + PO + CR);
 
-		kdebug("[ac97] desc: %d available: %x\r\n", i, available);
+		if (status & DMAS) {
+			// Refill buffers
+			for (int i=0; i < LAST_VALID_INDEX; i++) {
+				if (available >= 0x20000) {
+					ac97_write_single_buffer(&data[offset], 0xFFFE);
+					available -= 0x20000;
+					offset += 0x20000;
+					last = 32;
+				} else {
+					ac97_write_single_buffer(&data[offset], available >> 1);
+					last = i;
+					available = 0;
+					break;
+				}
+			}
 
-		if (available >= 0x20000) {
-			buf_descriptors[i].length = 0xFFFE;
-			buf_descriptors[i].bup = 0;
-			available -= 0x20000;
-		} else {
-			buf_descriptors[i].length = available >> 1;
-			buf_descriptors[i].bup = 1;
-			last = i;
-			kdebug("[ac97] last: %d length: %x\r\n", last, available >> 1);
-			available = 0;
-			break;
+			// Reset output channel registers
+			outb(dev.bars[1].io_base + PO + CR, RR);
+			while(inb(dev.bars[1].io_base + PO + CR) & RR) {
+			}
+
+			outl(dev.bars[1].io_base + PO + BDBAR, (uint32_t) buf_descriptors);
+			outb(dev.bars[1].io_base + PO + LVI, last - 1);
+
+			// Start playback
+			outb(dev.bars[1].io_base + PO + CR, RPBM | IOCE | LVBIE | FEIE); // Start DMA; Enable IOC interrupt; Enable Last Buffer Entry interrupt
 		}
 	}
-
-	// Reset output channel registers
-	outb(dev.bars[1].io_base + PO + CR, RR);
-	while(inb(dev.bars[1].io_base + PO + CR) & RR) {
-	}
-
-	outl(dev.bars[1].io_base + PO + BDBAR, (uint32_t) buf_descriptors);
-	outb(dev.bars[1].io_base + PO + LVI, last - 1);
-
-	// Start playback
-	outb(dev.bars[1].io_base + PO + CR, RPBM | IOCE | LVBIE | FEIE); // Start DMA; Enable IOC interrupt; Enable Last Buffer Entry interrupt
 }
 
 void ac97_init(pci_dev_descriptor pci_dev)
@@ -179,5 +215,6 @@ void ac97_init(pci_dev_descriptor pci_dev)
 
 	kdebug("[ac97] Channels: %d Samples: %s\r\n", channel_count, (sample_capabilities == 1) ? "16bit, 20bit" : "16bit");
 
-	//ac97_play(audio_wav, audio_wav_len);
+	buf_descriptors_rp = 0;
+	buf_descriptors_wp = 0;
 }
