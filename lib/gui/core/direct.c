@@ -3,7 +3,7 @@
 #include <gui/direct.h>
 #include <gui/font.h>
 
-void draw_pixel(context ctx, int x, int y, int color)
+void draw_pixel(context ctx, int x, int y, uint16_t color)
 {
 	x += ctx.x;
 	y += ctx.y;
@@ -12,7 +12,7 @@ void draw_pixel(context ctx, int x, int y, int color)
         *pixel = color;
 }
 
-void draw_horizontal_line(context ctx, int x, int y, int w, int color)
+void draw_horizontal_line(context ctx, int x, int y, int w, uint16_t color)
 {
 	x += ctx.x;
 	y += ctx.y;
@@ -26,7 +26,7 @@ void draw_horizontal_line(context ctx, int x, int y, int w, int color)
         }
 }
 
-void draw_vertical_line(context ctx, int x, int y, int h, int color)
+void draw_vertical_line(context ctx, int x, int y, int h, uint16_t color)
 {
 	x += ctx.x;
 	y += ctx.y;
@@ -40,7 +40,7 @@ void draw_vertical_line(context ctx, int x, int y, int h, int color)
         }
 }
 
-void draw_line(context ctx, int x0, int y0, int x1, int y1, int color)
+void draw_line(context ctx, int x0, int y0, int x1, int y1, uint16_t color)
 {
         int dx = x1 - x0;
         int dy = y1 - y0;
@@ -58,7 +58,7 @@ void draw_line(context ctx, int x0, int y0, int x1, int y1, int color)
         }
 }
 
-void draw_filled_rectangle(context ctx, int x, int y, int w, int h, int color)
+void draw_filled_rectangle(context ctx, int x, int y, int w, int h, uint16_t color)
 {
         int i;
 
@@ -67,7 +67,7 @@ void draw_filled_rectangle(context ctx, int x, int y, int w, int h, int color)
         }
 }
 
-void draw_rectangle(context ctx, int x, int y, int w, int h, int size, int color)
+void draw_rectangle(context ctx, int x, int y, int w, int h, int size, uint16_t color)
 {
         if (size==1) {
                 // Top, Bottom
@@ -86,7 +86,7 @@ void draw_rectangle(context ctx, int x, int y, int w, int h, int size, int color
         }
 }
 
-void draw_circle(context ctx, int x0, int y0, int radius, int color)
+void draw_circle(context ctx, int x0, int y0, int radius, uint16_t color)
 {
         /* Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm */
 
@@ -122,7 +122,7 @@ void draw_circle(context ctx, int x0, int y0, int radius, int color)
         }
 }
 
-void draw_circle_filled(context ctx, int x0, int y0, int radius, int color)
+void draw_circle_filled(context ctx, int x0, int y0, int radius, uint16_t color)
 {
         /* Source: https://stackoverflow.com/a/14976268/13378037 */
 
@@ -153,7 +153,7 @@ void draw_circle_filled(context ctx, int x0, int y0, int radius, int color)
         }
 }
 
-void draw_monochrome_bitmap(context ctx, int x, int y, int *bitmap, int color)
+void draw_monochrome_bitmap(context ctx, int x, int y, int *bitmap, uint16_t color)
 {
         for(int i=0; i < 32; i++) {
                 for(int j=0; j < 32; j++) {
@@ -166,7 +166,7 @@ void draw_monochrome_bitmap(context ctx, int x, int y, int *bitmap, int color)
         }
 }
 
-void draw_char(context ctx, int x, int y, char c, int color)
+void draw_char(context ctx, int x, int y, char c, uint16_t color)
 {
 	for(int i=0; i < 32; i++) {
                 for(int j=0; j < 32+2; j++) {
@@ -179,7 +179,7 @@ void draw_char(context ctx, int x, int y, char c, int color)
         }
 }
 
-void draw_string(context ctx, int x, int y, char* str, int color)
+void draw_string(context ctx, int x, int y, char* str, uint16_t color)
 {
         int j=0;
         for(int i=0; str[i] != '\0'; i++) {
@@ -194,8 +194,8 @@ void draw_image(context ctx, int x, int y, int w, int h, int data[])
 
         for (i=0; i<h; i++) {
                 for (j=0; j<w; j++) {
-                        int color24 = data[i*w+j];
-                        int color16;
+                        uint16_t color24 = data[i*w+j];
+                        uint16_t color16;
                         color16 = (((color24&0xf80000)>>8) + ((color24&0xfc00)>>5) + ((color24&0xf8)>>3));
                         draw_pixel(ctx, x+j, y+i, color16);
                 }
@@ -210,8 +210,8 @@ void draw_image_transparent(context ctx, int x, int y, int w, int h, int data[])
                 for (j=0; j<w; j++) {
                         if (data[i*w+j] == 0x20304) continue;
 
-                        int color24 = data[i*w+j];
-                        int color16;
+                        uint16_t color24 = data[i*w+j];
+                        uint16_t color16;
                         color16 = (((color24&0xf80000)>>8) + ((color24&0xfc00)>>5) + ((color24&0xf8)>>3));
                         draw_pixel(ctx, x+j, y+i, color16);
                 }

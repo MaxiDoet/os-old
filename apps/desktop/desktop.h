@@ -1,6 +1,8 @@
 #ifndef _desktop_h
 #define _desktop_h
 
-void desktop_init(unsigned long fbaddr, int width, int height, int pitch);
+#include "../include/kernel/multiboot.h"
+
+void desktop_init(multiboot_info_t *mbi);
 
 #endif

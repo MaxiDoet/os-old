@@ -56,7 +56,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
 	mbi = (multiboot_info_t *) mbi_addr;
-	
+
 	kdebug("[kernel\e[0;37m] GDT init\r\n");
     gdt_setup();
     kdebug("[kernel\e[0;37m] IDT init\r\n");
@@ -104,18 +104,12 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	pci_scan();
 
-	/* Play startup sound */
-	uint8_t *startup_buf = (uint8_t *) malloc(123510);
-	memset(startup_buf, 0x00, 123510);
-	vfs_read("/startup.wav", startup_buf);
-	ac97_play(startup_buf, 123510);
-	//free(startup_buf);
+	
 
 	keyboard_init();
 	mouse_init();
 
 	#ifdef DESKTOP
-		void *fb = (void *) (unsigned long) mbi->framebuffer_addr;
-		desktop_init(mbi->framebuffer_addr, mbi->framebuffer_width, mbi->framebuffer_height, mbi->framebuffer_pitch);
+		desktop_init(mbi);
 	#endif
 }

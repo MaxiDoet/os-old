@@ -132,19 +132,32 @@ void keyboard_handler(struct keyboard_event event)
 
 static inline void desktop_swap_fb()
 {
-	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((main_context.width * main_context.height * 4) / 2));
+	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((main_context.height * main_context.fb_pitch)));
 }
 
-void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
+void desktop_init(multiboot_info_t *mbi)
 {
-	bb = (void *) (unsigned long) fbaddr;
-	fb = (void *) (unsigned long) malloc(800 * 600);
+	kdebug("Addr: %x", (uint32_t) mbi->framebuffer_addr);
+	kdebug(" | BPP: %d", mbi->framebuffer_bpp);
+	kdebug(" | Width: %d", mbi->framebuffer_width);
+	kdebug(" | Height: %d", mbi->framebuffer_height);
+	kdebug(" | Pitch: %d\r\n", mbi->framebuffer_pitch);
+
+	/* Play startup sound */
+	uint8_t *startup_buf = (uint8_t *) malloc(123510);
+	memset(startup_buf, 0x00, 123510);
+	vfs_read("/startup.wav", startup_buf);
+	ac97_play(startup_buf, 123510);
+	//free(startup_buf);
+
+	bb = (void *) (uint32_t) mbi->framebuffer_addr;
+	fb = (void *) (uint32_t) malloc(mbi->framebuffer_height * mbi->framebuffer_pitch);
 
 	main_context.x = 0;
 	main_context.y = 0;
-	main_context.width = width;
-	main_context.height = height;
-	main_context.fb_pitch = pitch;
+	main_context.width = mbi->framebuffer_width;
+	main_context.height = mbi->framebuffer_height;
+	main_context.fb_pitch = mbi->framebuffer_pitch;
 	main_context.fb = fb;
 
 	cursor_x = main_context.width / 2;
