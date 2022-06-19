@@ -32,7 +32,6 @@
 #include "../apps/desktop/desktop.h"
 
 #include "../include/lib/wav.h"
-//#include "../include/drivers/audio.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
 
@@ -57,7 +56,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
 	mbi = (multiboot_info_t *) mbi_addr;
-
+	
 	kdebug("[kernel\e[0;37m] GDT init\r\n");
     gdt_setup();
     kdebug("[kernel\e[0;37m] IDT init\r\n");
@@ -105,47 +104,12 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	pci_scan();
 
-	/*
-	uint16_t *test_buf = (uint16_t *) malloc(1024);
-	vfs_read("/test.txt", test_buf);
-	kdebug("test: %s\r\n", (char *) test_buf);
-	*/
-
-	/*
-	uint16_t *test_buf = (uint16_t *) malloc(12288);
-	vfs_read("/music.wav", test_buf);
-	
-	wave_chunk_t *riff_chunk = (wave_chunk_t *) test_buf;
-
-	if (riff_chunk->chunk_id == WAVE_RIFF_SIGNATURE) {
-		kdebug("Found valid riff signature\r\n");
-	}
-
-	wave_format_chunk_t *format_header = (wave_format_chunk_t *) ((uint32_t) test_buf + sizeof(wave_chunk_t) + riff_chunk->chunk_size);
-
-	kdebug("Channels: %d Samplerate: %dhz Data length: %d\r\n", format_header->channels, format_header->samples_per_sec);
-
-	uint8_t *data = (uint8_t *) ((uint32_t) test_buf + 0x17F0);
-
-	for (int i=0; i < 10; i++) {
-		kdebug("%x ", *((uint8_t *) data + i));
-	}
-
-	ac97_play(data, 10000);
-	*/
-
-	/*
-	uint16_t *test_buf = (uint16_t *) malloc(audio_wav_len);
-	memcpy(test_buf, audio_wav, audio_wav_len);
-	ac97_play(test_buf, audio_wav_len);
-	*/
-
-	uint8_t *test_buf = (uint8_t *) malloc(5758830);
-	//memset(test_buf, 0x00, 5758830);
-	vfs_read("/audio.wav", test_buf);
-	ac97_play(test_buf, 5758830);
-
-	//free(test_buf);
+	/* Play startup sound */
+	uint8_t *startup_buf = (uint8_t *) malloc(123510);
+	memset(startup_buf, 0x00, 123510);
+	vfs_read("/startup.wav", startup_buf);
+	ac97_play(startup_buf, 123510);
+	//free(startup_buf);
 
 	keyboard_init();
 	mouse_init();

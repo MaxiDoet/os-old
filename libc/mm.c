@@ -2,56 +2,63 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../include/kernel/kernel.h"
 #include "../libc/include/mm.h"
 
-static mm_t mm;
+typedef struct mm_chunk_t {
+	struct mm_chunk_t *next_chunk;
+	struct mm_chunk_t *previous_chunk;
+	bool allocated;
+	uint32_t size;
+} __attribute__((packed)) mm_chunk_t;
 
-void mm_init(size_t start, size_t size)
+static mm_chunk_t *first_chunk;
+
+void mm_init(uint32_t start, size_t size)
 {
-	if (size < sizeof(mm_chunk)) {
-		mm.first_chunk = 0;
-	} else {
-		mm.first_chunk = (mm_chunk*) start;
+	first_chunk = (mm_chunk_t *) start;
 
-		mm.first_chunk->allocated = false;
-		mm.first_chunk->next_chunk = 0;
-		mm.first_chunk->previous_chunk = 0;
-		mm.first_chunk->size = size - sizeof(mm_chunk);
-	}
+	first_chunk->next_chunk = 0;
+	first_chunk->previous_chunk = 0;
+	first_chunk->allocated = false;
+	first_chunk->size = size - sizeof(mm_chunk_t);
 }
 
-void* malloc(size_t size)
+void* malloc(uint32_t size)
 {
-	mm_chunk* result = 0;
+	mm_chunk_t *current = first_chunk;
+	mm_chunk_t *last = 0;
+	mm_chunk_t *result = 0;
 
-	for (mm_chunk* chunk = mm.first_chunk; chunk != 0 && result == 0; chunk = chunk->next_chunk) {
-		if (chunk->size > size && !chunk->allocated) {
-			result = chunk;
+	#ifdef MM_DEBUG
+	kdebug("[malloc] requested %d bytes\r\n", size);
+	#endif
+
+	while (!result) {
+		//kdebug("[malloc] current: %x | next: %x | allocated: %s | size: %d\r\n", (uint32_t) current, (uint32_t) current->next_chunk, current->allocated ? "Yes" : "No", current->size);
+
+		if (!current->allocated) {
+			#ifdef MM_DEBUG
+			kdebug("[malloc] found unallocated chunk | size: %d\r\n", current->size);
+			#endif
+
+			current->allocated = true;
+			current->size = size;
+			
+			current->next_chunk = (mm_chunk_t *) ((uint32_t) current + sizeof(mm_chunk_t) + current->size);
+			//current->previous_chunk = last;
+
+			//last->next_chunk = current;
+
+			result = current;
+
+		} else {
+			current = current->next_chunk;
+			//last = current;
 		}
 	}
 
-	if (result == 0) return 0;
-
-	if (result->size >= size + sizeof(mm_chunk) + 1) {
-		mm_chunk* temp = (mm_chunk*)((size_t)result + sizeof(mm_chunk) + size);
-
-		temp->allocated = false;
-		temp->size = result->size - size - sizeof(mm_chunk);
-		temp->next_chunk = result->next_chunk;
-		temp->previous_chunk = result;
-
-		if (temp->next_chunk != 0) {
-			temp->next_chunk = temp;
-			temp->previous_chunk = temp;
-		}
-
-		result->size = size;
-		result->next_chunk = temp;
-	}
-
-	result->allocated = true;
-
-	return (void*)(((size_t)result) + sizeof(mm_chunk));
+	return (void *) ((uint32_t) result + sizeof(mm_chunk_t));
 }
 
 void free(void* ptr)

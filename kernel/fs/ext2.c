@@ -43,7 +43,7 @@ void ext2_read_singly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, 
 	for (int i=0; i < entries_max; i++) {
 		if (block[i] == 0) {
 			// EOF
-			return;
+			break;
 		}
 
 		uint8_t *block_buf = (uint8_t *) malloc(fs->block_size);
@@ -51,6 +51,8 @@ void ext2_read_singly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, 
 		memcpy(buf + (i * fs->block_size), block_buf, fs->block_size);
 		free(block_buf);
 	}
+
+	free(block_list_buf);
 }
 
 void ext2_read_doubly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, uint8_t *buf)
@@ -64,11 +66,13 @@ void ext2_read_doubly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, 
 	for (int i=0; i < entries_max; i++) {
 		if (block[i] == 0) {
 			// EOF
-			return;
+			break;
 		}
 
 		ext2_read_singly_linked(dev, fs, block[i], buf + i * (fs->block_size * fs->block_size / 4));
 	}
+
+	free(block_list_buf);
 }
 
 void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *buf)
@@ -91,7 +95,7 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 	ext2_inode *inode_temp = (ext2_inode *) block_buf;
 	memcpy(buf, &inode_temp[block_index], sizeof(ext2_inode));
 
-	free(inode_temp);
+	free(block_buf);
 }
 
 uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)

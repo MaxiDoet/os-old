@@ -17,6 +17,9 @@
 #include "../apps/desktop/cursor.h"
 #include "../apps/desktop/logo.h"
 
+#include "../include/kernel/fs/vfs.h"
+#include "../include/drivers/ac97.h"
+
 #include <gui/context.h>
 #include <gui/window.h>
 #include <gui/direct.h>
@@ -157,6 +160,8 @@ void desktop_init(unsigned long fbaddr, int width, int height, int pitch)
 
 	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);
+
+	
 
 	while(1) {
 		// Background
