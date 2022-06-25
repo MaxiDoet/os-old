@@ -99,59 +99,83 @@ void ata_err_dump(ata_dev_t *dev, uint8_t status)
 
 uint8_t ata_pio_wait_bsy(ata_dev_t *dev)
 {
+	uint16_t timeout = 1000;
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
-    while(status & ATA_STATUS_BSY) {
+    while((status & ATA_STATUS_BSY)) {
+		timeout--;
+
 		asm volatile ("nop");
         asm volatile ("nop");
         asm volatile ("nop");
         asm volatile ("nop");
         asm volatile ("nop");
 
+		#ifdef DEBUG_ATA
 		ata_device_debug(dev, "waiting busy");
+		#endif
 
 	    status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
 		if (status & ATA_STATUS_ERR) {
 			ata_err_dump(dev, status);
+			return ATA_RETURN_ERROR;
+		}
+
+		if (!timeout) {
+			return ATA_RETURN_TIMEOUT;
 		}
     }
 
-	return status;
+	return ATA_RETURN_SUCCESS;
 }
 
 uint8_t ata_pio_wait_drq(ata_dev_t *dev)
 {
+	uint16_t timeout = 1000;
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
-    while(!(status & ATA_STATUS_DRQ)) {
+    while(!(status & ATA_STATUS_DRQ) && timeout) {
+		timeout--;
 		ata_device_debug(dev, "waiting drq");
 
 		if (status & ATA_STATUS_ERR) {
 			ata_err_dump(dev, status);
+			return ATA_RETURN_ERROR;
+		}
+
+		if (!timeout) {
+			return ATA_RETURN_TIMEOUT;
 		}
 
 		status = inb(dev->io_base + ATA_REGISTER_STATUS);
 	}
 	
-	return status;
+	return ATA_RETURN_SUCCESS;
 }
 
 uint8_t ata_pio_wait_rdy(ata_dev_t *dev)
 {
+	uint16_t timeout = 1000;
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
     while(!(status & ATA_STATUS_RDY)) {
+		timeout--;
 		ata_device_debug(dev, "waiting rdy");
 
 		if (status & ATA_STATUS_ERR) {
 			ata_err_dump(dev, status);
+			return ATA_RETURN_ERROR;
+		}
+
+		if (!timeout) {
+			return ATA_RETURN_TIMEOUT;
 		}
 
 		status = inb(dev->io_base + ATA_REGISTER_STATUS);
 	}
 	
-	return status;
+	return ATA_RETURN_SUCCESS;
 }
 
 void ata_pio_reset(ata_dev_t *dev)
@@ -163,13 +187,16 @@ void ata_pio_reset(ata_dev_t *dev)
 	ata_pio_wait_rdy(dev);
 }
 
-void ata_pio_read(ata_dev_t *dev, uint32_t lba, uint8_t sector_count, uint16_t *buf)
+uint8_t ata_pio_read(ata_dev_t *dev, uint32_t lba, uint8_t sector_count, uint16_t *buf)
 {
-	if (!dev->ready) return;
+	if (!dev->ready) return ATA_RETURN_NOT_READY;
 
 	// Enable LBA mode and send upper LBA bits
 	outb(dev->io_base + ATA_REGISTER_SELECT, (dev->master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
-	ata_pio_wait_bsy(dev);
+
+	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
+		return 0;
+	}
 
 	/* Set sector count and write LBA */
 	outb(dev->io_base + ATA_REGISTER_ERROR, 0);
@@ -200,9 +227,6 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 
 	dev->ready = false;
 
-	uint8_t status;
-	uint32_t timeout;
-
 	outb(dev->master ? ATA_REGISTER_PRIMARY_CONTROL : ATA_REGISTER_SECONDARY_CONTROL, 0);
 
 	// Select drive
@@ -217,29 +241,13 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 
 	// Identify
 	outb(dev->io_base + ATA_REGISTER_COMMAND, ATA_COMMAND_IDENTIFY);
-	status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
-	timeout = 1000;
-	while (status & ATA_STATUS_BSY) {
-		status = inb(dev->io_base + ATA_REGISTER_STATUS);
-
-		timeout--;
-		if (timeout < 1) return 0;
+	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
+		return 0;
 	}
 
 	// Wait until all data is transfered
-	status = inb(dev->io_base + ATA_REGISTER_STATUS);
-
-	timeout = 1000;
-	while ((!status & ATA_STATUS_DRQ) && (!status & ATA_STATUS_ERR)) {
-		status = inb(dev->io_base + ATA_REGISTER_STATUS);
-
-		timeout--;
-		if (timeout < 1) return 0;
-	}
-
-	if (status & ATA_STATUS_ERR) {
-		ata_err_dump(dev, status);
+	if (ata_pio_wait_drq(dev) != ATA_RETURN_SUCCESS) {
 		return 0;
 	}
 

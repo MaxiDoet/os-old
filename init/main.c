@@ -100,11 +100,11 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		kdebug("[kernel] root device: ATA->Secondary Slave\r\n");
 	}
 
-	vfs_probe(&root_dev);
+	if (root_dev.ready) {
+		vfs_probe(&root_dev);
+	}
 
 	pci_scan();
-
-	
 
 	keyboard_init();
 	mouse_init();

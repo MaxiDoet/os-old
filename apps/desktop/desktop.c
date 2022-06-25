@@ -137,7 +137,7 @@ static inline void desktop_swap_fb()
 
 void desktop_init(multiboot_info_t *mbi)
 {
-	kdebug("Addr: %x", (uint32_t) mbi->framebuffer_addr);
+	kdebug("Framebuffer");
 	kdebug(" | BPP: %d", mbi->framebuffer_bpp);
 	kdebug(" | Width: %d", mbi->framebuffer_width);
 	kdebug(" | Height: %d", mbi->framebuffer_height);
@@ -146,10 +146,11 @@ void desktop_init(multiboot_info_t *mbi)
 	/* Play startup sound */
 	uint8_t *startup_buf = (uint8_t *) malloc(123510);
 	memset(startup_buf, 0x00, 123510);
-	vfs_read("/startup.wav", startup_buf);
-	ac97_play(startup_buf, 123510);
-	//free(startup_buf);
 
+	if (vfs_read("/startup.wav", startup_buf)) {
+		ac97_play(startup_buf, 123510);
+	}
+	
 	bb = (void *) (uint32_t) mbi->framebuffer_addr;
 	fb = (void *) (uint32_t) malloc(mbi->framebuffer_height * mbi->framebuffer_pitch);
 
@@ -173,8 +174,6 @@ void desktop_init(multiboot_info_t *mbi)
 
 	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);
-
-	
 
 	while(1) {
 		// Background

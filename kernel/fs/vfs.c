@@ -37,7 +37,7 @@ void vfs_probe(ata_dev_t *dev)
 	*/
 
 	uint16_t *gpt_table_header_buf = (uint16_t *) malloc(ATA_SECTOR_SIZE);
-	ata_pio_read(root_dev, 1, 1, gpt_table_header_buf);
+	ata_pio_read(dev, 1, 1, gpt_table_header_buf);
 	gpt_table_header_t *gpt_table_header = (gpt_table_header_t *) gpt_table_header_buf;
 
 	/* Check GPT signature */
@@ -73,6 +73,7 @@ void vfs_probe(ata_dev_t *dev)
 
 uint8_t vfs_read(char* path, uint8_t *buf)
 {
+	if (!root_dev) return 0;
 	if (!root_dev->ready) return 0;
 
 	return ext2_read_file(root_dev, &root_fs, path, buf);
