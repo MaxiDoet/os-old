@@ -5,8 +5,6 @@
 #include "../config.h"
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/serial.h"
-#include "../include/drivers/vgacon.h"
-#include "../include/drivers/vga-color.h"
 #include "../libc/include/mm.h"
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/irq.h"
@@ -14,6 +12,7 @@
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/pmm.h"
+#include "../include/kernel/console.h"
 #include "../include/drivers/pci.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
@@ -109,7 +108,5 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	keyboard_init();
 	mouse_init();
 
-	#ifdef DESKTOP
-		desktop_init(mbi);
-	#endif
+	desktop_init(mbi);
 }

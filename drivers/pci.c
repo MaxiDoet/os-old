@@ -343,7 +343,9 @@ void pci_scan()
 					rtl8139_init(dev);
 				}
 
-				if (dev.vendor_id == 0x8086 && dev.device_id == 0x2415) {
+				if ((dev.vendor_id == 0x8086 && dev.device_id == 0x2415) ||
+					(dev.vendor_id == 0x8086 && dev.device_id == 0x24C5)
+					) {
 					ac97_init(dev);
 				}
 

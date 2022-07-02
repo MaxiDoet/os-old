@@ -14,7 +14,7 @@ pixels = im.load()
 
 data="/* Generated using image converter tool by TheHeroCraft1579 */\n\n"
 # C Definition
-data+="int %s[%s] = {" % (name, width*height)
+data+="uint16_t %s[%s] = {" % (name, width*height)
 
 if (width, height) is not im.size:
 	print("Warning: Image size does not match size settings!")

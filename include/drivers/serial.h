@@ -1,10 +1,15 @@
 #ifndef _serial_h
 #define _serial_h
 
-void serial_init(int data_port);
-int serial_avaiable(int data_port);
-uint8_t serial_read(int data_port);
-int serial_transmit_empty(int data_port);
-void serial_write(int data_port, char c);
+#define COM1 0x3F8
+#define COM2 0x2F8
+#define COM3 0x3E8
+#define COM4 0x2E8
+
+void serial_init(uint16_t data_port);
+uint8_t serial_avaiable(uint16_t data_port);
+uint8_t serial_read(uint16_t data_port);
+uint8_t serial_transmit_empty(uint16_t data_port);
+void serial_write(uint16_t data_port, char c);
 
 #endif

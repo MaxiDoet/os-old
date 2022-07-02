@@ -13,7 +13,6 @@
 
 #include "../config.h"
 
-#include "../apps/desktop/wallpaper.h"
 #include "../apps/desktop/cursor.h"
 #include "../apps/desktop/logo.h"
 
@@ -177,11 +176,7 @@ void desktop_init(multiboot_info_t *mbi)
 
 	while(1) {
 		// Background
-		#ifdef DESKTOP_WALLPAPER
-			draw_image(main_context, 0, 0, main_context.width, main_context.height, wallpaper_image);
-		#else
-			draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x4A69);
-		#endif
+		draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x4A69);
 
 		for (int i=0; i < 10; i++) {
 			if (windows[i] == NULL) continue;

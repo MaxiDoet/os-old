@@ -6,6 +6,7 @@
 #include "../include/lib/string.h"
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/serial.h"
+#include "../include/kernel/console.h"
 #include "../config.h"
 
 void puts(int data_port, char* str)
@@ -13,6 +14,7 @@ void puts(int data_port, char* str)
 	int i=0;
 	while(str[i] != '\0') {
 		serial_write(data_port, str[i]);
+		console_write(str[i]);
 		i++;
 	}
 }
@@ -26,60 +28,62 @@ void kdebug(char* format, ...)
 	va_start(args, format);
 
 	char c;
-        long n;
-        int i=0;
+    long n;
+    int i=0;
 	char* s;
 	char cc;
 
 	int base;
 	char* prefix;
 
-        while(format[i] != '\0') {
+    while(format[i] != '\0') {
+		c=format[i];
 
-                c=format[i];
+        if(c == '%') {
+        	i++;
+            c=format[i];
 
-                if(c == '%') {
-                        i++;
-                        c=format[i];
+            switch(c) {
+				case '%':
+					puts(DEBUG_PORT, "%");
+					break;
+                case 'd':
+					prefix="";
+					base=10;
+                    goto print_num;
+				case 's':
+					s = va_arg(args, char *);
+					puts(DEBUG_PORT, s);
+					break;
+				case 'x':
+					prefix="";
+					base=16;
+                    goto print_num;
 
-                    switch(c) {
-						case '%':
-							puts(DEBUG_PORT, "%");
-							break;
-                		case 'd':
-							prefix="";
-							base=10;
-                            goto print_num;
-						case 's':
-							s = va_arg(args, char *);
-							puts(DEBUG_PORT, s);
-							break;
-						case 'x':
-							prefix="";
-							base=16;
-                            goto print_num;
+				print_num:
+					puts(DEBUG_PORT, prefix);
 
-						print_num:
-							puts(DEBUG_PORT, prefix);
+					n = va_arg(args, long);
 
-							n = va_arg(args, long);
+					if (n==0) kdebug("0");
 
-							if (n==0) kdebug("0");
+                    static char buf[32] = {0};
 
-                            static char buf[32] = {0};
+                    int j = 30;
 
-                            int j = 30;
+                    for(; n && j ; --j, n /= base)
+						buf[j] = "0123456789abcdef"[n % base];
+						puts(DEBUG_PORT, &buf[j+1]);
+						
+					break;
+			}
+        } else {
+            serial_write(DEBUG_PORT, c);
+			console_write(c);
+		}
 
-                            for(; n && j ; --j, n /= base)
-                            	buf[j] = "0123456789abcdef"[n % base];
-								puts(DEBUG_PORT, &buf[j+1]);
-                    }
-                } else {
-                        serial_write(DEBUG_PORT, c);
-                }
-
-                i++;
-        }
+        i++;
+	}
 
 	va_end(args);
 

@@ -6,26 +6,49 @@
 
 #include "../include/kernel/io.h"
 
-void serial_init(int data_port)
+#define REG_DATA	0x00
+#define REG_IEN		0x01
+#define REG_BLSB	0x00
+#define REG_BMSB	0x01
+#define REG_II		0x02
+#define REG_LCTL	0x03
+#define REG_MCTL	0x04
+#define REG_LSTAT	0x05
+#define REG_MSTAT	0x06
+
+#define IEN_DATA			(1 << 0)
+#define IEN_TXEMPTY			(1 << 1)
+#define IEN_ERROR			(1 << 2)
+#define IEN_STATUS_CHANGE	(1 << 3)
+
+#define LCTL_DLAB	(1 << 7)
+
+#define LSTAT_DR	(1 << 0)
+#define LSTAT_THRE	(1 << 5)
+
+void serial_init(uint16_t data_port)
 {
-	outb(data_port + 1, 1); // Fires irq if data is avaiable
-	outb(data_port + 3, 0x80); // Allow access to baud rate registers
-	outb(data_port + 0, 0x03); // Send low byte of divisor
-	outb(data_port + 1, 0x00); // Send high byte of divisor
-	outb(data_port + 3, 0x03); // 8bits, one stopbyte
-	outb(data_port + 2, 0xC7);
+	/* Disable interrupts */
+	outb(data_port + REG_IEN, 0);
+	
+	/* Unlock baud rate regs and set baudrate to 115200 baud */
+	outb(data_port + REG_LCTL, LCTL_DLAB);
+	outb(data_port + REG_BLSB, 0x00);
+	outb(data_port + REG_BMSB, 0x00);
+	outb(data_port + REG_LCTL, 0x00);
+
+	outb(data_port + REG_LCTL, 0x03); // 8bits, one stopbyte
+	outb(data_port + REG_II, 0xC7);
 	outb(data_port + 4, 0x0B); // Enable irqs
 	outb(data_port + 4, 0x0F); // Normal mode
-
-	// Todo: Test if chip works, set to loopback mode, send some data and see if we receive data
 }
 
-int serial_avaiable(int data_port)
+uint8_t serial_avaiable(uint16_t data_port)
 {
-	return inb(data_port + 5) & 1;
+	return inb(data_port + REG_LSTAT) & LSTAT_DR;
 }
 
-uint8_t serial_read(int data_port)
+uint8_t serial_read(uint16_t data_port)
 {
 	// Wait until we receive some data
 	while(serial_avaiable(data_port) == 0);
@@ -33,12 +56,12 @@ uint8_t serial_read(int data_port)
 	return inb(data_port);
 }
 
-int serial_transmit_empty(int data_port)
+uint8_t serial_transmit_empty(uint16_t data_port)
 {
-	return inb(data_port + 5) & 0x20;
+	return inb(data_port + REG_LSTAT) & LSTAT_THRE;
 }
 
-void serial_write(int data_port, char c)
+void serial_write(uint16_t data_port, char c)
 {
 	// Wait until all data was sent
 	while(serial_transmit_empty(data_port) == 0);
