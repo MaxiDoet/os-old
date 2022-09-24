@@ -149,7 +149,8 @@ void desktop_init(multiboot_info_t *mbi)
 	if (vfs_read("/startup.wav", startup_buf)) {
 		ac97_play(startup_buf, 123510);
 	}
-	
+	//free(startup_buf);
+
 	bb = (void *) (uint32_t) mbi->framebuffer_addr;
 	fb = (void *) (uint32_t) malloc(mbi->framebuffer_height * mbi->framebuffer_pitch);
 
@@ -184,7 +185,7 @@ void desktop_init(multiboot_info_t *mbi)
 		}
 
 		// Cursor
-		draw_image_transparent(main_context, cursor_x, cursor_y, 13, 24, cursor);
+		draw_filled_rectangle(main_context, cursor_x, cursor_y, 10, 10, 0xFFFF);
 
 		// Swap frontbuffer and backbuffer
     	desktop_swap_fb();

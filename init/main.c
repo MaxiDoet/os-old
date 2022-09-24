@@ -76,11 +76,27 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	//pmm_init(mbi);
 	//pmm_alloc();
 
-	size_t heap_start = mbi->mem_upper + 10*1024*1024;
+	uint32_t heap_start = mbi->mem_upper + 10*1024*1024;
 	//size_t heap_size = mbi->mem_upper * 1024 - heap_size - 10*1024;
-	size_t heap_size = 1000000000;
+	uint32_t heap_size = 10000000;
 	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
 	mm_init(heap_start, heap_size);
+
+	/*
+	kdebug("mm test\r\n");
+
+	void *ptr1 = malloc(1024);
+	void *ptr2 = malloc(512);
+	void *ptr3 = malloc(256);
+	void *ptr4 = malloc(2048);
+
+	kdebug("ptr1: %x ptr2: %x ptr3: %x ptr4: %x\r\n", ptr1, ptr2, ptr3, ptr4);
+
+	free(ptr3);
+
+	ptr3 = malloc(256);
+	kdebug("ptr3: %x\r\n", ptr3);
+	*/
 
 	kdebug("[kernel] Platform init\r\n");
 	platform_init();
