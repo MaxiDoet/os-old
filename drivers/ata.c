@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../libc/include/string.h"
 #include "../include/drivers/ata.h"
 #include "../include/kernel/io.h"
 #include "../include/kernel/kernel.h"
@@ -29,6 +30,8 @@
 #define ATA_STATUS_BSY	(1 << 7)
 
 #define ATA_COMMAND_READ_SECTORS 	0x20
+#define ATA_COMMAND_WRITE_SECTORS	0x30
+#define ATA_COMMAND_CACHE_FLUSH		0xE7
 #define ATA_COMMAND_IDENTIFY 		0xEC
 
 #define ATA_CONTROL_SRST			(0 << 2)
@@ -218,6 +221,41 @@ uint8_t ata_pio_read(ata_dev_t *dev, uint32_t lba, uint8_t sector_count, uint16_
 	}
 }
 
+uint8_t ata_pio_write(ata_dev_t *dev, uint32_t lba, uint16_t* buf, uint8_t sector_count)
+{
+	if (!dev->ready) return ATA_RETURN_NOT_READY;
+
+	// Enable LBA mode and send upper LBA bits
+	outb(dev->io_base + ATA_REGISTER_SELECT, (dev->master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
+
+	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
+		return 0;
+	}
+
+	/* Set sector count and write LBA */
+	outb(dev->io_base + ATA_REGISTER_ERROR, 0);
+	outb(dev->io_base + ATA_REGISTER_SECTOR_COUNT, sector_count);
+	outb(dev->io_base + ATA_REGISTER_LBA_LOW, lba & 0x000000FF);
+	outb(dev->io_base + ATA_REGISTER_LBA_MID, (lba & 0x0000FF00) >> 8);
+	outb(dev->io_base + ATA_REGISTER_LBA_HIGH, (lba & 0x00FF0000) >> 16);
+	outb(dev->io_base + ATA_REGISTER_COMMAND, ATA_COMMAND_WRITE_SECTORS);
+
+	for (int i=0; i < sector_count; i++) {
+		ata_pio_wait_bsy(dev);
+		ata_pio_wait_drq(dev);
+
+		kdebug("cycle\r\n");
+
+		for (int j=0; j < 256; j++) {
+			outw(dev->io_base + ATA_REGISTER_DATA, buf[j]);
+		}
+
+		buf+=256;
+	}
+
+	outb(dev->io_base + ATA_REGISTER_COMMAND, ATA_COMMAND_CACHE_FLUSH);
+}
+
 uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 {
 	dev->primary = primary;
@@ -260,35 +298,6 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 	}
 
 	dev->ready = true;
+
 	return 1;
 }
-
-/*
-void ata_pio_write(ata_dev_t dev, uint32_t sector, uint16_t* buf, uint32_t count)
-{
-	// Select sector
-        outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
-        outb(dev.error_port, 0);
-        outb(dev.sector_count_port, 1);
-        outb(dev.lba_low_port, sector & 0x000000FF);
-        outb(dev.lba_mid_port, (sector & 0x0000FF00) >> 8);
-        outb(dev.lba_high_port, (sector & 0x00FF0000) >> 16);
-        outb(dev.command_port, 0x20);
-
-	for(int i = 0; i < 256; i++) {
-		outw(dev.data_port, buf[i]);
-    	}
-}
-
-void ata_pio_flush(ata_dev_t dev)
-{
-	outb(dev.device_select_port, (dev.master ? 0xE0 : 0xF0));
-	outb(dev.command_port, 0xE7);
-
-	uint8_t status = ata_pio_wait_bsy(dev);
-
-	if (status & 0x01) {
-		return;
-	}
-}
-*/

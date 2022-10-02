@@ -120,5 +120,5 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	keyboard_init();
 	mouse_init();
 
-	desktop_init(mbi);
+	//desktop_init(mbi);
 }

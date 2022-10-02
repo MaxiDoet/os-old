@@ -11,5 +11,3 @@
 
 #define PAGE_SIZE 4096
 #define HEAP_SIZE 10485760
-
-//#define DESKTOP
