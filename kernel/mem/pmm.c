@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../libc/include/string.h"
-#include "../include/kernel/pmm.h"
+#include "../include/kernel/mem/pmm.h"
 #include "../include/kernel/kernel.h"
 #include "../config.h"
 

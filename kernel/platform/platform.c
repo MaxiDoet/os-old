@@ -13,7 +13,7 @@ void platform_init()
 	smbios_entry_point *entry_point = smbios_get_entry_point();
 
 	if (entry_point) {
-		kdebug("[kernel] SMBIOS Version: %d.%d\r\n", entry_point->major_version, entry_point->minor_version);
+		kdebug("[platform] SMBIOS Version: %d.%d\r\n", entry_point->major_version, entry_point->minor_version);
 
 		for (int i=0; i < entry_point->structure_table_entries; i++) {
 			size_t offset = entry_point->structure_table_address;

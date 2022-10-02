@@ -4,7 +4,7 @@
 
 #include "../apps/desktop/desktop.h"
 #include "../include/kernel/kernel.h"
-#include "../libc/include/mm.h"
+#include "../include/kernel/mem/heap.h"
 #include "../libc/include/string.h"
 
 #include "../include/drivers/keyboard.h"
@@ -12,9 +12,6 @@
 #include "../include/drivers/serial.h"
 
 #include "../config.h"
-
-#include "../apps/desktop/cursor.h"
-#include "../apps/desktop/logo.h"
 
 #include "../include/kernel/fs/vfs.h"
 #include "../include/drivers/ac97.h"
@@ -37,7 +34,7 @@ void draw_window(context ctx, window *win)
 	draw_filled_rectangle(ctx, win->x, win->y, win->width, 30, FRAME_COLOR);
 
 	// Window title
-	//draw_string(ctx, win->x + 10, win->y, win->title, 0xFFFF);
+	draw_string(ctx, win->x + 5, win->y - 8, win->title, 0xFFFF);
 
 	// Content
 	draw_filled_rectangle(ctx, win->x, win->y + 20, win->width, win->height - 20, WINDOW_COLOR);
@@ -65,9 +62,21 @@ static void mouse_handler(struct mouse_event event)
 		main_context.grabbed_window->y -= movement_y;
 	}
 
+	/*
 	if (main_context.grabbing && main_context.grabbed_window && !main_context.grabbed_window->coliding) {
 		cursor_x += movement_x;
 		cursor_y -= movement_y;
+	}
+	*/
+
+	if (main_context.grabbing && main_context.grabbed_window) {
+		if (!main_context.grabbed_window->coliding_x) {
+			cursor_x += movement_x;
+		}
+
+		if (!main_context.grabbed_window->coliding_y) {
+			cursor_y -= movement_y;
+		}
 	}
 
 	// Check for collision
@@ -112,6 +121,7 @@ static void mouse_handler(struct mouse_event event)
 			windows[i]->y = 0;
 		}
 
+		/*
 		if (windows[i]->x + windows[i]->width >= main_context.width ||
 			windows[i]->y + windows[i]->height >= main_context.height ||
 			windows[i]->x <= 0 ||
@@ -121,6 +131,10 @@ static void mouse_handler(struct mouse_event event)
 		} else {
 			windows[i]->coliding = false;
 		}
+		*/
+
+		windows[i]->coliding_x = (windows[i]->x <= 0 || windows[i]->width >= main_context.width);
+		windows[i]->coliding_y = (windows[i]->y <= 0 || windows[i]->height >= main_context.height);
 	}
 }
 
@@ -169,6 +183,7 @@ void desktop_init(multiboot_info_t *mbi)
 	test.y = 70;
 	test.width = 400;
 	test.height = 300;
+	test.title = "Editor";
 
 	windows[0] = &test;
 

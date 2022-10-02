@@ -7,7 +7,7 @@
 #include "../include/kernel/irq.h"
 #include "../include/drivers/pci.h"
 #include "../include/kernel/io.h"
-#include "../libc/include/mm.h"
+#include "../include/kernel/mem/heap.h"
 #include "../libc/include/string.h"
 
 static hda_dev_t dev;

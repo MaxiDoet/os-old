@@ -6,8 +6,7 @@
 #include "../include/kernel/io.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
-#include "../libc/include/mm.h"
-
+#include "../include/kernel/mem/heap.h"
 #include "../include/drivers/rtl8139.h"
 #include "../include/drivers/ac97.h"
 #include "../include/drivers/hda.h"

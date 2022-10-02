@@ -4,11 +4,11 @@
 
 #include "../include/drivers/pci.h"
 #include "../include/kernel/io.h"
+#include "../include/kernel/mem/heap.h"
 #include "../include/drivers/ac97.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/fs/vfs.h"
-#include "../libc/include/mm.h"
 
 /* NAM Registers */
 #define NAM_RESET 0x00

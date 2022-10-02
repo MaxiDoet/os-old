@@ -5,13 +5,13 @@
 #include "../config.h"
 #include "../include/kernel/kernel.h"
 #include "../include/drivers/serial.h"
-#include "../libc/include/mm.h"
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/idt.h"
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
-#include "../include/kernel/pmm.h"
+#include "../include/kernel/mem/pmm.h"
+#include "../include/kernel/mem/heap.h"
 #include "../include/kernel/console.h"
 #include "../include/drivers/pci.h"
 #include "../include/drivers/keyboard.h"
@@ -56,16 +56,13 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	multiboot_info_t *mbi;
 	mbi = (multiboot_info_t *) mbi_addr;
 
-	kdebug("[kernel\e[0;37m] GDT init\r\n");
+	kdebug("[kernel] GDT init\r\n");
     gdt_setup();
-    kdebug("[kernel\e[0;37m] IDT init\r\n");
+    kdebug("[kernel] IDT init\r\n");
     idt_install();
 
 	// Init serial debug
 	serial_init(DEBUG_PORT);
-	kdebug(BUILD_INFO);
-	kdebug("\r\n");
-
 	// For debug commands
 	irq_install_handler(4, serial_irq_handler);
 
@@ -77,10 +74,9 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	//pmm_alloc();
 
 	uint32_t heap_start = mbi->mem_upper + 10*1024*1024;
-	//size_t heap_size = mbi->mem_upper * 1024 - heap_size - 10*1024;
 	uint32_t heap_size = 10000000;
-	kdebug("[kernel] Heap init\r\n   Start: %x\r\n", heap_start);
-	mm_init(heap_start, heap_size);
+	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
+	heap_init(heap_start, heap_size);
 
 	/*
 	kdebug("mm test\r\n");

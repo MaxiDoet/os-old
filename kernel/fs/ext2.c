@@ -6,7 +6,7 @@
 #include "../include/kernel/fs/gpt.h"
 #include "../include/drivers/ata.h"
 #include "../include/kernel/kernel.h"
-#include "../libc/include/mm.h"
+#include "../include/kernel/mem/heap.h"
 #include "../libc/include/string.h"
 #include "../config.h"
 

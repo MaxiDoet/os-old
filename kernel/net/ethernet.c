@@ -3,7 +3,7 @@
 
 #include "../include/kernel/kernel.h"
 #include "../libc/include/string.h"
-#include "../libc/include/mm.h"
+#include "../include/kernel/mem/heap.h"
 #include "../include/kernel/net/ethernet.h"
 #include "../include/drivers/rtl8139.h"
 #include "../include/kernel/net/arp.h"

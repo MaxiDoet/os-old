@@ -2,8 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../libc/include/mm.h"
 #include "../include/kernel/kernel.h"
+#include "../include/kernel/mem/heap.h"
 #include "../include/kernel/fs/vfs.h"
 #include "../include/kernel/fs/gpt.h"
 #include "../include/kernel/fs/ext2.h"

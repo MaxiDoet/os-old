@@ -6,10 +6,9 @@
 
 void kpanic(char* msg)
 {
-        serial_init(DEBUG_PORT);
+    serial_init(DEBUG_PORT);
 
-	kdebug("[kernel] Panic! %s\r\n", msg);
+	kdebug("[kernel] Panic | %s\r\n", msg);
 
 	for(;;);
 }
-

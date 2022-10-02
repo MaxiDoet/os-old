@@ -12,7 +12,8 @@ typedef struct window {
 	
 	char *title;
 
-	bool coliding;
+	bool coliding_x;
+	bool coliding_y;
 
 	bool focused;
 	bool grabbed;
