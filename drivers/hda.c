@@ -40,8 +40,6 @@ void hda_irq_handler()
 	uint32_t intsts = hda_rl(&dev, HDA_INTSTS);
 	uint16_t statests = hda_rw(&dev, HDA_STATESTS);
 
-	kdebug("[hda] irq INTSTS: %x STATESTS: %x\r\n", intsts, statests);
-
 	// Clear interrupts
 	hda_wl(&dev, HDA_INTSTS, intsts);
 	hda_ww(&dev, HDA_STATESTS, statests);

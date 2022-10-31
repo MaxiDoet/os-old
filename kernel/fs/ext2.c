@@ -87,6 +87,8 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 	uint32_t block = (bg_index * fs->inode_size) / fs->block_size;
 	uint32_t block_index = bg_index % fs->inodes_per_block;
 
+	kdebug("read_inode | bg: %d | bg_index: %d | block: %d | block_index: %d\r\n", bg, bg_index, block, block_index);
+
 	ext2_bg_descriptor *bg_descriptor = &fs->bgdt[bg];
 
 	uint8_t *block_buf = (uint8_t *) malloc(fs->block_size);
@@ -100,15 +102,17 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 
 uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 {
-	uint32_t result;
+	uint32_t result = 0;
 	size_t current = strsplit(path, '/');
 	char* filename = (char *) path + 1; // Remove slash
 	ext2_dir_entry *dir = (ext2_dir_entry *) malloc(sizeof(ext2_dir_entry));
 	ext2_inode *inode_buf = (ext2_inode *) malloc(sizeof(ext2_inode));
 
 	if (current == 1) {
+		kdebug("start root read\r\n");
 		// Root is always inode 2
 		ext2_read_inode(dev, fs, 2, inode_buf);
+		kdebug("end root read\r\n");
 		
 		for (int i=0; i < 12; i++) {
 			uint32_t block = inode_buf->direct_block_ptr[i];
@@ -120,26 +124,30 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 				memcpy(name, &dir->name_reserved, dir->name_length);
 				name[dir->name_length] = '\0';
 				if (strcmp(name, filename) == 0) {
-					return dir->inode;
+					result = dir->inode;
+
+					break;
 				}
 				
 				dir = (ext2_dir_entry *) ((uint32_t) dir + dir->size);
 			}
 		}
-
-		return 0;
 	} else {
 		kdebug("[ext2] Subdirs are not supported yet!");
 	}
 
 	free(inode_buf);
 	free(dir);
+
+	return result;
 }
 
 uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
 {
 	uint32_t inode = ext2_find_inode(dev, fs, path);
 	if (inode == 0) return -1;
+	
+	kdebug("%d\r\n", inode);
 
 	ext2_inode *inode_buf = (ext2_inode *) malloc(sizeof(ext2_inode));
 	ext2_read_inode(dev, fs, inode, inode_buf);
@@ -196,7 +204,7 @@ uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs)
 	fs->block_size = (1024 << sb->block_size);
 	fs->inodes_per_block = fs->block_size / fs->inode_size;
 	fs->block_groups_total = sb->blocks_total / sb->blocks_per_group;
-
+ 
 	kdebug("[ext2] Block size: %d Inode size: %d\r\n", fs->block_size, fs->inode_size);
 
 	/* Read block group descriptor table */

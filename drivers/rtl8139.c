@@ -13,11 +13,69 @@
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/net/ip.h"
 
+// Registers
+#define REG_CR 0x37
+#define REG_CAPR 0x38
+#define REG_IMR 0x3C
+#define REG_ISR 0x3E
+#define REG_TCR 0x40
+#define REG_RCR 0x44
+#define REG_RBSTART 0x30
+
+// Buffers
+#define TX_BUFFER_SIZE 1792
+#define RX_BUFFER_SIZE 9744
+
+// Interrupt mask register masks
+#define IMR_SERR (1 << 15)
+#define IMR_TIMEOUT (1 << 14)
+#define IMR_LENCHG (1 << 13)
+#define IMR_FOVW (1 << 6)
+#define IMR_PUN (1 << 5)
+#define IMR_RXOVW (1 << 4)
+#define IMR_TER (1 << 3)
+#define IMR_TOK (1 << 2)
+#define IMR_RER (1 << 1)
+#define IMR_ROK (1 << 0)
+
+// Transmit start address registers
+#define REG_TSAD0 0x20
+#define REG_TSAD1 0x24
+#define REG_TSAD2 0x28
+#define REG_TSAD3 0x2C
+
+// Transmit status registers
+#define REG_TSD0 0x10
+#define REG_TSD1 0x14
+#define REG_TSD2 0x18
+#define REG_TSD3 0x1C
+
+// Config registers
+#define REG_CONFIG0 0x51
+#define REG_CONFIG1 0x52
+#define REG_CONFIG3 0x59
+#define REG_CONFIG4 0x5A
+
+// Command register
+#define CR_RST (1 << 4)
+#define CR_RE (1 << 3)
+#define CR_TE (1 << 2)
+#define CR_BUFE (1 << 0)
+
+// RX config
+#define RCR_ACCEPT_PHYSICAL_ADDRESS_PACKETS (1 << 0)
+#define RCR_ACCEPT_PHYSICAL_MATCH_PACKETS (1 << 1)
+#define RCR_ACCEPT_MULTICAST_PACKETS (1 << 2)
+#define RCR_ACCEPT_BROADCAST_PACKETS (1 << 3)
+#define RCR_ACCEPT_RUNT_PACKETS (1 << 4)
+#define RCR_ACCEPT_ERROR_PACKETS (1 << 5)
+#define RCR_WRAP (1 << 7)
+
 pci_dev_descriptor dev;
 uint16_t *rx_buffer;
 uint16_t rx_buffer_offset;
 uint16_t *tx_buffers[4];
-int tx_buffer_current;
+uint8_t tx_buffer_current;
 
 void rtl8139_handle_rx();
 bool init_done = false;
@@ -110,9 +168,9 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	pci_write_word(dev.bus, dev.device, dev.function, PCI_REGISTER_COMMAND, command);
 
 	// Setup rx buffer
-	rx_buffer = (uint16_t *) 0x00070000;
+	rx_buffer = (uint16_t *) malloc(8192 + 16 + 1500);
 	outl(dev.bars[0].io_base + REG_RBSTART, (uint32_t) rx_buffer);
-	memset(rx_buffer, 0x00, 8192 + 16 + 1500);
+	memset(rx_buffer, 0x00, 8192 + 16);
 
 	// Enable rx, tx
 	outb(dev.bars[0].io_base + REG_CR, CR_RE | CR_TE);
@@ -130,6 +188,12 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	outw(dev.bars[0].io_base + REG_ISR, 0);
 	outw(dev.bars[0].io_base + REG_IMR, 0xFFFF);
 
+	// Init TX buffers
+	tx_buffers[0] = malloc(1792);
+	tx_buffers[1] = malloc(1792);
+	tx_buffers[2] = malloc(1792);
+	tx_buffers[3] = malloc(1792);
+
 	// Install irq handler
     irq_install_handler(dev.irq, rtl8139_irq_handler);
 
@@ -146,21 +210,13 @@ void rtl8139_init(pci_dev_descriptor pci_dev)
 	arp_set_ip(static_ip);
 	arp_set_mac(mac);
 
-	// Test packet
-	tx_buffers[0] = (uint16_t *) 0x00030000;
-	tx_buffers[1] = (uint16_t *) 0x00040000;
-	tx_buffers[2] = (uint16_t *) 0x00050000;
-	tx_buffers[3] = (uint16_t *) 0x00060000;
-
-	memset(tx_buffers[0], 0x00, 1792);
-	memset(tx_buffers[1], 0x00, 1792);
-	memset(tx_buffers[2], 0x00, 1792);
-	memset(tx_buffers[3], 0x00, 1792);
-
 	init_done = true;
 
 	// Default qemu gateway
 	uint8_t gateway_ip[4] = {10, 0, 2, 2};
 	arp_request_mac(gateway_ip);
 	//arp_broadcast_mac(gateway_ip);
+
+	uint16_t status = inw(dev.bars[0].io_base + 0x64);
+	kdebug("status: %x\r\n", status);
 }

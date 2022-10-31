@@ -13,7 +13,6 @@
 
 #include "../config.h"
 
-#include "../include/kernel/fs/vfs.h"
 #include "../include/drivers/ac97.h"
 
 #include <gui/context.h>
@@ -148,7 +147,7 @@ static inline void desktop_swap_fb()
 	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((main_context.height * main_context.fb_pitch)));
 }
 
-void desktop_init(multiboot_info_t *mbi)
+void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 {
 	kdebug("Framebuffer");
 	kdebug(" | BPP: %d", mbi->framebuffer_bpp);
@@ -159,11 +158,11 @@ void desktop_init(multiboot_info_t *mbi)
 	/* Play startup sound */
 	uint8_t *startup_buf = (uint8_t *) malloc(123510);
 	memset(startup_buf, 0x00, 123510);
-
-	if (vfs_read("/startup.wav", startup_buf)) {
+	
+	if (vfs_read(root_fs, "/startup.wav", startup_buf)) {
 		ac97_play(startup_buf, 123510);
 	}
-	//free(startup_buf);
+	free(startup_buf);
 
 	bb = (void *) (uint32_t) mbi->framebuffer_addr;
 	fb = (void *) (uint32_t) malloc(mbi->framebuffer_height * mbi->framebuffer_pitch);

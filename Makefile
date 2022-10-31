@@ -27,15 +27,15 @@ os.bin: $(obj_files)
 	$(LD) -T linker.ld $(LDFLAGS) $^ -o os.bin
 
 os.iso: os.bin
-	mkdir -p isodir/boot/grub
-	cp os.bin isodir/boot/os.bin
-	cp grub.cfg isodir/boot/grub/grub.cfg
-	grub-mkrescue -o os.iso isodir
+	mkdir -p build/boot/grub
+	cp os.bin build/boot/os.bin
+	cp grub.cfg build/boot/grub/grub.cfg
+	grub-mkrescue -o os.iso build
 
 clean:
 	rm -f $(obj_files)
 	rm -f *.iso*
-	rm -fr isodir
+	rm -fr build
 	rm -f os.bin
 
 run: os.iso

@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../libc/include/string.h"
 #include "../include/drivers/pci.h"
 #include "../include/kernel/io.h"
 #include "../include/kernel/mem/heap.h"
@@ -72,6 +73,7 @@ static pci_dev_descriptor dev;
 struct buf_desc buf_descriptors[32];
 static uint8_t buf_descriptors_rp;
 static uint8_t buf_descriptors_wp;
+uint8_t *sound_buf;
 
 void ac97_irq_handler()
 {
@@ -146,6 +148,9 @@ void ac97_write_single_buffer(uint8_t *data, uint16_t size)
 
 void ac97_play(uint8_t *data, uint32_t size)
 {
+	sound_buf = (uint8_t *) malloc(size);
+	memcpy(sound_buf, data, size);
+
 	uint32_t available = size;
 	uint32_t offset = 0;
 	uint8_t last = 0;
@@ -158,12 +163,12 @@ void ac97_play(uint8_t *data, uint32_t size)
 			// Refill buffers
 			for (int i=0; i < LAST_VALID_INDEX; i++) {
 				if (available >= 0x20000) {
-					ac97_write_single_buffer(&data[offset], 0xFFFE);
+					ac97_write_single_buffer(&sound_buf[offset], 0xFFFE);
 					available -= 0x20000;
 					offset += 0x20000;
 					last = 32;
 				} else {
-					ac97_write_single_buffer(&data[offset], available >> 1);
+					ac97_write_single_buffer(&sound_buf[offset], available >> 1);
 					last = i;
 					available = 0;
 					break;
@@ -182,6 +187,8 @@ void ac97_play(uint8_t *data, uint32_t size)
 			outb(dev.bars[1].io_base + PO + CR, RPBM | IOCE | LVBIE | FEIE); // Start DMA; Enable IOC interrupt; Enable Last Buffer Entry interrupt
 		}
 	}
+
+	free(sound_buf);
 }
 
 void ac97_init(pci_dev_descriptor pci_dev)
@@ -214,6 +221,9 @@ void ac97_init(pci_dev_descriptor pci_dev)
 	}
 
 	kdebug("[ac97] Channels: %d Samples: %s\r\n", channel_count, (sample_capabilities == 1) ? "16bit, 20bit" : "16bit");
+
+	uint16_t extended_caps = inw(pci_dev.bars[0].io_base + 0x28);
+	kdebug("etended_caps: %x\r\n", extended_caps);
 
 	buf_descriptors_rp = 0;
 	buf_descriptors_wp = 0;
