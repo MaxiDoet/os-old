@@ -3,8 +3,8 @@
 #include <stdint.h>
 
 #include "../libc/include/string.h"
-#include "../include/drivers/pci.h"
-#include "../include/kernel/io.h"
+#include "../include/kernel/io/pci.h"
+#include "../include/kernel/io/io.h"
 #include "../include/kernel/mem/heap.h"
 #include "../include/drivers/ac97.h"
 #include "../include/kernel/kernel.h"
@@ -19,9 +19,16 @@
 #define NAM_REC_SLC 0x1A
 #define NAM_REC_GAIN 0x1C
 #define NAM_MIC_GAIN 0x1E
+#define NAM_POWER_STS 0x26
 #define NAM_EXT_ID 0x28
 #define NAM_EXT_CTRL 0x2A
 #define NAM_EXT_FRONT_RATE 0x2C
+
+/* NAM_POWER_STS */
+#define NAM_POWER_STS_ADC (1 << 0)
+#define NAM_POWER_STS_DAC (1 << 1)
+#define NAM_POWER_STS_ANL (1 << 2)
+#define NAM_POWER_STS_REF (1 << 3)
 
 /* NABM Registers */
 #define PI 0x00
@@ -69,7 +76,7 @@ typedef struct buf_desc {
 	unsigned int ioc : 1;
 } __attribute__((packed)) buf_desc;
 
-static pci_dev_descriptor dev;
+static pci_dev_t dev;
 struct buf_desc buf_descriptors[32];
 static uint8_t buf_descriptors_rp;
 static uint8_t buf_descriptors_wp;
@@ -81,7 +88,7 @@ void ac97_irq_handler()
 
 	if (status & LBI) {
 		#ifdef AC97_DEBUG
-		kdebug("Last Buffer Entry interrupt\r\n");
+		kdebug("[ac97] lvb interrupt\r\n");
 		#endif
 
 		buf_descriptors_rp = 0;
@@ -89,27 +96,23 @@ void ac97_irq_handler()
 	}
 
 	if (status & IOCI) {
-		#ifdef AC97_DEBUG
-		kdebug("IOC interrupt\r\n");
-		#endif
-
 		buf_descriptors_rp = (buf_descriptors_rp + 1) % 32;
 
 		#ifdef AC97_DEBUG
-		kdebug("buf_descriptors_index: %d\r\n", buf_descriptors_rp);
+		kdebug("[ac97] IOC interrupt | rp: %d\r\n", buf_descriptors_rp);
 		#endif
 	}
 
 	if (status & FEI) {
 		#ifdef AC97_DEBUG
-		kdebug("FIFO error interrupt\r\n");
+		kdebug("[ac97] FIFO error interrupt\r\n");
 		#endif
 	}
 
 	outw(dev.bars[1].io_base + PO + SR, 0x1C);
 }
 
-void ac97_reset(pci_dev_descriptor pci_dev)
+void ac97_reset(pci_dev_t pci_dev)
 {
 	// Enable interrupts
 	irq_install_handler(dev.irq, ac97_irq_handler);
@@ -134,6 +137,21 @@ void ac97_reset(pci_dev_descriptor pci_dev)
 void ac97_write_single_buffer(uint8_t *data, uint16_t size)
 {
 	if (size > MAX_ENTRY_SIZE) return;
+
+	/* Check if chip is ready */
+	uint16_t power_sts = inw(dev.bars[0].io_base + NAM_POWER_STS);
+
+	if (!(power_sts & (NAM_POWER_STS_ADC | NAM_POWER_STS_DAC | NAM_POWER_STS_ANL | NAM_POWER_STS_REF))) {
+		#ifdef AC97_DEBUG
+		kdebug("[ac97] not ready\r\n");
+		#endif
+
+		return;
+	}
+
+	#ifdef AC97_DEBUG
+	kdebug("[ac97] write | size: %d | wp: %d\r\n", size, buf_descriptors_wp);
+	#endif
 
 	buf_desc *desc = &buf_descriptors[buf_descriptors_wp];
 
@@ -191,7 +209,7 @@ void ac97_play(uint8_t *data, uint32_t size)
 	free(sound_buf);
 }
 
-void ac97_init(pci_dev_descriptor pci_dev)
+void ac97_init(pci_dev_t pci_dev)
 {
 	dev = pci_dev;
 
@@ -223,7 +241,6 @@ void ac97_init(pci_dev_descriptor pci_dev)
 	kdebug("[ac97] Channels: %d Samples: %s\r\n", channel_count, (sample_capabilities == 1) ? "16bit, 20bit" : "16bit");
 
 	uint16_t extended_caps = inw(pci_dev.bars[0].io_base + 0x28);
-	kdebug("etended_caps: %x\r\n", extended_caps);
 
 	buf_descriptors_rp = 0;
 	buf_descriptors_wp = 0;

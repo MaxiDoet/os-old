@@ -13,20 +13,22 @@
 #include "../include/kernel/mem/pmm.h"
 #include "../include/kernel/mem/heap.h"
 #include "../include/kernel/console.h"
-#include "../include/drivers/pci.h"
+#include "../include/kernel/io/pci.h"
+#include "../include/kernel/fs/ext2.h"
+#include "../include/kernel/fs/mbr.h"
+#include "../include/kernel/fs/vfs.h"
+#include "../include/kernel/io/io.h"
+#include "../include/kernel/platform.h"
+#include "../libc/include/string.h"
+
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
 #include "../include/drivers/rtc.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
+#include "../include/drivers/hda.h"
 #include "../include/drivers/ac97.h"
 #include "../include/drivers/rtl8139.h"
-#include "../include/kernel/fs/ext2.h"
-#include "../include/kernel/fs/mbr.h"
-#include "../include/kernel/fs/vfs.h"
-#include "../include/kernel/io.h"
-#include "../include/kernel/platform.h"
-#include "../libc/include/string.h"
 
 #include "../apps/desktop/desktop.h"
 
@@ -69,12 +71,6 @@ void probe_root_fs(ata_dev_t *dev)
 		}
 	}
 
-	kdebug("UUID: ");
-	for (int i=0; i < 16; i++) {
-		kdebug("%x", gpt_table_header->guid[i]);
-	}
-	kdebug(" | Entries: %d Start: %d End: %d\r\n", gpt_table_header->table_entry_count, gpt_table_header->start_lba, gpt_table_header->last_lba);
-
 	uint8_t sector_count = (gpt_table_header->table_entry_count * gpt_table_header->table_entry_size) / ATA_SECTOR_SIZE + 1;
 
 	uint16_t *gpt_table_buf = (uint16_t *) malloc(sector_count * ATA_SECTOR_SIZE);
@@ -107,7 +103,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	// Init kernel heap
 	uint32_t heap_start = mbi->mem_upper + 10*1024*1024;
-	uint32_t heap_size = 10000000;
+	uint32_t heap_size = 100000000;
 	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
 	heap_init(heap_start, heap_size);
 
@@ -130,11 +126,48 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		kdebug("[kernel] Probe for root filesystem\r\n");
 		probe_root_fs(&root_dev);
 	}
-	
+
 	pci_scan();
+
+	/* Init PCI devices */
+	pci_dev_t *list = (pci_dev_t *) malloc(sizeof(pci_dev_t)* 1024);
+	uint16_t list_length = 0;
+
+	// Audio / AC97
+	list_length = pci_get_device_by_id(list, 0x8086, 0x2415);
+	for (uint16_t i=0; i < list_length; i++) {
+		ac97_init(list[i]);
+	}
+
+	// Audio / Intel HDA
+	list_length = pci_get_device_by_id(list, 0x8086, 0x2668);
+	for (uint16_t i=0; i < list_length; i++) {
+		hda_init(list[i]);
+	}
+
+	list_length = pci_get_device_by_id(list, 0x8086, 0x293E);
+	for (uint16_t i=0; i < list_length; i++) {
+		hda_init(list[i]);
+	}
+
+	// NIC / RTL8139
+	list_length = pci_get_device_by_id(list, 0x10EC, 0x8139);
+	for (uint16_t i=0; i < list_length; i++) {
+		rtl8139_init(list[i]);
+	}
 
 	keyboard_init();
 	mouse_init();
+
+	/*	
+	uint8_t *test_buf = (uint8_t *) malloc(25548514);
+	memset(test_buf, 0x00, 25548514);
+
+	if (vfs_read(&root_fs, "/audio.wav", test_buf)) {
+		ac97_play(test_buf, 25548514);
+	}
+	free(test_buf);
+	*/
 
 	desktop_init(mbi, &root_fs);
 }

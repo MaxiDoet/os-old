@@ -3,9 +3,9 @@
 #include <stdint.h>
 
 #include "../include/kernel/mem/heap.h"
-#include "../include/kernel/io.h"
+#include "../include/kernel/io/io.h"
 #include "../include/drivers/rtl8139.h"
-#include "../include/drivers/pci.h"
+#include "../include/kernel/io/pci.h"
 #include "../include/kernel/kernel.h"
 #include "../libc/include/string.h"
 #include "../include/kernel/irq.h"
@@ -21,22 +21,6 @@
 #define REG_TCR 0x40
 #define REG_RCR 0x44
 #define REG_RBSTART 0x30
-
-// Buffers
-#define TX_BUFFER_SIZE 1792
-#define RX_BUFFER_SIZE 9744
-
-// Interrupt mask register masks
-#define IMR_SERR (1 << 15)
-#define IMR_TIMEOUT (1 << 14)
-#define IMR_LENCHG (1 << 13)
-#define IMR_FOVW (1 << 6)
-#define IMR_PUN (1 << 5)
-#define IMR_RXOVW (1 << 4)
-#define IMR_TER (1 << 3)
-#define IMR_TOK (1 << 2)
-#define IMR_RER (1 << 1)
-#define IMR_ROK (1 << 0)
 
 // Transmit start address registers
 #define REG_TSAD0 0x20
@@ -56,6 +40,22 @@
 #define REG_CONFIG3 0x59
 #define REG_CONFIG4 0x5A
 
+// Buffers
+#define TX_BUFFER_SIZE 1792
+#define RX_BUFFER_SIZE 9744
+
+// Interrupt mask register masks
+#define IMR_SERR (1 << 15)
+#define IMR_TIMEOUT (1 << 14)
+#define IMR_LENCHG (1 << 13)
+#define IMR_FOVW (1 << 6)
+#define IMR_PUN (1 << 5)
+#define IMR_RXOVW (1 << 4)
+#define IMR_TER (1 << 3)
+#define IMR_TOK (1 << 2)
+#define IMR_RER (1 << 1)
+#define IMR_ROK (1 << 0)
+
 // Command register
 #define CR_RST (1 << 4)
 #define CR_RE (1 << 3)
@@ -71,7 +71,7 @@
 #define RCR_ACCEPT_ERROR_PACKETS (1 << 5)
 #define RCR_WRAP (1 << 7)
 
-pci_dev_descriptor dev;
+pci_dev_t dev;
 uint16_t *rx_buffer;
 uint16_t rx_buffer_offset;
 uint16_t *tx_buffers[4];
@@ -147,7 +147,7 @@ void rtl8139_send(uint16_t *data, uint32_t len)
 	if (tx_buffer_current > 3) tx_buffer_current = 0;
 }
 
-void rtl8139_init(pci_dev_descriptor pci_dev)
+void rtl8139_init(pci_dev_t pci_dev)
 {
 	dev = pci_dev;
 

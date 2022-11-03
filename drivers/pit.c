@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/drivers/pit.h"
-#include "../include/kernel/io.h"
+#include "../include/kernel/io/io.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/kernel.h"
 

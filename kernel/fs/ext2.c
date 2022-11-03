@@ -109,10 +109,8 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 	ext2_inode *inode_buf = (ext2_inode *) malloc(sizeof(ext2_inode));
 
 	if (current == 1) {
-		kdebug("start root read\r\n");
 		// Root is always inode 2
 		ext2_read_inode(dev, fs, 2, inode_buf);
-		kdebug("end root read\r\n");
 		
 		for (int i=0; i < 12; i++) {
 			uint32_t block = inode_buf->direct_block_ptr[i];
@@ -147,8 +145,6 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
 	uint32_t inode = ext2_find_inode(dev, fs, path);
 	if (inode == 0) return -1;
 	
-	kdebug("%d\r\n", inode);
-
 	ext2_inode *inode_buf = (ext2_inode *) malloc(sizeof(ext2_inode));
 	ext2_read_inode(dev, fs, inode, inode_buf);
 

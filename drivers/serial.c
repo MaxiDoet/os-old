@@ -4,7 +4,7 @@
 
 #include "../include/drivers/serial.h"
 
-#include "../include/kernel/io.h"
+#include "../include/kernel/io/io.h"
 
 #define REG_DATA	0x00
 #define REG_IEN		0x01

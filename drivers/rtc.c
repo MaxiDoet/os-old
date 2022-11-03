@@ -4,7 +4,7 @@
 
 #include "../include/drivers/rtc.h"
 #include "../include/kernel/kernel.h"
-#include "../include/kernel/io.h"
+#include "../include/kernel/io/io.h"
 
 uint8_t rtc_read(uint8_t offset) {
   uint8_t tmp = inb(RTC_PORT_ADDRESS);

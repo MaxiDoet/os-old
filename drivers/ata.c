@@ -4,7 +4,7 @@
 
 #include "../libc/include/string.h"
 #include "../include/drivers/ata.h"
-#include "../include/kernel/io.h"
+#include "../include/kernel/io/io.h"
 #include "../include/kernel/kernel.h"
 #include "../config.h"
 
@@ -204,8 +204,6 @@ void ata_pio_reset(ata_dev_t *dev)
 uint8_t ata_pio_read(ata_dev_t *dev, uint32_t lba, uint8_t sector_count, uint16_t *buf)
 {
 	if (!dev->ready) return ATA_RETURN_NOT_READY;
-
-	kdebug("ata_pio_read | lba: %x | sector_count: %d\r\n", lba, sector_count);
 	
 	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
 		return ATA_RETURN_ERROR;

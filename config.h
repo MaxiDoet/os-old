@@ -6,7 +6,7 @@
 //#define DEBUG_KEYBOARD_EVENT
 #define DEBUG_PCI
 //#define DEBUG_ATA
-#define DEBUG_EXT2
+//#define DEBUG_EXT2
 #define DEBUG_NET_ARP
 
 #define PAGE_SIZE 4096
