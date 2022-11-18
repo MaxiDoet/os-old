@@ -72,9 +72,9 @@
 #define RCR_WRAP (1 << 7)
 
 pci_dev_t dev;
-uint16_t *rx_buffer;
-uint16_t rx_buffer_offset;
-uint16_t *tx_buffers[4];
+uint8_t *rx_buffer;
+uint32_t rx_buffer_offset;
+uint8_t *tx_buffers[4];
 uint8_t tx_buffer_current;
 
 void rtl8139_handle_rx();
@@ -105,37 +105,19 @@ void rtl8139_irq_handler()
 
 void rtl8139_handle_rx()
 {
-	while (!(inb(dev.bars[0].io_base + REG_CR) & CR_BUFE)) {
-		uint16_t *buffer = (uint16_t *) ((uint32_t) rx_buffer + rx_buffer_offset);
-		uint16_t length = *(buffer + 1);
+	uint8_t *buffer = (uint8_t *) (rx_buffer + rx_buffer_offset);
+	uint16_t length = *((uint16_t *) (buffer + 2));
 
-		rx_buffer_offset += length + 4;
-		rx_buffer_offset = (rx_buffer_offset + 3) & ~0x3;
-		outw(dev.bars[0].io_base + REG_CAPR, rx_buffer_offset - 0x10);
+	rx_buffer_offset = (rx_buffer_offset + length + 4 + 3) & ~0x3;
+	outw(dev.bars[0].io_base + REG_CAPR, rx_buffer_offset - 0x10);
 
-		kdebug("[rtl8139] rx: ");
-		for (int i=0; i < length; i++) {
-			kdebug("%x ", *(buffer + i));
-		}
-		kdebug("\r\n");
-
-		// Check packet
-		if (*buffer & (1 << 0)) {
-			ethernet_handle_frame(buffer, length);
-		}
-	}
+	ethernet_handle_frame(buffer + 4, length);
 }
 
-void rtl8139_send(uint16_t *data, uint32_t len)
+void rtl8139_send(uint8_t *data, uint32_t len)
 {
-	kdebug("[rtl8139] tx (%d bytes): ", len);
-	for (int i=0; i < len; i++) {
-		kdebug("%x ", *(data + i));
-	}
-	kdebug("\r\n");
-
 	// Copy data to current tx buffer
-	memcpy(tx_buffers[tx_buffer_current], data, len);
+	memcpy(tx_buffers[tx_buffer_current], data, len); 
 
 	// Send tx buffer address
 	outl(dev.bars[0].io_base + 0x20 + (tx_buffer_current * 4), (uint32_t) tx_buffers[tx_buffer_current]);
@@ -168,7 +150,7 @@ void rtl8139_init(pci_dev_t pci_dev)
 	pci_write_word(dev.bus, dev.device, dev.function, PCI_REGISTER_COMMAND, command);
 
 	// Setup rx buffer
-	rx_buffer = (uint16_t *) malloc(8192 + 16 + 1500);
+	rx_buffer = (uint8_t *) malloc(8192 + 16 + 1500);
 	outl(dev.bars[0].io_base + REG_RBSTART, (uint32_t) rx_buffer);
 	memset(rx_buffer, 0x00, 8192 + 16);
 
@@ -205,18 +187,10 @@ void rtl8139_init(pci_dev_t pci_dev)
 		kdebug("%x%s", mac[i], ((i < 5) ? ":" : "\r\n"));
 	}
 
+	init_done = true;
+
 	// Set static ip and mac
 	uint8_t static_ip[4] = {10, 0, 2, 15};
 	arp_set_ip(static_ip);
 	arp_set_mac(mac);
-
-	init_done = true;
-
-	// Default qemu gateway
-	uint8_t gateway_ip[4] = {10, 0, 2, 2};
-	arp_request_mac(gateway_ip);
-	//arp_broadcast_mac(gateway_ip);
-
-	uint16_t status = inw(dev.bars[0].io_base + 0x64);
-	kdebug("status: %x\r\n", status);
 }

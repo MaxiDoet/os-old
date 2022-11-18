@@ -18,7 +18,9 @@
 #include "../include/kernel/fs/mbr.h"
 #include "../include/kernel/fs/vfs.h"
 #include "../include/kernel/io/io.h"
+#include "../include/kernel/net/net.h"
 #include "../include/kernel/platform.h"
+#include "../include/kernel/audio/dev.h"
 #include "../libc/include/string.h"
 
 #include "../include/drivers/keyboard.h"
@@ -26,8 +28,6 @@
 #include "../include/drivers/rtc.h"
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
-#include "../include/drivers/hda.h"
-#include "../include/drivers/ac97.h"
 #include "../include/drivers/rtl8139.h"
 
 #include "../apps/desktop/desktop.h"
@@ -129,42 +129,21 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	pci_scan();
 
-	/* Init PCI devices */
-	pci_dev_t *list = (pci_dev_t *) malloc(sizeof(pci_dev_t)* 1024);
-	uint16_t list_length = 0;
-
-	// Audio / AC97
-	list_length = pci_get_device_by_id(list, 0x8086, 0x2415);
-	for (uint16_t i=0; i < list_length; i++) {
-		ac97_init(list[i]);
-	}
-
-	// Audio / Intel HDA
-	list_length = pci_get_device_by_id(list, 0x8086, 0x2668);
-	for (uint16_t i=0; i < list_length; i++) {
-		hda_init(list[i]);
-	}
-
-	list_length = pci_get_device_by_id(list, 0x8086, 0x293E);
-	for (uint16_t i=0; i < list_length; i++) {
-		hda_init(list[i]);
-	}
-
-	// NIC / RTL8139
-	list_length = pci_get_device_by_id(list, 0x10EC, 0x8139);
-	for (uint16_t i=0; i < list_length; i++) {
-		rtl8139_init(list[i]);
-	}
-
+	kdebug("[kernel] Net init\r\n");
+	net_init();
+	
+	kdebug("[kernel] Audio init\r\n");
+	audio_init();
+	
 	keyboard_init();
 	mouse_init();
 
-	/*	
+	/*
 	uint8_t *test_buf = (uint8_t *) malloc(25548514);
 	memset(test_buf, 0x00, 25548514);
 
 	if (vfs_read(&root_fs, "/audio.wav", test_buf)) {
-		ac97_play(test_buf, 25548514);
+		audio_dev_play(test_buf, 25548514);
 	}
 	free(test_buf);
 	*/

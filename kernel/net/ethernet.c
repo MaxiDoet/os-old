@@ -8,26 +8,27 @@
 #include "../include/drivers/rtl8139.h"
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/net/ip.h"
-#include "../include/kernel/net/swap.h"
+#include "../include/kernel/net/utils.h"
 
-void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type, uint16_t *data, uint32_t size)
+void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type, uint8_t *data, uint32_t size)
 {
-	uint16_t *buf = (uint16_t *) malloc(sizeof(etherframe_header) + size);
+	uint8_t *buf = (uint8_t *) malloc(sizeof(etherframe_header) + size);
 	memset(buf, 0x00, sizeof(etherframe_header) + size);
 
 	etherframe_header *header = (etherframe_header *) buf;
 	memcpy(header->dst_mac, dst_mac, 6);
 	memcpy(header->src_mac, src_mac, 6);
+
 	header->ether_type = net_swap_word(type);
 
-	memcpy(buf + sizeof(etherframe_header) - 7, data, size);
+	memcpy(buf + sizeof(etherframe_header), data, size);
 
 	rtl8139_send(buf, sizeof(etherframe_header) + size);
 }
 
-void ethernet_handle_frame(uint16_t *buffer, uint16_t length)
+void ethernet_handle_frame(uint8_t *buffer, uint32_t size)
 {
-	etherframe_header *frame_header = (etherframe_header *) (buffer + 2);
+	etherframe_header *frame_header = (etherframe_header *) buffer;
 	frame_header->ether_type = net_swap_word(frame_header->ether_type);
 
 	kdebug("[net] ether_type: %x dst_mac: ", frame_header->ether_type);
@@ -40,12 +41,13 @@ void ethernet_handle_frame(uint16_t *buffer, uint16_t length)
 		kdebug("%x%s", frame_header->src_mac[i], ((i < 5) ? ":" : "\r\n"));
 	}
 
-	uint16_t *packet = (uint16_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
+	uint8_t *packet = (uint8_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
 
 	switch(frame_header->ether_type) {
 		case ETHERTYPE_ARP: ;
-			arp_handle_packet(packet);
+			arp_handle_packet((arp_packet *) packet);
 			break;
+
 		case ETHERTYPE_IPV4: ;
 			ip_handle_packet(packet);
 			break;

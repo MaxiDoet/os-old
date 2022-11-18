@@ -43,10 +43,8 @@ void arp_set_ip(uint8_t addr[4])
 	memcpy(&ip, addr, 4);
 }
 
-void arp_handle_packet(uint16_t *buffer)
+void arp_handle_packet(arp_packet *packet)
 {
-	arp_packet *packet = (arp_packet *) buffer;
-
 	switch(packet->operation_type) {
 		case 0x0100:
 			// Request
@@ -90,7 +88,7 @@ void arp_request_mac(uint8_t addr[4])
 	memset(packet->dst_mac, 0xFF, 6);
 	memcpy(packet->dst_ip, addr, 4);
 
-	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint16_t *) packet, sizeof(arp_packet));
+	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint8_t *) packet, sizeof(arp_packet));
 }
 
 void arp_reply(arp_packet *packet)
@@ -108,7 +106,7 @@ void arp_reply(arp_packet *packet)
 	memcpy(reply_packet->dst_mac, packet->src_mac, 6);
 	memcpy(reply_packet->dst_ip, packet->src_ip, 4);
 
-	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint16_t *) reply_packet, sizeof(arp_packet));
+	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint8_t *) reply_packet, sizeof(arp_packet));
 }
 
 void arp_broadcast_mac(uint8_t addr[4])
@@ -126,7 +124,7 @@ void arp_broadcast_mac(uint8_t addr[4])
 	memcpy(packet->dst_mac, arp_get_mac(addr), 6);
 	memcpy(packet->dst_ip, addr, 4);
 
-	ethernet_send_frame(mac, arp_resolve_mac(addr), ETHERTYPE_ARP, (uint16_t *) packet, sizeof(arp_packet));
+	ethernet_send_frame(mac, arp_resolve_mac(addr), ETHERTYPE_ARP, (uint8_t *) packet, sizeof(arp_packet));
 }
 
 uint8_t *arp_resolve_mac(uint8_t addr[4])

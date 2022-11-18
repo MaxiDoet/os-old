@@ -10,6 +10,7 @@
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/fs/vfs.h"
+#include "../include/kernel/audio/dev.h"
 
 /* NAM Registers */
 #define NAM_RESET 0x00
@@ -81,6 +82,17 @@ struct buf_desc buf_descriptors[32];
 static uint8_t buf_descriptors_rp;
 static uint8_t buf_descriptors_wp;
 uint8_t *sound_buf;
+
+/*
+typedef struct ac97_dev_t {
+	pci_dev_t pci_dev;
+
+	uint8_t *sound_buf;
+	buf_desc buf_descriptors[32];
+	uint8_t buf_descriptors_rp;
+	uint8_t buf_descriptors_wp;
+} ac97_dev_t;
+*/
 
 void ac97_irq_handler()
 {
@@ -164,7 +176,7 @@ void ac97_write_single_buffer(uint8_t *data, uint16_t size)
 	buf_descriptors_wp = (buf_descriptors_wp + 1) % LAST_VALID_INDEX;
 }
 
-void ac97_play(uint8_t *data, uint32_t size)
+void ac97_play(void *data, uint32_t size)
 {
 	sound_buf = (uint8_t *) malloc(size);
 	memcpy(sound_buf, data, size);
@@ -244,4 +256,13 @@ void ac97_init(pci_dev_t pci_dev)
 
 	buf_descriptors_rp = 0;
 	buf_descriptors_wp = 0;
+
+	/* Register audio device */
+	audio_dev_t audio_dev;
+
+	audio_dev.name = "AC97 Output";
+	audio_dev.type = AUDIO_DEV_TYPE_OUTPUT;
+	audio_dev.driver_play = ac97_play;
+	
+	audio_dev_add(audio_dev);
 }

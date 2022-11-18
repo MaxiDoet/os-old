@@ -537,7 +537,7 @@ void hda_codec_scan(hda_dev_t *dev, int codec)
 		int widgets_start = (temp >> 16) & 0xFF;
 
 		temp = hda_codec_query(dev, codec, fg_start + i, HDA_VERB_GET_PARAMETER | HDA_VERB_PARAMETER_FUNCTION_GROUP_TYPE);
-                temp &= 0x7F;
+        temp &= 0x7F;
 
 		if (temp == HDA_FG_TYPE_AUDIO) {
 			// Set powerstate to D0
