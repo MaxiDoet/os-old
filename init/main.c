@@ -4,7 +4,6 @@
 
 #include "../config.h"
 #include "../include/kernel/kernel.h"
-#include "../include/drivers/serial.h"
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/idt.h"
@@ -23,6 +22,7 @@
 #include "../include/kernel/audio/dev.h"
 #include "../libc/include/string.h"
 
+#include "../include/drivers/serial.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
 #include "../include/drivers/rtc.h"
@@ -93,6 +93,12 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
     kdebug("[kernel] IDT init\r\n");
     idt_install();
 
+	// Init kernel heap
+	uint32_t heap_start = mbi->mem_upper + 10*1024*1024;
+	uint32_t heap_size = 100000000;
+	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
+	heap_init(heap_start, heap_size);
+
 	// Init PIT
 	pit_init();
 
@@ -101,11 +107,8 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	// For debug commands
 	irq_install_handler(4, serial_irq_handler);
 
-	// Init kernel heap
-	uint32_t heap_start = mbi->mem_upper + 10*1024*1024;
-	uint32_t heap_size = 100000000;
-	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
-	heap_init(heap_start, heap_size);
+	keyboard_init();
+	mouse_init();
 
 	kdebug("[kernel] Platform init\r\n");
 	platform_init();
@@ -134,9 +137,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	
 	kdebug("[kernel] Audio init\r\n");
 	audio_init();
-	
-	keyboard_init();
-	mouse_init();
 
 	/*
 	uint8_t *test_buf = (uint8_t *) malloc(25548514);
