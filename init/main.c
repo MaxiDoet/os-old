@@ -43,20 +43,6 @@ const uint8_t gpt_signature[8] = {0x45, 0x46, 0x49, 0x20, 0x50, 0x41, 0x52, 0x54
 ata_dev_t root_dev;
 vfs_fs_t root_fs;
 
-void serial_irq_handler()
-{
-	char c = serial_read(DEBUG_PORT);
-
-	switch(c) {
-		case 'i':
-			irq_print_map();
-			break;
-		case 'p':
-			pmm_info();
-			break;
-	}
-}
-
 void probe_root_fs(ata_dev_t *dev)
 {
 	uint16_t *gpt_table_header_buf = (uint16_t *) malloc(ATA_SECTOR_SIZE);
@@ -104,8 +90,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	// Init serial debug
 	serial_init(DEBUG_PORT);
-	// For debug commands
-	irq_install_handler(4, serial_irq_handler);
 
 	keyboard_init();
 	mouse_init();

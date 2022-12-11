@@ -218,3 +218,11 @@ void draw_image_transparent(context ctx, int x, int y, int w, int h, uint32_t da
         }
 }
 
+void draw_bitmap(context ctx, int x, int y, int w, int h, uint16_t *data)
+{
+        for (int i=0; i < h; i++) {
+                for (int j=0; j < w; j++) {
+                        draw_pixel(ctx, x + j, y + i, data[i * w + j]);
+                }
+        }
+}

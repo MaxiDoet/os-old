@@ -18,25 +18,25 @@ static bool button3_pressed;
 void mouse_fire_callback(struct mouse_event event)
 {
 	for(int i=0; mouse_callbacks[i]; i++) {
-               	mouse_callbacks[i](event);
-        }
+        mouse_callbacks[i](event);
+    }
 }
 
 void mouse_add_callback(void (*callback)(struct mouse_event))
 {
-        mouse_callbacks[mouse_callback_num] = callback;
-        mouse_callback_num++;
+    mouse_callbacks[mouse_callback_num] = callback;
+    mouse_callback_num++;
 }
 
 void mouse_remove_callback()
 {
-        mouse_callbacks[mouse_callback_num] = 0;
+    mouse_callbacks[mouse_callback_num] = 0;
 }
 
 void mouse_irq_handler()
 {
 	static uint16_t mouse_receive_byte[3];
-        static uint8_t mouse_receive_counter=0;
+    static uint8_t mouse_receive_counter=0;
 
 	uint8_t data = inb(0x60);
 
@@ -91,11 +91,11 @@ void mouse_init()
 	outb(0x64, 0xA8);
 
 	// Enable irq
-        outb(0x64, 0x20);
+    outb(0x64, 0x20);
 
-        uint8_t status = inb(0x60) | 2;
-        outb(0x64, 0x60);
-        outb(0x60, status);
+    uint8_t status = inb(0x60) | 2;
+    outb(0x64, 0x60);
+    outb(0x60, status);
 
 	// Use default settings
 	mouse_write(0xF6);
@@ -103,7 +103,7 @@ void mouse_init()
 	// Enable mouse
 	mouse_write(0xF4);
 
-        inb(0x60);
+    inb(0x60);
 
 	irq_install_handler(12, mouse_irq_handler);
 }

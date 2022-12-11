@@ -17,5 +17,6 @@ void draw_char(context ctx, int x, int y, char c, uint16_t color);
 void draw_string(context ctx, int x, int y, char* str, uint16_t color);
 void draw_image(context ctx, int x, int y, int w, int h, uint32_t data[]);
 void draw_image_transparent(context ctx, int x, int y, int w, int h, uint32_t data[]);
+void draw_bitmap(context ctx, int x, int y, int w, int h, uint16_t *data);
 
 #endif

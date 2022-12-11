@@ -18,6 +18,8 @@
 #include <gui/context.h>
 #include <gui/window.h>
 #include <gui/direct.h>
+#include <gui/utils.h>
+#include <bmp.h>
 
 static window *windows[10];
 static int cursor_x;
@@ -168,6 +170,17 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	cursor_x = main_context.width / 2;
 	cursor_y = main_context.height / 2;
 
+	/* Load background image */
+	uint8_t *background_bmp_buf = (uint8_t *) malloc(960138);
+	vfs_read(root_fs, "/background.bmp", background_bmp_buf);
+	bmp_header_t *background_bmp_header = (bmp_header_t *) background_bmp_buf;
+	
+	uint8_t *background_buf = (uint8_t *) malloc(800 * 600 * 2);
+	memcpy(background_buf, background_bmp_buf + background_bmp_header->offset, 800 * 600 * 2);
+
+	// Flip bitmap
+	bitmap_flip_h(800, 600, 2, background_buf);
+
 	window test;
 	test.x = 70;
 	test.y = 70;
@@ -182,7 +195,9 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 
 	while(1) {
 		// Background
-		draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x4A69);
+		//draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x4A69);
+
+		draw_bitmap(main_context, 0, 0, 800, 600, (uint16_t *) background_buf);
 
 		for (int i=0; i < 10; i++) {
 			if (windows[i] == NULL) continue;
