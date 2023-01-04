@@ -87,7 +87,9 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 	uint32_t block = (bg_index * fs->inode_size) / fs->block_size;
 	uint32_t block_index = bg_index % fs->inodes_per_block;
 
+	#ifdef EXT2_DEBUG
 	kdebug("read_inode | bg: %d | bg_index: %d | block: %d | block_index: %d\r\n", bg, bg_index, block, block_index);
+	#endif
 
 	ext2_bg_descriptor *bg_descriptor = &fs->bgdt[bg];
 

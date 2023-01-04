@@ -32,6 +32,7 @@
 
 #include "../apps/desktop/desktop.h"
 
+#include "../include/lib/datetime.h"
 #include "../include/lib/wav.h"
 
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
@@ -84,6 +85,9 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	uint32_t heap_size = 100000000;
 	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
 	heap_init(heap_start, heap_size);
+
+	datetime_t datetime = rtc_read_datetime();
+	kdebug("%d:%d:%d %d/%d/%d\r\n", datetime.hour, datetime.minute, datetime.second, datetime.day_of_month, datetime.month, datetime.year);
 
 	// Init PIT
 	pit_init();
