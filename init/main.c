@@ -86,8 +86,10 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
 	heap_init(heap_start, heap_size);
 
+	/*
 	datetime_t datetime = rtc_read_datetime();
 	kdebug("%d:%d:%d %d/%d/%d\r\n", datetime.hour, datetime.minute, datetime.second, datetime.day_of_month, datetime.month, datetime.year);
+	*/
 
 	// Init PIT
 	pit_init();

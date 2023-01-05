@@ -1,46 +1,35 @@
 #include <stdint.h>
 
+#include <gui/surface.h>
 #include <gui/direct.h>
-#include <gui/font.h>
 
-void draw_pixel(context ctx, int x, int y, uint16_t color)
+void direct_draw_pixel(surface_t *surface, uint16_t x, uint16_t y, uint16_t color)
 {
-	x += ctx.x;
-	y += ctx.y;
-
-        uint16_t *pixel = ctx.fb + ctx.fb_pitch * y + 2 * x;
-        *pixel = color;
+    uint16_t *pixel = surface->fb + (y * surface->width * surface->bpp + x * surface->bpp);
+    *pixel = color;
 }
 
-void draw_horizontal_line(context ctx, int x, int y, int w, uint16_t color)
+void direct_draw_rectangle(surface_t *surface, uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color)
 {
-	x += ctx.x;
-	y += ctx.y;
-        int i;
+	for (uint16_t i=0; i < height; i++) {
+		for (uint16_t j=0; j < width; j++) {
+			direct_draw_pixel(surface, x + j, y + i, color);
+		}
+	}
+}
 
-        uint16_t *pixel = ctx.fb + ctx.fb_pitch * y + 2 * x;
-
-        for (i=0; i<w; i++) {
-                *pixel = color;
-                *pixel++;
+/* Todo: Implement bitmap structure */
+void direct_draw_bitmap(surface_t *surface, int x, int y, int width, int height, uint16_t *data)
+{
+    for (int i=0; i < height; i++) {
+        for (int j=0; j < width; j++) {
+            direct_draw_pixel(surface, x + j, y + i, data[i * width + j]);
         }
+    }
 }
 
-void draw_vertical_line(context ctx, int x, int y, int h, uint16_t color)
-{
-	x += ctx.x;
-	y += ctx.y;
-        int i;
-
-        uint16_t *pixel = ctx.fb + ctx.fb_pitch * y + 2 * x;
-
-        for (i=0; i<h; i++) {
-                *pixel = color;
-                pixel = ctx.fb + ctx.fb_pitch * (y+i) + 2 * x;
-        }
-}
-
-void draw_line(context ctx, int x0, int y0, int x1, int y1, uint16_t color)
+/*
+void direct_draw_line(uint32_t *fb, int x0, int y0, int x1, int y1, uint16_t color);
 {
         int dx = x1 - x0;
         int dy = y1 - y0;
@@ -58,7 +47,7 @@ void draw_line(context ctx, int x0, int y0, int x1, int y1, uint16_t color)
         }
 }
 
-void draw_filled_rectangle(context ctx, int x, int y, int w, int h, uint16_t color)
+void direct_draw_rectangle_filled(uint32_t *fb int x, int y, int w, int h, uint16_t color);
 {
         int i;
 
@@ -88,8 +77,6 @@ void draw_rectangle(context ctx, int x, int y, int w, int h, int size, uint16_t 
 
 void draw_circle(context ctx, int x0, int y0, int radius, uint16_t color)
 {
-        /* Source: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm */
-
         int f = 1-radius;
         int ddF_x = 0;
         int ddF_y = -2 * radius;
@@ -124,8 +111,6 @@ void draw_circle(context ctx, int x0, int y0, int radius, uint16_t color)
 
 void draw_circle_filled(context ctx, int x0, int y0, int radius, uint16_t color)
 {
-        /* Source: https://stackoverflow.com/a/14976268/13378037 */
-
         int x = radius;
         int y = 0;
         int xChange = 1 - (radius << 1);
@@ -217,12 +202,4 @@ void draw_image_transparent(context ctx, int x, int y, int w, int h, uint32_t da
                 }
         }
 }
-
-void draw_bitmap(context ctx, int x, int y, int w, int h, uint16_t *data)
-{
-        for (int i=0; i < h; i++) {
-                for (int j=0; j < w; j++) {
-                        draw_pixel(ctx, x + j, y + i, data[i * w + j]);
-                }
-        }
-}
+*/

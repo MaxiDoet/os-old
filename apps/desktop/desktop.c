@@ -15,103 +15,114 @@
 
 #include "../include/drivers/ac97.h"
 
-#include <gui/context.h>
-#include <gui/window.h>
+#include <gui/surface.h>
 #include <gui/direct.h>
 #include <gui/utils.h>
 #include <bmp.h>
 
-static window *windows[10];
-static int cursor_x;
-static int cursor_y;
-context main_context;
+#define WINDOW_COLOR 	0x31A6
+#define TITLE_BAR_COLOR 0x632C
+#define FRAME_COLOR 	0x2945
 
+typedef struct window {
+	int x;
+	int y;
+	int width;
+	int height;
+	
+	char *title;
+
+	bool coliding_x;
+	bool coliding_y;
+
+	bool focused;
+	bool grabbed;
+} window;
+
+surface_t *screen;
 static void *fb;
 static void *bb;
 
-void draw_window(context ctx, window *win)
+static window *windows[10];
+window *grabbed_window;
+bool grabbing;
+static int cursor_x;
+static int cursor_y;
+
+void draw_window(window *win)
 {
-	// Frame
-	draw_filled_rectangle(ctx, win->x, win->y, win->width, 30, FRAME_COLOR);
+	// Titlebar
+	direct_draw_rectangle(screen, win->x, win->y, win->width, 20, TITLE_BAR_COLOR);
+
+	// Window
+	direct_draw_rectangle(screen, win->x, win->y + 20, win->width, win->height - 20, WINDOW_COLOR);
 
 	// Window title
-	draw_string(ctx, win->x + 5, win->y - 8, win->title, 0xFFFF);
-
-	// Content
-	draw_filled_rectangle(ctx, win->x, win->y + 20, win->width, win->height - 20, WINDOW_COLOR);
-
-	// Frame buttons
-	draw_circle_filled(ctx, win->x + win->width - 40, win->y + 8, 5, 0x5ECC);
-	draw_circle_filled(ctx, win->x + win->width - 25, win->y + 8, 5, 0xFE26);
-	draw_circle_filled(ctx, win->x + win->width - 10, win->y + 8, 5, 0xF28A);
+	//draw_string(ctx, win->x + 5, win->y - 8, win->title, 0xFFFF);
 }
-
 
 static void mouse_handler(struct mouse_event event)
 {
 	int movement_x = event.x * 2;
 	int movement_y = event.y * 2;
 
-	// Update cursor position
-	if (!main_context.grabbing) {
+	if (!grabbing) {
 		cursor_x += movement_x;
 		cursor_y -= movement_y;
 	}
 
-	if (main_context.grabbing && main_context.grabbed_window) {
-		main_context.grabbed_window->x += movement_x;
-		main_context.grabbed_window->y -= movement_y;
+	if (grabbing && grabbed_window) {
+		grabbed_window->x += movement_x;
+		grabbed_window->y -= movement_y;
 	}
 
 	/*
-	if (main_context.grabbing && main_context.grabbed_window && !main_context.grabbed_window->coliding) {
+	if (grabbing && grabbed_window && !grabbed_window->coliding) {
 		cursor_x += movement_x;
 		cursor_y -= movement_y;
 	}
 	*/
 
-	if (main_context.grabbing && main_context.grabbed_window) {
-		if (!main_context.grabbed_window->coliding_x) {
+	if (grabbing && grabbed_window) {
+		if (!grabbed_window->coliding_x) {
 			cursor_x += movement_x;
 		}
 
-		if (!main_context.grabbed_window->coliding_y) {
+		if (!grabbed_window->coliding_y) {
 			cursor_y -= movement_y;
 		}
 	}
 
 	// Check for collision
 	if (cursor_x < 0) cursor_x = 0;
-	if (cursor_x > main_context.width) cursor_x = main_context.width;
+	if (cursor_x > screen->width) cursor_x = screen->width;
 	if (cursor_y < 0) cursor_y = 0;
-	if (cursor_y > main_context.height) cursor_y = main_context.height;
+	if (cursor_y > screen->height) cursor_y = screen->height;
 
 	for (int i=0; i < 1; i++) {
 		if (windows[i] == NULL) continue;
 
-		/* Window grabbing */
 		if (!windows[i]->grabbed && event.button1_pressed && cursor_x >= windows[i]->x-10 && cursor_x <= windows[i]->x-10 + windows[i]->width && cursor_y >= windows[i]->y-10 && cursor_y <= windows[i]->y-10 + 20) {
 			windows[i]->grabbed = true;
 			windows[i]->focused = true;
 
-			main_context.grabbing = true;
-			main_context.grabbed_window = windows[i];
+			grabbing = true;
+			grabbed_window = windows[i];
 		}
 
 		if (windows[i]->grabbed && !event.button1_pressed) {
 			windows[i]->grabbed = false;
 
-			main_context.grabbing = false;
-			main_context.grabbed_window = NULL;
+			grabbing = false;
+			grabbed_window = NULL;
 		}
 
-		/* Window collision */
-		if (windows[i]->x + windows[i]->width >= main_context.width) {
-			windows[i]->x = main_context.width - windows[i]->width;
+		if (windows[i]->x + windows[i]->width >= screen->width) {
+			windows[i]->x = screen->width - windows[i]->width;
 		}
 
-		if (windows[i]->y + windows[i]->height >= main_context.height) {
-			windows[i]->y = main_context.height - windows[i]->height;
+		if (windows[i]->y + windows[i]->height >= screen->height) {
+			windows[i]->y = screen->height - windows[i]->height;
 		}
 
 		if (windows[i]->x <= 0) {
@@ -123,8 +134,8 @@ static void mouse_handler(struct mouse_event event)
 		}
 
 		/*
-		if (windows[i]->x + windows[i]->width >= main_context.width ||
-			windows[i]->y + windows[i]->height >= main_context.height ||
+		if (windows[i]->x + windows[i]->width >= screen->width ||
+			windows[i]->y + windows[i]->height >= screen->height ||
 			windows[i]->x <= 0 ||
 			windows[i]->y <= 0) 
 		{
@@ -134,8 +145,8 @@ static void mouse_handler(struct mouse_event event)
 		}
 		*/
 
-		windows[i]->coliding_x = (windows[i]->x <= 0 || windows[i]->width >= main_context.width);
-		windows[i]->coliding_y = (windows[i]->y <= 0 || windows[i]->height >= main_context.height);
+		windows[i]->coliding_x = (windows[i]->x <= 0 || windows[i]->width >= screen->width);
+		windows[i]->coliding_y = (windows[i]->y <= 0 || windows[i]->height >= screen->height);
 	}
 }
 
@@ -146,7 +157,7 @@ void keyboard_handler(struct keyboard_event event)
 
 static inline void desktop_swap_fb()
 {
-	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((main_context.height * main_context.fb_pitch)));
+	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((screen->width * screen->height * screen->bpp)));
 }
 
 void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
@@ -160,15 +171,23 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	bb = (void *) (uint32_t) mbi->framebuffer_addr;
 	fb = (void *) (uint32_t) malloc(mbi->framebuffer_height * mbi->framebuffer_pitch);
 
+	screen = (surface_t *) malloc(sizeof(surface_t));
+	screen->width = mbi->framebuffer_width;
+	screen->height = mbi->framebuffer_height;
+	screen->bpp = 2;
+	screen->fb = fb;
+
+	/*
 	main_context.x = 0;
 	main_context.y = 0;
 	main_context.width = mbi->framebuffer_width;
 	main_context.height = mbi->framebuffer_height;
 	main_context.fb_pitch = mbi->framebuffer_pitch;
 	main_context.fb = fb;
+	*/
 
-	cursor_x = main_context.width / 2;
-	cursor_y = main_context.height / 2;
+	cursor_x = screen->width / 2;
+	cursor_y = screen->height / 2;
 
 	/* Load background image */
 	uint8_t *background_bmp_buf = (uint8_t *) malloc(960138);
@@ -196,16 +215,18 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	while(1) {
 		// Background
 		//draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x4A69);
+		direct_draw_bitmap(screen, 0, 0, screen->width, screen->height, (uint16_t *) background_buf);
 
-		draw_bitmap(main_context, 0, 0, 800, 600, (uint16_t *) background_buf);
+		// Draw clock
+		//draw_string(main_context, 20, 20, ":-)", 0xFFFFFF);
 
 		for (int i=0; i < 10; i++) {
 			if (windows[i] == NULL) continue;
-			draw_window(main_context, windows[i]);
+			draw_window(windows[i]);
 		}
 
 		// Cursor
-		draw_filled_rectangle(main_context, cursor_x, cursor_y, 10, 10, 0xFFFF);
+		direct_draw_rectangle(screen, cursor_x, cursor_y, 10, 10, 0xFFFF);
 
 		// Swap frontbuffer and backbuffer
     	desktop_swap_fb();
