@@ -19,12 +19,35 @@ void direct_draw_rectangle(surface_t *surface, uint16_t x, uint16_t y, uint16_t 
 }
 
 /* Todo: Implement bitmap structure */
-void direct_draw_bitmap(surface_t *surface, int x, int y, int width, int height, uint16_t *data)
+void direct_draw_bitmap(surface_t *surface, uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t *data)
 {
-    for (int i=0; i < height; i++) {
+	for (int i=0; i < height; i++) {
         for (int j=0; j < width; j++) {
             direct_draw_pixel(surface, x + j, y + i, data[i * width + j]);
         }
+    }
+}
+
+void direct_draw_char(surface_t *surface, uint16_t x, uint16_t y, uint8_t font[][1024], char c, uint16_t color)
+{
+	for(int i=0; i < 32; i++) {
+        for(int j=0; j < 32+2; j++) {
+            if(font[c][j+i*32] == 1) {
+                direct_draw_pixel(surface, x + j, y + i, color);
+            } else {
+                continue;
+            }
+        }
+    }
+}
+
+void direct_draw_string(surface_t *surface, uint16_t x, uint16_t y, uint8_t font[][1024], char* str, uint16_t color)
+{
+	uint32_t j=0;
+
+	for(uint32_t i=0; str[i] != '\0'; i++) {
+		direct_draw_char(surface, x+j, y, font, str[i], color);
+        j+=15;
     }
 }
 

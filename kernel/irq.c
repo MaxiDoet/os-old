@@ -26,7 +26,7 @@ uint8_t irq_install_handler(int irq, void (*handler))
 {
 	if (irq_is_used(irq)) {
 		#ifdef DEBUG_IRQ
-			kdebug("[irq] irq %d is already used\r\n", irq);
+		kdebug("[irq] irq %d is already used\r\n", irq);
 		#endif
 
 		return 0;
@@ -35,7 +35,7 @@ uint8_t irq_install_handler(int irq, void (*handler))
 	irq_routines[irq] = handler;
 
 	#ifdef DEBUG_IRQ_INSTALL
-		kdebug("[irq] installed handler for irq %d\r\n", irq);
+	kdebug("[irq] installed handler for irq %d\r\n", irq);
 	#endif
 
 	return 1;
@@ -49,8 +49,8 @@ void irq_uninstall_handler(int irq)
 void irq_handler(uint8_t irq)
 {
 	#ifdef DEBUG_IRQ_PRINT
-		kdebug("IRQ%d got fired!\r\n", (int)irq);
-        #endif
+	kdebug("IRQ%d got fired!\r\n", (int)irq);
+    #endif
 
 	void (*handler)();
 
@@ -59,7 +59,7 @@ void irq_handler(uint8_t irq)
 
 	if (handler) {
 		#ifdef DEBUG_IRQ_PRINT_ROUTINE
-			kdebug("IRQ%d got fired!\r\n", (int)irq);
+		kdebug("IRQ%d got fired!\r\n", (int)irq);
 		#endif
 
 		handler();

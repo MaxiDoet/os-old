@@ -1,4 +1,5 @@
 #include "./include/string.h"
+#include "../include/kernel/kernel.h"
 
 int memcmp(const void* aptr, const void* bptr, size_t size) {
         const unsigned char* a = (const unsigned char*) aptr;
@@ -82,4 +83,72 @@ int strcmp(char *str1, char *str2)
 	}
 
 	return result;
+}
+
+void strfmt(char *str, char* format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	int str_index = 0;
+
+	char c;
+    long n;
+    int i=0;
+	char* s;
+	char cc;
+
+	int base;
+	char prefix;
+
+    while(format[i] != '\0') {
+		c=format[i];
+
+        if(c == '%') {
+        	i++;
+            c=format[i];
+
+            switch(c) {
+				case '%':
+					str[str_index] = '%';
+					break;
+                case 'd':
+					prefix=' ';
+					base=10;
+                    goto print_num;
+				case 's':
+					s = va_arg(args, char *);
+					memcpy((char *) &str[str_index], s, strlen(s));
+					break;
+				case 'x':
+					prefix=' ';
+					base=16;
+                    goto print_num;
+
+				print_num:
+					str[str_index] = prefix;
+
+					n = va_arg(args, long);
+
+					if (n==0) str[str_index++] = '0';
+
+                    static char buf[32] = {0};
+
+                    int j = 30;
+
+                    for(; n && j ; --j, n /= base)
+						buf[j] = "0123456789abcdef"[n % base];
+						memcpy((char *) &str[str_index], (char *) &buf[j + 1], strlen(&buf[j + 1]));	
+						str_index += strlen(&buf[j + 1]) - 1;					
+					break;
+			}
+        } else {
+            str[str_index] = c;
+		}
+
+        i++;
+		str_index++;
+	}
+
+	va_end(args);
 }

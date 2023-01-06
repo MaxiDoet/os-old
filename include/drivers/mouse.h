@@ -1,17 +1,18 @@
 #ifndef _mouse_h
 #define _mouse_h
 
-struct mouse_event {
+typedef struct mouse_event_t {
 	int x;
 	int y;
-	bool button1_pressed;
-	bool button2_pressed;
-	bool button3_pressed;
-};
+
+	bool button_left_pressed;
+	bool button_right_pressed;
+	bool button_middle_pressed;
+} mouse_event_t;
 
 void mouse_init();
 void mouse_irq_handler();
-void mouse_add_callback(void (*callback)(struct mouse_event));
+void mouse_add_callback(void (*callback)(struct mouse_event_t));
 void mouse_remove_callback();
 
 #endif

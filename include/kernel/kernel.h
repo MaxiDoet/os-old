@@ -1,7 +1,9 @@
 #ifndef _kernel_h
 #define _kernel_h
 
-struct cpu_state {
+#include <stdint.h>
+
+typedef struct cpu_state {
     uint32_t   eax;
     uint32_t   ebx;
     uint32_t   ecx;
@@ -13,11 +15,11 @@ struct cpu_state {
     uint32_t   intr;
 
     uint32_t   eip;
+    uint32_t   esp;
     uint32_t   cs;
     uint32_t   eflags;
-    uint32_t   esp;
     uint32_t   ss;
-};
+} cpu_state;
 
 void kmain(unsigned long magic, unsigned long addr);
 void kpanic(char* msg);

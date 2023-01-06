@@ -18,7 +18,7 @@ typedef struct wave_format_chunk_t {
     uint32_t samples_per_sec;
     uint32_t avg_bytes_per_sec;
     uint16_t block_align;
-    uint16_t bits_per_sample;  
+    uint16_t bits_per_sample;
 } __attribute__((packed)) wave_format_chunk_t;
 
 #define WAVE_RIFF_SIGNATURE     0x52494646

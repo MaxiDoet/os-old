@@ -8,21 +8,21 @@
 #include "../include/kernel/irq.h"
 
 static int mouse_callback_num = 0;
-static void (*mouse_callbacks[8])(struct mouse_event);
-static struct mouse_event event;
+static void (*mouse_callbacks[8])(struct mouse_event_t);
+static struct mouse_event_t event;
 
-static bool button1_pressed;
-static bool button2_pressed;
-static bool button3_pressed;
+static bool button_left_pressed;
+static bool button_right_pressed;
+static bool button_middle_pressed;
 
-void mouse_fire_callback(struct mouse_event event)
+void mouse_fire_callback(struct mouse_event_t event)
 {
 	for(int i=0; mouse_callbacks[i]; i++) {
         mouse_callbacks[i](event);
     }
 }
 
-void mouse_add_callback(void (*callback)(struct mouse_event))
+void mouse_add_callback(void (*callback)(struct mouse_event_t))
 {
     mouse_callbacks[mouse_callback_num] = callback;
     mouse_callback_num++;
@@ -46,9 +46,9 @@ void mouse_irq_handler()
 			mouse_receive_byte[0] = data;
 			mouse_receive_counter++;
 
-			button1_pressed = mouse_receive_byte[0] & 0x1 ? true : false;
-			button2_pressed = mouse_receive_byte[0] & (0x1 << 1) ? true : false;
-			button3_pressed = mouse_receive_byte[0] & (0x1 << 2) ? true : false;
+			button_left_pressed = mouse_receive_byte[0] & 0x1 ? true : false;
+			button_right_pressed = mouse_receive_byte[0] & (0x1 << 1) ? true : false;
+			button_middle_pressed = mouse_receive_byte[0] & (0x1 << 2) ? true : false;
 
 			break;
 		case 1:
@@ -63,9 +63,9 @@ void mouse_irq_handler()
 			event.x = mouse_receive_byte[1] - ((mouse_receive_byte[0] << 4) & 0x100);
 			event.y = mouse_receive_byte[2] - ((mouse_receive_byte[0] << 3) & 0x100);
 
-			event.button1_pressed = button1_pressed;
-			event.button2_pressed = button2_pressed;
-			event.button3_pressed = button3_pressed;
+			event.button_left_pressed = button_left_pressed;
+			event.button_right_pressed = button_right_pressed;
+			event.button_middle_pressed = button_middle_pressed;
 
 			mouse_fire_callback(event);
 

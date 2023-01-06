@@ -3,17 +3,19 @@
 #include <stdint.h>
 
 #include "../apps/desktop/desktop.h"
+#include "../apps/desktop/font.h"
+
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/mem/heap.h"
 #include "../libc/include/string.h"
 
+#include "../include/drivers/ac97.h"
 #include "../include/drivers/keyboard.h"
 #include "../include/drivers/mouse.h"
 #include "../include/drivers/serial.h"
+#include "../include/drivers/rtc.h"
 
 #include "../config.h"
-
-#include "../include/drivers/ac97.h"
 
 #include <gui/surface.h>
 #include <gui/direct.h>
@@ -22,7 +24,6 @@
 
 #define WINDOW_COLOR 	0x31A6
 #define TITLE_BAR_COLOR 0x632C
-#define FRAME_COLOR 	0x2945
 
 typedef struct window {
 	int x;
@@ -61,7 +62,7 @@ void draw_window(window *win)
 	//draw_string(ctx, win->x + 5, win->y - 8, win->title, 0xFFFF);
 }
 
-static void mouse_handler(struct mouse_event event)
+static void mouse_handler(mouse_event_t event)
 {
 	int movement_x = event.x * 2;
 	int movement_y = event.y * 2;
@@ -75,13 +76,6 @@ static void mouse_handler(struct mouse_event event)
 		grabbed_window->x += movement_x;
 		grabbed_window->y -= movement_y;
 	}
-
-	/*
-	if (grabbing && grabbed_window && !grabbed_window->coliding) {
-		cursor_x += movement_x;
-		cursor_y -= movement_y;
-	}
-	*/
 
 	if (grabbing && grabbed_window) {
 		if (!grabbed_window->coliding_x) {
@@ -102,7 +96,7 @@ static void mouse_handler(struct mouse_event event)
 	for (int i=0; i < 1; i++) {
 		if (windows[i] == NULL) continue;
 
-		if (!windows[i]->grabbed && event.button1_pressed && cursor_x >= windows[i]->x-10 && cursor_x <= windows[i]->x-10 + windows[i]->width && cursor_y >= windows[i]->y-10 && cursor_y <= windows[i]->y-10 + 20) {
+		if (!windows[i]->grabbed && event.button_left_pressed && cursor_x >= windows[i]->x-10 && cursor_x <= windows[i]->x-10 + windows[i]->width && cursor_y >= windows[i]->y-10 && cursor_y <= windows[i]->y-10 + 20) {
 			windows[i]->grabbed = true;
 			windows[i]->focused = true;
 
@@ -110,7 +104,7 @@ static void mouse_handler(struct mouse_event event)
 			grabbed_window = windows[i];
 		}
 
-		if (windows[i]->grabbed && !event.button1_pressed) {
+		if (windows[i]->grabbed && !event.button_left_pressed) {
 			windows[i]->grabbed = false;
 
 			grabbing = false;
@@ -132,18 +126,6 @@ static void mouse_handler(struct mouse_event event)
 		if (windows[i]->y <= 0) {
 			windows[i]->y = 0;
 		}
-
-		/*
-		if (windows[i]->x + windows[i]->width >= screen->width ||
-			windows[i]->y + windows[i]->height >= screen->height ||
-			windows[i]->x <= 0 ||
-			windows[i]->y <= 0) 
-		{
-			windows[i]->coliding = true;
-		} else {
-			windows[i]->coliding = false;
-		}
-		*/
 
 		windows[i]->coliding_x = (windows[i]->x <= 0 || windows[i]->width >= screen->width);
 		windows[i]->coliding_y = (windows[i]->y <= 0 || windows[i]->height >= screen->height);
@@ -177,15 +159,6 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	screen->bpp = 2;
 	screen->fb = fb;
 
-	/*
-	main_context.x = 0;
-	main_context.y = 0;
-	main_context.width = mbi->framebuffer_width;
-	main_context.height = mbi->framebuffer_height;
-	main_context.fb_pitch = mbi->framebuffer_pitch;
-	main_context.fb = fb;
-	*/
-
 	cursor_x = screen->width / 2;
 	cursor_y = screen->height / 2;
 
@@ -193,7 +166,7 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	uint8_t *background_bmp_buf = (uint8_t *) malloc(960138);
 	vfs_read(root_fs, "/background.bmp", background_bmp_buf);
 	bmp_header_t *background_bmp_header = (bmp_header_t *) background_bmp_buf;
-	
+
 	uint8_t *background_buf = (uint8_t *) malloc(800 * 600 * 2);
 	memcpy(background_buf, background_bmp_buf + background_bmp_header->offset, 800 * 600 * 2);
 
@@ -212,13 +185,20 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	keyboard_add_callback(keyboard_handler);
 	mouse_add_callback(mouse_handler);
 
+	char *clock_str = (char *) malloc(20);
+	memset(clock_str, 0x00, 20);
+
 	while(1) {
 		// Background
 		//draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x4A69);
 		direct_draw_bitmap(screen, 0, 0, screen->width, screen->height, (uint16_t *) background_buf);
 
 		// Draw clock
-		//draw_string(main_context, 20, 20, ":-)", 0xFFFFFF);
+		datetime_t datetime;
+		datetime = rtc_read_datetime();
+		
+		strfmt(clock_str, "%d:%d\r\n", datetime.hour, datetime.minute);
+		direct_draw_string(screen, 20, 20, font, clock_str, 0xFFFF);
 
 		for (int i=0; i < 10; i++) {
 			if (windows[i] == NULL) continue;

@@ -7,6 +7,7 @@
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/idt.h"
+#include "../include/kernel/task.h"
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/mem/pmm.h"
@@ -70,6 +71,20 @@ void probe_root_fs(ata_dev_t *dev)
 	ext2_probe(dev, gpt_table[0], (ext2_fs_t *) root_fs.data);
 }
 
+void task1()
+{
+	while (1) {
+		kdebug("A\r\n");
+	}
+}
+
+void task2()
+{
+	while (1) {
+		kdebug("B\r\n");
+	}
+}
+
 void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
@@ -86,10 +101,8 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
 	heap_init(heap_start, heap_size);
 
-	/*
 	datetime_t datetime = rtc_read_datetime();
-	kdebug("%d:%d:%d %d/%d/%d\r\n", datetime.hour, datetime.minute, datetime.second, datetime.day_of_month, datetime.month, datetime.year);
-	*/
+	kdebug("[kernel] RTC %d:%d:%d %d/%d/%d\r\n", datetime.hour, datetime.minute, datetime.second, datetime.day_of_month, datetime.month, datetime.year);
 
 	// Init PIT
 	pit_init();
@@ -136,6 +149,13 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 		audio_dev_play(test_buf, 25548514);
 	}
 	free(test_buf);
+	*/
+
+	/*
+	tasking_init();
+
+	task_create(&task1);
+	task_create(&task2);
 	*/
 
 	desktop_init(mbi, &root_fs);
