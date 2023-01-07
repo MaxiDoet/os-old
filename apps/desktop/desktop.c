@@ -19,6 +19,7 @@
 
 #include <gui/surface.h>
 #include <gui/direct.h>
+#include <gui/bitmap.h>
 #include <gui/utils.h>
 #include <bmp.h>
 
@@ -139,15 +140,15 @@ void keyboard_handler(struct keyboard_event event)
 
 static inline void desktop_swap_fb()
 {
-	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((screen->width * screen->height * screen->bpp)));
+	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((screen->pitch * screen->height)));
 }
 
 void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 {
 	kdebug("Framebuffer");
-	kdebug(" | BPP: %d", mbi->framebuffer_bpp);
 	kdebug(" | Width: %d", mbi->framebuffer_width);
 	kdebug(" | Height: %d", mbi->framebuffer_height);
+	kdebug(" | BPP: %d", mbi->framebuffer_bpp);
 	kdebug(" | Pitch: %d\r\n", mbi->framebuffer_pitch);	
 
 	bb = (void *) (uint32_t) mbi->framebuffer_addr;
@@ -156,7 +157,8 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	screen = (surface_t *) malloc(sizeof(surface_t));
 	screen->width = mbi->framebuffer_width;
 	screen->height = mbi->framebuffer_height;
-	screen->bpp = 2;
+	screen->bpp = mbi->framebuffer_bpp;
+	screen->pitch = mbi->framebuffer_pitch;
 	screen->fb = fb;
 
 	cursor_x = screen->width / 2;
@@ -170,8 +172,12 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	uint8_t *background_buf = (uint8_t *) malloc(800 * 600 * 2);
 	memcpy(background_buf, background_bmp_buf + background_bmp_header->offset, 800 * 600 * 2);
 
-	// Flip bitmap
-	bitmap_flip_h(800, 600, 2, background_buf);
+	bitmap_t *background_bitmap = (bitmap_t *) malloc(sizeof(bitmap_t));
+	background_bitmap->width = 800;
+	background_bitmap->height = 600;
+	background_bitmap->bpp = 2;
+	background_bitmap->data = background_buf;
+	bitmap_flip_h(background_bitmap);
 
 	window test;
 	test.x = 70;
@@ -190,15 +196,17 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 
 	while(1) {
 		// Background
-		//draw_filled_rectangle(main_context, 0, 0, main_context.width, main_context.height, 0x4A69);
-		direct_draw_bitmap(screen, 0, 0, screen->width, screen->height, (uint16_t *) background_buf);
+		//direct_draw_rectangle(screen, 0, 0, screen->width, screen->height, 0x333333);
+		direct_draw_bitmap(screen, 0, 0, background_bitmap);
 
 		// Draw clock
 		datetime_t datetime;
 		datetime = rtc_read_datetime();
-		
 		strfmt(clock_str, "%d:%d\r\n", datetime.hour, datetime.minute);
-		direct_draw_string(screen, 20, 20, font, clock_str, 0xFFFF);
+		//direct_draw_string(screen, screen->width - 16 * 5 - 20, 20, font, clock_str, 0xFFFF);
+		direct_draw_string(screen, 20, 20, font, clock_str, 0xFFFFFF);
+
+		direct_draw_string(screen, 120, 20, font, "Welcome", 0xFFFFFF);
 
 		for (int i=0; i < 10; i++) {
 			if (windows[i] == NULL) continue;
@@ -206,7 +214,7 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 		}
 
 		// Cursor
-		direct_draw_rectangle(screen, cursor_x, cursor_y, 10, 10, 0xFFFF);
+		direct_draw_rectangle(screen, cursor_x, cursor_y, 10, 10, 0xFFFFFF);
 
 		// Swap frontbuffer and backbuffer
     	desktop_swap_fb();

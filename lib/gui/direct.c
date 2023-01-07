@@ -1,15 +1,18 @@
 #include <stdint.h>
 
+#include "../libc/include/string.h"
 #include <gui/surface.h>
 #include <gui/direct.h>
 
-void direct_draw_pixel(surface_t *surface, uint16_t x, uint16_t y, uint16_t color)
+void direct_draw_pixel(surface_t *surface, uint16_t x, uint16_t y, uint32_t color)
 {
-    uint16_t *pixel = surface->fb + (y * surface->width * surface->bpp + x * surface->bpp);
-    *pixel = color;
+    //void *pixel = surface->fb + (y * surface->pitch + x * surface->bpp / 8);
+	//*pixel = color;
+
+	memcpy(surface->fb + (y * surface->pitch + x * surface->bpp / 8), (void *) &color, surface->bpp / 8);
 }
 
-void direct_draw_rectangle(surface_t *surface, uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color)
+void direct_draw_rectangle(surface_t *surface, uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color)
 {
 	for (uint16_t i=0; i < height; i++) {
 		for (uint16_t j=0; j < width; j++) {
@@ -18,17 +21,16 @@ void direct_draw_rectangle(surface_t *surface, uint16_t x, uint16_t y, uint16_t 
 	}
 }
 
-/* Todo: Implement bitmap structure */
-void direct_draw_bitmap(surface_t *surface, uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t *data)
+void direct_draw_bitmap(surface_t *surface, uint16_t x, uint16_t y, bitmap_t *bitmap)
 {
-	for (int i=0; i < height; i++) {
-        for (int j=0; j < width; j++) {
-            direct_draw_pixel(surface, x + j, y + i, data[i * width + j]);
+	for (int i=0; i < bitmap->height; i++) {
+        for (int j=0; j < bitmap->width; j++) {
+            direct_draw_pixel(surface, x + j, y + i, bitmap->data[i * bitmap->width + j]);
         }
     }
 }
 
-void direct_draw_char(surface_t *surface, uint16_t x, uint16_t y, uint8_t font[][1024], char c, uint16_t color)
+void direct_draw_char(surface_t *surface, uint16_t x, uint16_t y, uint8_t font[][1024], char c, uint32_t color)
 {
 	for(int i=0; i < 32; i++) {
         for(int j=0; j < 32+2; j++) {
@@ -41,7 +43,7 @@ void direct_draw_char(surface_t *surface, uint16_t x, uint16_t y, uint8_t font[]
     }
 }
 
-void direct_draw_string(surface_t *surface, uint16_t x, uint16_t y, uint8_t font[][1024], char* str, uint16_t color)
+void direct_draw_string(surface_t *surface, uint16_t x, uint16_t y, uint8_t font[][1024], char* str, uint32_t color)
 {
 	uint32_t j=0;
 

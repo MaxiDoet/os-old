@@ -5,14 +5,14 @@
 
 #include <gui/utils.h>
 
-void bitmap_flip_h(int w, int h, int bpp, uint8_t *bitmap)
+void bitmap_flip_h(bitmap_t *bitmap)
 {
-    uint8_t *bitmap_copy = (uint8_t *) malloc(w * h * bpp);
-    memcpy(bitmap_copy, bitmap, w * h * bpp);
+    uint8_t *bitmap_copy = (uint8_t *) malloc(bitmap->width * bitmap->height * bitmap->bpp);
+    memcpy(bitmap_copy, bitmap->data, bitmap->width * bitmap->height * bitmap->bpp);
 
-    for (int y=0; y < h; y++) {
-        for (int x=0; x < w; x++) {
-            memcpy(&bitmap[(w * y + x) * bpp], &bitmap_copy[((h - y) * w + x) * bpp], bpp);
+    for (uint16_t y=0; y < bitmap->height; y++) {
+        for (uint16_t x=0; x < bitmap->width; x++) {
+            memcpy(&bitmap->data[(bitmap->width * y + x) * bitmap->bpp], &bitmap_copy[((bitmap->height - y) * bitmap->width + x) * bitmap->bpp], bitmap->bpp);
         }
     }
 
