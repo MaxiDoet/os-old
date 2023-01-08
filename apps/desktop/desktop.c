@@ -23,8 +23,8 @@
 #include <gui/utils.h>
 #include <bmp.h>
 
-#define WINDOW_COLOR 	0x31A6
-#define TITLE_BAR_COLOR 0x632C
+#define WINDOW_COLOR 	0x262626
+#define TITLE_BAR_COLOR 0x4D4C4C
 
 typedef struct window {
 	int x;
@@ -165,17 +165,17 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	cursor_y = screen->height / 2;
 
 	/* Load background image */
-	uint8_t *background_bmp_buf = (uint8_t *) malloc(960138);
+	uint8_t *background_bmp_buf = (uint8_t *) malloc(2359434);
 	vfs_read(root_fs, "/background.bmp", background_bmp_buf);
 	bmp_header_t *background_bmp_header = (bmp_header_t *) background_bmp_buf;
 
-	uint8_t *background_buf = (uint8_t *) malloc(800 * 600 * 2);
-	memcpy(background_buf, background_bmp_buf + background_bmp_header->offset, 800 * 600 * 2);
+	uint8_t *background_buf = (uint8_t *) malloc(1024 * 768 * 3);
+	memcpy(background_buf, background_bmp_buf + background_bmp_header->offset, 1024 * 768 * 3);
 
 	bitmap_t *background_bitmap = (bitmap_t *) malloc(sizeof(bitmap_t));
-	background_bitmap->width = 800;
-	background_bitmap->height = 600;
-	background_bitmap->bpp = 2;
+	background_bitmap->width = 1024;
+	background_bitmap->height = 768;
+	background_bitmap->bpp = 24;
 	background_bitmap->data = background_buf;
 	bitmap_flip_h(background_bitmap);
 

@@ -3,13 +3,17 @@
 #include "../libc/include/string.h"
 #include <gui/surface.h>
 #include <gui/direct.h>
+#include <gui/utils.h>
 
 void direct_draw_pixel(surface_t *surface, uint16_t x, uint16_t y, uint32_t color)
 {
-    //void *pixel = surface->fb + (y * surface->pitch + x * surface->bpp / 8);
-	//*pixel = color;
-
-	memcpy(surface->fb + (y * surface->pitch + x * surface->bpp / 8), (void *) &color, surface->bpp / 8);
+	if (surface->bpp == 16) {
+		uint16_t *pixel = surface->fb + (y * surface->pitch + x * 2);
+		*pixel = rgb888_to_rgb565(color);
+	} else if (surface->bpp == 24) {
+		uint32_t *pixel = surface->fb + (y * surface->pitch + x * 3);
+		*pixel = color;
+	}
 }
 
 void direct_draw_rectangle(surface_t *surface, uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color)
@@ -25,7 +29,7 @@ void direct_draw_bitmap(surface_t *surface, uint16_t x, uint16_t y, bitmap_t *bi
 {
 	for (int i=0; i < bitmap->height; i++) {
         for (int j=0; j < bitmap->width; j++) {
-            direct_draw_pixel(surface, x + j, y + i, bitmap->data[i * bitmap->width + j]);
+        	direct_draw_pixel(surface, x + j, y + i, *((uint32_t *) &bitmap->data[i * bitmap->width * 3 + j * 3]));
         }
     }
 }
