@@ -26,7 +26,7 @@
 #define WINDOW_COLOR 	0x262626
 #define TITLE_BAR_COLOR 0x4D4C4C
 
-typedef struct window {
+typedef struct window_t {
 	int x;
 	int y;
 	int width;
@@ -39,28 +39,28 @@ typedef struct window {
 
 	bool focused;
 	bool grabbed;
-} window;
+} window_t;
 
 surface_t *screen;
 static void *fb;
 static void *bb;
 
-static window *windows[10];
-window *grabbed_window;
+static window_t *windows[10];
+window_t *grabbed_window;
 bool grabbing;
 static int cursor_x;
 static int cursor_y;
 
-void draw_window(window *win)
+void draw_window(window_t *win)
 {
 	// Titlebar
 	direct_draw_rectangle(screen, win->x, win->y, win->width, 20, TITLE_BAR_COLOR);
 
+	// Title
+	//direct_draw_string(screen, win->x + 5, win->y - 8, font, win->title, 0xFFFFFF);
+
 	// Window
 	direct_draw_rectangle(screen, win->x, win->y + 20, win->width, win->height - 20, WINDOW_COLOR);
-
-	// Window title
-	//draw_string(ctx, win->x + 5, win->y - 8, win->title, 0xFFFF);
 }
 
 static void mouse_handler(mouse_event_t event)
@@ -143,7 +143,7 @@ static inline void desktop_swap_fb()
 	__asm__ volatile("rep movsb" : : "D" (bb), "S" (fb), "c" ((screen->pitch * screen->height)));
 }
 
-void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
+void desktop_init(multiboot_info_t *mbi, fs_t *root_fs)
 {
 	kdebug("Framebuffer");
 	kdebug(" | Width: %d", mbi->framebuffer_width);
@@ -165,8 +165,12 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	cursor_y = screen->height / 2;
 
 	/* Load background image */
-	uint8_t *background_bmp_buf = (uint8_t *) malloc(2359434);
-	vfs_read(root_fs, "/background.bmp", background_bmp_buf);
+	fs_file_t background_file = fs_open(root_fs, "/background.bmp");
+	uint32_t background_size = fs_size(background_file);
+
+	uint8_t *background_bmp_buf = (uint8_t *) malloc(background_size);
+	fs_read(background_file, background_bmp_buf);
+
 	bmp_header_t *background_bmp_header = (bmp_header_t *) background_bmp_buf;
 
 	uint8_t *background_buf = (uint8_t *) malloc(1024 * 768 * 3);
@@ -179,12 +183,12 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 	background_bitmap->data = background_buf;
 	bitmap_flip_h(background_bitmap);
 
-	window test;
+	window_t test;
 	test.x = 70;
 	test.y = 70;
 	test.width = 400;
 	test.height = 300;
-	test.title = "Editor";
+	test.title = "Control Panel";
 
 	windows[0] = &test;
 
@@ -203,10 +207,7 @@ void desktop_init(multiboot_info_t *mbi, vfs_fs_t *root_fs)
 		datetime_t datetime;
 		datetime = rtc_read_datetime();
 		strfmt(clock_str, "%d:%d\r\n", datetime.hour, datetime.minute);
-		//direct_draw_string(screen, screen->width - 16 * 5 - 20, 20, font, clock_str, 0xFFFF);
 		direct_draw_string(screen, 20, 20, font, clock_str, 0xFFFFFF);
-
-		direct_draw_string(screen, 120, 20, font, "Welcome", 0xFFFFFF);
 
 		for (int i=0; i < 10; i++) {
 			if (windows[i] == NULL) continue;

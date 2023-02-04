@@ -8,6 +8,7 @@
 #include "../include/drivers/pic.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/kernel.h"
+#include "../include/kernel/task.h"
 #include "../config.h"
 
 struct idt_description idt_desc;
@@ -255,8 +256,15 @@ void idt_install()
     asm volatile("sti");
 }
 
-cpu_state *int_handler(cpu_state* state)
+uint32_t int_handler(uint32_t esp)
 {
+    cpu_state_t *state = (cpu_state_t *) esp;
+
+    /*
+    kdebug("CPU State | EAX: %x EBX: %x ECX: %x EDX: %x ESI: %x EDI: %x EBP: %x\r\n",
+    state->eax, state->ebx, state->ecx, state->edx, state->esi, state->edi, state->ebp);
+    */
+
 	// Here we receive the cpu state
 	if (state->intr < 20) {
 		// Kernel Exception
@@ -327,13 +335,14 @@ cpu_state *int_handler(cpu_state* state)
 		}
 
 		kdebug("\r\n");
-
 	} else if (state->intr > 31){
 		// IRQ
 		irq_handler(state->intr - 32);
 	}
 
-    //state->eip = 0;
+    if (state->intr == 32) {
+        state = tasking_schedule(state);
+    }
 
-    return state;
+    return (uint32_t) state;
 }

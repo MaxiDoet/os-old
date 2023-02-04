@@ -19,6 +19,7 @@ void bitmap_flip_h(bitmap_t *bitmap)
     free(bitmap_copy);
 }
 
+/*
 uint32_t rgb565_to_rgb888(uint32_t rgb565)
 {
     uint32_t rgb888 = 0;
@@ -29,8 +30,9 @@ uint32_t rgb565_to_rgb888(uint32_t rgb565)
 
     return rgb888;
 }
+*/
 
-uint32_t rgb888_to_rgb565(uint32_t rgb888)
+inline uint32_t rgb888_to_rgb565(uint32_t rgb888)
 {
 	uint32_t rgb565 = 0;
 

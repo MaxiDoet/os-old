@@ -142,17 +142,13 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 	return result;
 }
 
-uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
+uint8_t ext2_read(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
 {
 	uint32_t inode = ext2_find_inode(dev, fs, path);
 	if (inode == 0) return -1;
 	
 	ext2_inode *inode_buf = (ext2_inode *) malloc(sizeof(ext2_inode));
 	ext2_read_inode(dev, fs, inode, inode_buf);
-
-	#ifdef DEBUG_EXT2
-	kdebug("[ext2] read_file: inode: %d type: %x\r\n", inode, inode_buf->type);
-	#endif
 
 	for (int i=0; i < 12; i++) {
 		uint32_t block = inode_buf->direct_block_ptr[i];
@@ -178,6 +174,17 @@ uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
 	free(inode_buf);
 
 	return 1;
+}
+
+uint32_t ext2_size(ata_dev_t *dev, ext2_fs_t *fs, char *path)
+{
+	uint32_t inode = ext2_find_inode(dev, fs, path);
+	if (inode == 0) return -1;
+	
+	ext2_inode *inode_buf = (ext2_inode *) malloc(sizeof(ext2_inode));
+	ext2_read_inode(dev, fs, inode, inode_buf);
+
+	return inode_buf->size_low;
 }
 
 uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs)

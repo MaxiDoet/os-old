@@ -16,7 +16,7 @@
 #include "../include/kernel/io/pci.h"
 #include "../include/kernel/fs/ext2.h"
 #include "../include/kernel/fs/mbr.h"
-#include "../include/kernel/fs/vfs.h"
+#include "../include/kernel/fs/fs.h"
 #include "../include/kernel/io/io.h"
 #include "../include/kernel/net/net.h"
 #include "../include/kernel/platform.h"
@@ -43,7 +43,7 @@ extern const void kernel_end;
 
 const uint8_t gpt_signature[8] = {0x45, 0x46, 0x49, 0x20, 0x50, 0x41, 0x52, 0x54};
 ata_dev_t root_dev;
-vfs_fs_t root_fs;
+fs_t root_fs;
 
 void probe_root_fs(ata_dev_t *dev)
 {
@@ -65,24 +65,10 @@ void probe_root_fs(ata_dev_t *dev)
 	ata_pio_read(dev, gpt_table_header->table_lba, sector_count, gpt_table_buf);
 	gpt_table_entry_t *gpt_table = (gpt_table_entry_t *) gpt_table_buf;
 
-	root_fs.type = VFS_FS_TYPE_EXT2;
+	root_fs.type = FS_TYPE_EXT2;
 	root_fs.dev = dev;
 	root_fs.data = (uint8_t *) malloc(sizeof(ext2_fs_t));
 	ext2_probe(dev, gpt_table[0], (ext2_fs_t *) root_fs.data);
-}
-
-void task1()
-{
-	while (1) {
-		kdebug("A\r\n");
-	}
-}
-
-void task2()
-{
-	while (1) {
-		kdebug("B\r\n");
-	}
 }
 
 void kmain(unsigned long magic, unsigned long mbi_addr)
@@ -95,23 +81,17 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
     kdebug("[kernel] IDT init\r\n");
     idt_install();
 
+	// Init serial debug
+	serial_init(DEBUG_PORT);
+
 	// Init kernel heap
 	uint32_t heap_start = mbi->mem_upper + 10*1024*1024;
 	uint32_t heap_size = 100000000;
 	kdebug("[kernel] Heap init | Start: %x | Size: %x\r\n", heap_start, heap_size);
 	heap_init(heap_start, heap_size);
 
-	datetime_t datetime = rtc_read_datetime();
-	kdebug("[kernel] RTC %d:%d:%d %d/%d/%d\r\n", datetime.hour, datetime.minute, datetime.second, datetime.day_of_month, datetime.month, datetime.year);
-
 	// Init PIT
 	pit_init();
-
-	// Init serial debug
-	serial_init(DEBUG_PORT);
-
-	keyboard_init();
-	mouse_init();
 
 	kdebug("[kernel] Platform init\r\n");
 	platform_init();
@@ -141,22 +121,20 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	kdebug("[kernel] Audio init\r\n");
 	audio_init();
 
+	keyboard_init();
+	mouse_init();
+
 	/*
 	uint8_t *test_buf = (uint8_t *) malloc(25548514);
 	memset(test_buf, 0x00, 25548514);
 
-	if (vfs_read(&root_fs, "/audio.wav", test_buf)) {
+	if (fs_read(&root_fs, "/audio.wav", test_buf)) {
 		audio_dev_play(test_buf, 25548514);
 	}
 	free(test_buf);
 	*/
 
-	/*
-	tasking_init();
-
-	task_create(&task1);
-	task_create(&task2);
-	*/
+	//tasking_init();
 
 	desktop_init(mbi, &root_fs);
 }

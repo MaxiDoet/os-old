@@ -7,6 +7,8 @@
 
 void direct_draw_pixel(surface_t *surface, uint16_t x, uint16_t y, uint32_t color)
 {
+	if (x >= surface->width || y >= surface->height) return;
+	
 	if (surface->bpp == 16) {
 		uint16_t *pixel = surface->fb + (y * surface->pitch + x * 2);
 		*pixel = rgb888_to_rgb565(color);

@@ -10,26 +10,30 @@ int_common_handler:
 	push ebp
 	push edi
 	push esi
+
 	push edx
 	push ecx
 	push ebx
 	push eax
 
 	push esp
-	
+
 	call int_handler
-	add esp, 4
+	;add esp, 4
+	mov esp, eax
 
 	; Restore all registers
 	pop eax
 	pop ebx
 	pop ecx
 	pop edx
+
 	pop esi
 	pop edi
 	pop ebp
 
 	add esp, 8
+	;add esp, 4
 
 	; Return
 	iret

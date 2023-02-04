@@ -9,7 +9,6 @@
 #include "../include/drivers/ac97.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/irq.h"
-#include "../include/kernel/fs/vfs.h"
 #include "../include/kernel/audio/dev.h"
 
 /* NAM Registers */

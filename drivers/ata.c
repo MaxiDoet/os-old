@@ -238,12 +238,6 @@ uint8_t ata_pio_write(ata_dev_t *dev, uint32_t lba, uint16_t* buf, uint8_t secto
 	// Enable LBA mode and send upper LBA bits
 	outb(dev->io_base + ATA_REGISTER_SELECT, (dev->master ? 0xE0 : 0xF0) | ((lba & 0x0F000000) >> 24));
 	
-	/*
-	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
-		return 0;
-	}
-	*/
-
 	/* Set sector count and write LBA */
 	outb(dev->io_base + ATA_REGISTER_ERROR, 0);
 	outb(dev->io_base + ATA_REGISTER_SECTOR_COUNT, sector_count);

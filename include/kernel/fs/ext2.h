@@ -110,6 +110,7 @@ typedef struct ext2_fs_t {
 } ext2_fs_t;
 
 uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs);
-uint8_t ext2_read_file(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf);
+uint8_t ext2_read(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf);
+uint32_t ext2_size(ata_dev_t *dev, ext2_fs_t *fs, char *path);
 
 #endif

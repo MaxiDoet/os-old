@@ -54,9 +54,9 @@ void irq_handler(uint8_t irq)
 
 	void (*handler)();
 
-	/* Lets see if we have a routine for that */
 	handler = irq_routines[irq];
 
+	/* Lets see if we have a routine for that */
 	if (handler) {
 		#ifdef DEBUG_IRQ_PRINT_ROUTINE
 		kdebug("IRQ%d got fired!\r\n", (int)irq);
