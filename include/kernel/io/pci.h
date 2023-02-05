@@ -54,7 +54,8 @@ void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offse
 pci_dev_t pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func);
 pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum);
 
-uint16_t pci_get_device_by_id(pci_dev_t *list, uint16_t vendor_id, uint16_t device_id);
 void pci_scan();
+uint16_t pci_get_device_list(pci_dev_t *list);
+uint16_t pci_get_device_by_id(pci_dev_t *list, uint16_t vendor_id, uint16_t device_id);
 
 #endif

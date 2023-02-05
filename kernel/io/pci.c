@@ -10,6 +10,7 @@
 #include "../include/drivers/rtl8139.h"
 #include "../include/drivers/ac97.h"
 #include "../include/drivers/hda.h"
+#include "../libc/include/string.h"
 
 pci_dev_t pci_device_list[1024];
 uint16_t pci_device_list_index = 0;
@@ -111,35 +112,8 @@ pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_
 	return bar;
 }
 
-/* This function returns a list of pci devices with matching vendor oder device ids 
-   If value is 0 then the id is ignored
-*/
-
-uint16_t pci_get_device_by_id(pci_dev_t *list, uint16_t vendor_id, uint16_t device_id)
-{
-	uint16_t list_length = 0;
-
-	for (uint16_t i=0; i < pci_device_list_index; i++) {
-		pci_dev_t *dev = &pci_device_list[i];
-
-		if ((vendor_id != 0) && (vendor_id != dev->vendor_id)) {
-			continue;
-		}
-
-		if ((device_id != 0) && (device_id != dev->device_id)) {
-			continue;
-		}
-
-		list[list_length++] = *dev;
-	}
-
-	return list_length;
-}
-
 void pci_scan()
 {
-	/* This performs a brute force scan */
-
 	int bus_num;
 	int slot_num;
 	int function_num;
@@ -157,8 +131,6 @@ void pci_scan()
 
 					dev.bars[bar_num] = bar;
 				}
-
-				kdebug("[pci] Bus: %d Slot: %d Func: %d Vendor: %x Device: %x | ", bus_num, slot_num, function_num, dev.vendor_id, dev.device_id);
 
 				switch(dev.class_id) {
 					case 0x00:
@@ -364,11 +336,41 @@ void pci_scan()
 						break;
 				}
 
-				kdebug("%s\r\n", dev.class_description);
-
 				pci_device_list[pci_device_list_index++] = dev;
 			}
 
 		}
 	}
+}
+
+uint16_t pci_get_device_list(pci_dev_t *list)
+{
+	/* Protect list from being changed */
+	memcpy(list, pci_device_list, pci_device_list_index * sizeof(pci_dev_t));
+
+	return pci_device_list_index;
+}
+
+/* This function returns a list of pci devices with matching vendor oder device ids 
+   If value is 0 then the id is ignored
+*/
+uint16_t pci_get_device_by_id(pci_dev_t *list, uint16_t vendor_id, uint16_t device_id)
+{
+	uint16_t list_length = 0;
+
+	for (uint16_t i=0; i < pci_device_list_index; i++) {
+		pci_dev_t *dev = &pci_device_list[i];
+
+		if ((vendor_id != 0) && (vendor_id != dev->vendor_id)) {
+			continue;
+		}
+
+		if ((device_id != 0) && (device_id != dev->device_id)) {
+			continue;
+		}
+
+		list[list_length++] = *dev;
+	}
+
+	return list_length;
 }

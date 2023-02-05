@@ -71,6 +71,21 @@ void probe_root_fs(ata_dev_t *dev)
 	ext2_probe(dev, gpt_table[0], (ext2_fs_t *) root_fs.data);
 }
 
+/* Print a list of all pci devices found */
+void pci_dump()
+{
+	pci_dev_t *list = (pci_dev_t *) malloc(sizeof(pci_dev_t) * 1024);
+	uint16_t list_len = pci_get_device_list(list);
+
+	kdebug("PCI Devices\r\n-----------\r\n");
+
+	for (uint16_t i=0; i < list_len; i++) {
+		kdebug("Bus %d | Device %d | Function %d | %s\r\n", list[i].bus, list[i].device, list[i].function, list[i].class_description);
+	}
+
+	free(list);
+}
+
 void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
@@ -114,6 +129,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	}
 
 	pci_scan();
+	pci_dump();
 
 	kdebug("[kernel] Net init\r\n");
 	net_init();
