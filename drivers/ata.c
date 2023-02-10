@@ -29,12 +29,15 @@
 #define ATA_STATUS_RDY	(1 << 6)
 #define ATA_STATUS_BSY	(1 << 7)
 
-#define ATA_COMMAND_READ_SECTORS 	0x20
-#define ATA_COMMAND_WRITE_SECTORS	0x30
-#define ATA_COMMAND_CACHE_FLUSH		0xE7
-#define ATA_COMMAND_IDENTIFY 		0xEC
+#define ATA_COMMAND_READ_SECTORS 		0x20
+#define ATA_COMMAND_WRITE_SECTORS		0x30
+#define ATA_COMMAND_CACHE_FLUSH			0xE7
+#define ATA_COMMAND_IDENTIFY 			0xEC
 
-#define ATA_CONTROL_SRST			(0 << 2)
+#define ATA_IDENTIFY_SERIAL				0x14
+#define ATA_IDENTIFY_MODEL 				0x36
+
+#define ATA_CONTROL_SRST				(0 << 2)
 
 #define ATA_REGISTER_DATA 				0x00
 #define ATA_REGISTER_ERROR				0x01
@@ -49,23 +52,9 @@
 #define ATA_REGISTER_PRIMARY_CONTROL	0x3F6
 #define ATA_REGISTER_SECONDARY_CONTROL	0x376
 
-void ata_device_debug(ata_dev_t *dev, char* msg)
+void ata_device_print(ata_dev_t *dev, char* msg)
 {
-	#ifdef DEBUG_ATA
-	char* prefix;
-
-	if (dev->primary && dev->master) {
-		prefix = "ATA->Primary Master";
-	} else if (dev->primary && !dev->master) {
-		prefix = "ATA->Primary Slave";
-	} else if (!dev->primary && dev->master) {
-		prefix = "ATA->Secondary Master";
-	} else {
-		prefix = "ATA->Secondary Slave";
-	}
-
-	kdebug("[ata] %s | %s\r\n", prefix, msg);
-	#endif
+	kdebug("%s bus | %s | %s\r\n", dev->primary ? "Primary" : "Secondary", dev->master ? "Master" : "Slave", msg);
 }
 
 void ata_err_dump(ata_dev_t *dev, uint8_t status)
@@ -117,7 +106,7 @@ void ata_err_dump(ata_dev_t *dev, uint8_t status)
 		}
 	}
 
-	ata_device_debug(dev, error_text);
+	ata_device_print(dev, error_text);
 }
 
 uint8_t ata_pio_wait_err(ata_dev_t *dev)
@@ -147,10 +136,6 @@ uint8_t ata_pio_wait_bsy(ata_dev_t *dev)
 		asm volatile ("nop");
 		asm volatile ("nop");
 
-		#ifdef DEBUG_ATA
-		ata_device_debug(dev, "waiting busy");
-		#endif
-
 		/* This produces the error messages */
 		if (ata_pio_wait_err(dev) != ATA_RETURN_SUCCESS) {
 			return ATA_RETURN_ERROR;
@@ -163,12 +148,10 @@ uint8_t ata_pio_wait_bsy(ata_dev_t *dev)
 }
 
 uint8_t ata_pio_wait_drq(ata_dev_t *dev)
-{
+{	
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
 	while (!(status & ATA_STATUS_DRQ)) {
-		ata_device_debug(dev, "waiting drq");
-
 		if (ata_pio_wait_err(dev) != ATA_RETURN_SUCCESS) {
 			return ATA_RETURN_ERROR;
 		}
@@ -184,8 +167,6 @@ uint8_t ata_pio_wait_rdy(ata_dev_t *dev)
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
     while(!(status & ATA_STATUS_RDY)) {
-		ata_device_debug(dev, "waiting rdy");
-
 		status = inb(dev->io_base + ATA_REGISTER_STATUS);
 	}
 	
@@ -269,13 +250,19 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 
 	dev->ready = false;
 
-	outb(dev->master ? ATA_REGISTER_PRIMARY_CONTROL : ATA_REGISTER_SECONDARY_CONTROL, 0);
+	// Check for floating bus
+	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
+	if (status == 0xFF) {
+		ata_device_print(dev, "not connected (floating bus)");
+		return ATA_RETURN_NONE;
+	}
+
+	outb(dev->primary ? ATA_REGISTER_PRIMARY_CONTROL : ATA_REGISTER_SECONDARY_CONTROL, 0);
 
 	// Select drive
 	outb(dev->io_base + ATA_REGISTER_SELECT, master ? 0xA0 : 0xB0);
 
 	// Reset
-	outb(dev->io_base + ATA_REGISTER_SELECT, master ? 0xA0 : 0xB0);
 	outb(dev->io_base + ATA_REGISTER_SECTOR_COUNT, 0);
 	outb(dev->io_base + ATA_REGISTER_LBA_LOW, 0);
 	outb(dev->io_base + ATA_REGISTER_LBA_MID, 0);
@@ -284,24 +271,36 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 	// Identify
 	outb(dev->io_base + ATA_REGISTER_COMMAND, ATA_COMMAND_IDENTIFY);
 
+	// Check if drive exists
+	if (!inb(dev->io_base + ATA_REGISTER_STATUS)) {
+		ata_device_print(dev, "not connected");
+		return ATA_RETURN_NONE;
+	}
+
 	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
-		return 0;
+		return ATA_RETURN_ERROR;
 	}
 
 	// Wait until all data is transfered
 	if (ata_pio_wait_drq(dev) != ATA_RETURN_SUCCESS) {
-		return 0;
+		return ATA_RETURN_ERROR;
 	}
 
-	ata_device_debug(dev, "ready");
-	
 	// Read identify data
 	for (int i=0; i < 256; i++) {
 		uint16_t data = inw(dev->io_base + ATA_REGISTER_DATA);
-				
-		dev->info[i] = (data >> 8);
-		dev->info[i] = data & 0xFF;
+
+		dev->info[i * 2] = (data >> 8);
+		dev->info[i * 2 + 1] = data & 0xFF;
 	}
+
+	memcpy(dev->serial, &dev->info[ATA_IDENTIFY_SERIAL], 20);
+	dev->serial[19] = '\0';
+
+	memcpy(dev->model, &dev->info[ATA_IDENTIFY_MODEL], 40);
+	dev->model[39] = '\0';
+
+	ata_device_print(dev, "ready");
 
 	dev->ready = true;
 

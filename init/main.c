@@ -113,13 +113,13 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	kdebug("[kernel] ATA init\r\n");
 
-	if (ata_init(&root_dev, true, true)) {
+	if (ata_init(&root_dev, true, true) == ATA_RETURN_SUCCESS) {
 		kdebug("[kernel] root device: ATA->Primary Master\r\n");
-	} else if (ata_init(&root_dev, true, false)) {
+	} else if (ata_init(&root_dev, true, false) == ATA_RETURN_SUCCESS) {
 		kdebug("[kernel] root device: ATA->Primary Slave\r\n");
-	} else if (ata_init(&root_dev, false, true)) {
+	} else if (ata_init(&root_dev, false, true) == ATA_RETURN_SUCCESS) {
 		kdebug("[kernel] root device: ATA->Secondary Master\r\n");
-	} else if (ata_init(&root_dev, false, false)) {
+	} else if (ata_init(&root_dev, false, false) == ATA_RETURN_SUCCESS) {
 		kdebug("[kernel] root device: ATA->Secondary Slave\r\n");
 	}
 
