@@ -20,6 +20,7 @@
 #include "../include/kernel/io/io.h"
 #include "../include/kernel/net/net.h"
 #include "../include/kernel/platform.h"
+#include "../include/kernel/dd/dev.h"
 #include "../include/kernel/audio/dev.h"
 #include "../libc/include/string.h"
 
@@ -42,13 +43,13 @@ extern const void kernel_start;
 extern const void kernel_end;
 
 const uint8_t gpt_signature[8] = {0x45, 0x46, 0x49, 0x20, 0x50, 0x41, 0x52, 0x54};
-ata_dev_t root_dev;
+dd_dev_t *root_dev;
 fs_t root_fs;
 
-void probe_root_fs(ata_dev_t *dev)
+void probe_root_fs(dd_dev_t *dev)
 {
-	uint16_t *gpt_table_header_buf = (uint16_t *) malloc(ATA_SECTOR_SIZE);
-	ata_pio_read(dev, 1, 1, gpt_table_header_buf);
+	uint16_t *gpt_table_header_buf = (uint16_t *) malloc(512);
+	dd_dev_read(dev, 1, 1, gpt_table_header_buf);
 	gpt_table_header_t *gpt_table_header = (gpt_table_header_t *) gpt_table_header_buf;
 
 	/* Check GPT signature */
@@ -62,7 +63,7 @@ void probe_root_fs(ata_dev_t *dev)
 	uint8_t sector_count = (gpt_table_header->table_entry_count * gpt_table_header->table_entry_size) / ATA_SECTOR_SIZE + 1;
 
 	uint16_t *gpt_table_buf = (uint16_t *) malloc(sector_count * ATA_SECTOR_SIZE);
-	ata_pio_read(dev, gpt_table_header->table_lba, sector_count, gpt_table_buf);
+	dd_dev_read(dev, gpt_table_header->table_lba, 1, gpt_table_buf);
 	gpt_table_entry_t *gpt_table = (gpt_table_entry_t *) gpt_table_buf;
 
 	root_fs.type = FS_TYPE_EXT2;
@@ -112,23 +113,16 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	platform_init();
 
 	kdebug("[kernel] ATA init\r\n");
-
-	if (ata_init(&root_dev, true, true) == ATA_RETURN_SUCCESS) {
-		kdebug("[kernel] root device: ATA->Primary Master\r\n");
-	} else if (ata_init(&root_dev, true, false) == ATA_RETURN_SUCCESS) {
-		kdebug("[kernel] root device: ATA->Primary Slave\r\n");
-	} else if (ata_init(&root_dev, false, true) == ATA_RETURN_SUCCESS) {
-		kdebug("[kernel] root device: ATA->Secondary Master\r\n");
-	} else if (ata_init(&root_dev, false, false) == ATA_RETURN_SUCCESS) {
-		kdebug("[kernel] root device: ATA->Secondary Slave\r\n");
-	}
-
-	if (root_dev.ready) {
+	ata_detect();
+	root_dev = dd_dev_get(0);
+	
+	if (root_dev) {
 		kdebug("[kernel] Probe for root filesystem\r\n");
-		probe_root_fs(&root_dev);
+		probe_root_fs(root_dev);
 	}
 
-	pci_scan();
+	kdebug("[kernel] PCI detect\r\n");
+	pci_detect();
 	pci_dump();
 
 	kdebug("[kernel] Net init\r\n");

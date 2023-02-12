@@ -19,7 +19,7 @@ uint32_t block_to_sector(uint32_t block)
 
 static uint8_t *root_buf;
 
-void ext2_read_block(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block, uint8_t *buf)
+void ext2_read_block(dd_dev_t *dev, ext2_fs_t *fs, uint32_t block, uint8_t *buf)
 {
 	if (block > fs->sb->blocks_total) {
 		kdebug("[ext2] attempted to read invalid block\r\n");
@@ -29,10 +29,10 @@ void ext2_read_block(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block, uint8_t *buf
 	kdebug("[ext2] reading block %d (sector %d)\r\n", block, fs->start_sector + block_to_sector(block));
 	#endif
 
-	ata_pio_read(dev, fs->start_sector + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, (uint16_t *) buf);
+	dd_dev_read(dev, fs->start_sector + block_to_sector(block), fs->block_size / ATA_SECTOR_SIZE, (uint16_t *) buf);
 }
 
-void ext2_read_singly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, uint8_t *buf)
+void ext2_read_singly_linked(dd_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, uint8_t *buf)
 {
 	uint16_t entries_max = fs->block_size / sizeof(uint32_t);
 
@@ -55,7 +55,7 @@ void ext2_read_singly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, 
 	free(block_list_buf);
 }
 
-void ext2_read_doubly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, uint8_t *buf)
+void ext2_read_doubly_linked(dd_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, uint8_t *buf)
 {
 	uint16_t entries_max = fs->block_size / sizeof(uint32_t);
 
@@ -75,7 +75,7 @@ void ext2_read_doubly_linked(ata_dev_t *dev, ext2_fs_t *fs, uint32_t block_ptr, 
 	free(block_list_buf);
 }
 
-void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *buf)
+void ext2_read_inode(dd_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *buf)
 {
 	if (inode > fs->sb->inodes_total) {
 		kdebug("[ext2] attempted to read invalid inode\r\n");
@@ -102,7 +102,7 @@ void ext2_read_inode(ata_dev_t *dev, ext2_fs_t *fs, uint32_t inode, ext2_inode *
 	free(block_buf);
 }
 
-uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
+uint32_t ext2_find_inode(dd_dev_t *dev, ext2_fs_t *fs, char* path)
 {
 	uint32_t result = 0;
 	size_t current = strsplit(path, '/');
@@ -142,7 +142,7 @@ uint32_t ext2_find_inode(ata_dev_t *dev, ext2_fs_t *fs, char* path)
 	return result;
 }
 
-uint8_t ext2_read(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
+uint8_t ext2_read(dd_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
 {
 	uint32_t inode = ext2_find_inode(dev, fs, path);
 	if (inode == 0) return -1;
@@ -176,7 +176,7 @@ uint8_t ext2_read(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf)
 	return 1;
 }
 
-uint32_t ext2_size(ata_dev_t *dev, ext2_fs_t *fs, char *path)
+uint32_t ext2_size(dd_dev_t *dev, ext2_fs_t *fs, char *path)
 {
 	uint32_t inode = ext2_find_inode(dev, fs, path);
 	if (inode == 0) return -1;
@@ -187,10 +187,10 @@ uint32_t ext2_size(ata_dev_t *dev, ext2_fs_t *fs, char *path)
 	return inode_buf->size_low;
 }
 
-uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs)
+uint8_t ext2_probe(dd_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs)
 {
 	uint16_t *sb_buf = (uint16_t *) malloc(1024);
-    ata_pio_read(dev, entry.start_lba + 2, 2, sb_buf);
+    dd_dev_read(dev, entry.start_lba + 2, 2, sb_buf);
 	
 	ext2_superblock *sb = (ext2_superblock *) sb_buf;
 	if (sb->signature != EXT2_SIGNATURE) return -1;
@@ -215,7 +215,7 @@ uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs)
 	/* Read block group descriptor table */
 	uint8_t sector_count = (sizeof(ext2_bg_descriptor) * fs->block_groups_total) / ATA_SECTOR_SIZE + 1;
 	fs->bgdt = (ext2_bg_descriptor *) malloc(sector_count * ATA_SECTOR_SIZE);
-	ata_pio_read(dev, entry.start_lba + block_to_sector(2), sector_count, (uint16_t *) fs->bgdt);
+	dd_dev_read(dev, entry.start_lba + block_to_sector(2), sector_count, (uint16_t *) fs->bgdt);
 
 	// Init buffers
     if (!root_buf) root_buf = (uint8_t *) malloc(fs->block_size);

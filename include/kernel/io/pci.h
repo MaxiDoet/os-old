@@ -8,9 +8,10 @@
 #define PCI_REGISTER_COMMAND 0x04
 
 /* Command register */
-#define PCI_COMMAND_IO 			(1 << 0)
-#define PCI_COMMAND_MMIO		(1 << 1)
-#define PCI_COMMAND_BUSMASTER	(1 << 2)
+#define PCI_COMMAND_IO 					(1 << 0)
+#define PCI_COMMAND_MMIO				(1 << 1)
+#define PCI_COMMAND_BUSMASTER			(1 << 2)
+#define PCI_COMMAND_INTERRUPT_DISABLE	(1 << 10)
 
 enum pci_bar_layout_type {
 	PCI_BAR_LAYOUT_MEMORYMAPPING = 0,
@@ -47,14 +48,17 @@ typedef struct {
 
 } pci_dev_t;
 
+
+/* IO */
 uint32_t pci_read_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset);
 uint16_t pci_read_word(uint16_t bus, uint16_t device, uint16_t func, uint16_t offset);
 void pci_write_dword(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint32_t value);
 void pci_write_word(uint16_t bus, uint16_t device, uint16_t func, uint32_t offset, uint16_t value);
+
 pci_dev_t pci_get_dev_descriptor(uint16_t bus, uint16_t device, uint16_t func);
 pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_t func, int barNum);
 
-void pci_scan();
+void pci_detect();
 uint16_t pci_get_device_list(pci_dev_t *list);
 uint16_t pci_get_device_by_id(pci_dev_t *list, uint16_t vendor_id, uint16_t device_id);
 

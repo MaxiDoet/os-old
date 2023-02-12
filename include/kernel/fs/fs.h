@@ -1,7 +1,7 @@
 #ifndef _fs_fs_h
 #define _fs_fs_h
 
-#include "../include/drivers/ata.h"
+#include "../include/kernel/dd/dev.h"
 
 enum fs_type {
     FS_TYPE_EXT2 = 0,
@@ -10,7 +10,7 @@ enum fs_type {
 
 typedef struct fs_t {
     enum fs_type type;
-    ata_dev_t *dev;
+    dd_dev_t *dev;
 
     uint8_t *data; // This points to fs data
 } fs_t;

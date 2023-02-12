@@ -1,7 +1,7 @@
 #ifndef _fs_ext2_h
 #define _fs_ext2_h
 
-#include "../include/drivers/ata.h"
+#include "../include/kernel/dd/dev.h"
 #include "../include/kernel/fs/gpt.h"
 
 #define EXT2_SIGNATURE 0xEF53
@@ -109,8 +109,8 @@ typedef struct ext2_fs_t {
 	ext2_superblock *sb;
 } ext2_fs_t;
 
-uint8_t ext2_probe(ata_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs);
-uint8_t ext2_read(ata_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf);
-uint32_t ext2_size(ata_dev_t *dev, ext2_fs_t *fs, char *path);
+uint8_t ext2_probe(dd_dev_t *dev, gpt_table_entry_t entry, ext2_fs_t *fs);
+uint8_t ext2_read(dd_dev_t *dev, ext2_fs_t *fs, char* path, uint8_t *buf);
+uint32_t ext2_size(dd_dev_t *dev, ext2_fs_t *fs, char *path);
 
 #endif

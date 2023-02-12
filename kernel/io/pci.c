@@ -112,7 +112,7 @@ pci_bar_descriptor pci_get_bar_descriptor(uint16_t bus, uint16_t device, uint16_
 	return bar;
 }
 
-void pci_scan()
+void pci_detect()
 {
 	int bus_num;
 	int slot_num;

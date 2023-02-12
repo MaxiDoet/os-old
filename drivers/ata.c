@@ -3,6 +3,8 @@
 #include <stdint.h>
 
 #include "../libc/include/string.h"
+#include "../include/kernel/mem/heap.h"
+#include "../include/kernel/dd/dev.h"
 #include "../include/drivers/ata.h"
 #include "../include/kernel/io/io.h"
 #include "../include/kernel/kernel.h"
@@ -36,6 +38,7 @@
 
 #define ATA_IDENTIFY_SERIAL				0x14
 #define ATA_IDENTIFY_MODEL 				0x36
+#define ATA_IDENTIFY_FIRMWARE_REVISION	0x2E
 
 #define ATA_CONTROL_SRST				(0 << 2)
 
@@ -57,6 +60,17 @@ void ata_device_print(ata_dev_t *dev, char* msg)
 	kdebug("%s bus | %s | %s\r\n", dev->primary ? "Primary" : "Secondary", dev->master ? "Master" : "Slave", msg);
 }
 
+void ata_info_extract_str(uint8_t *info, char *str, uint32_t offset, uint32_t length)
+{
+	// Find tail of the string
+	uint32_t tail = length;
+	while (tail > 0 && ((char) info[offset + tail - 1]) == ' ') {
+		tail--;
+	}
+
+	memcpy(str, info + offset, tail);
+}
+
 void ata_err_dump(ata_dev_t *dev, uint8_t status)
 {
 	char* error_text;
@@ -64,8 +78,6 @@ void ata_err_dump(ata_dev_t *dev, uint8_t status)
 
 	if (status & (1 << 0)) {
 		uint8_t error = inb(dev->io_base + ATA_REGISTER_ERROR);
-
-		kdebug("error: %x\r\n", error);
 
 		switch(error) {
 			case ATA_ERROR_AMNF:
@@ -185,7 +197,7 @@ void ata_pio_reset(ata_dev_t *dev)
 uint8_t ata_pio_read(ata_dev_t *dev, uint32_t lba, uint8_t sector_count, uint16_t *buf)
 {
 	if (!dev->ready) return ATA_RETURN_NOT_READY;
-	
+
 	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
 		return ATA_RETURN_ERROR;
 	}
@@ -241,8 +253,10 @@ uint8_t ata_pio_write(ata_dev_t *dev, uint32_t lba, uint16_t* buf, uint8_t secto
 	outb(dev->io_base + ATA_REGISTER_COMMAND, ATA_COMMAND_CACHE_FLUSH);
 }
 
-uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
+void ata_init(bool primary, bool master)
 {
+	ata_dev_t *dev = (ata_dev_t *) malloc(sizeof(ata_dev_t));
+
 	dev->primary = primary;
 	dev->master = master;
 
@@ -254,7 +268,7 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 	if (status == 0xFF) {
 		ata_device_print(dev, "not connected (floating bus)");
-		return ATA_RETURN_NONE;
+		return;
 	}
 
 	outb(dev->primary ? ATA_REGISTER_PRIMARY_CONTROL : ATA_REGISTER_SECONDARY_CONTROL, 0);
@@ -274,35 +288,47 @@ uint8_t ata_init(ata_dev_t *dev, bool primary, bool master)
 	// Check if drive exists
 	if (!inb(dev->io_base + ATA_REGISTER_STATUS)) {
 		ata_device_print(dev, "not connected");
-		return ATA_RETURN_NONE;
+		return;
 	}
 
 	if (ata_pio_wait_bsy(dev) != ATA_RETURN_SUCCESS) {
-		return ATA_RETURN_ERROR;
+		return;
 	}
 
 	// Wait until all data is transfered
 	if (ata_pio_wait_drq(dev) != ATA_RETURN_SUCCESS) {
-		return ATA_RETURN_ERROR;
+		return;
 	}
 
-	// Read identify data
+	uint8_t info[512];
+
+	// Extract info
 	for (int i=0; i < 256; i++) {
 		uint16_t data = inw(dev->io_base + ATA_REGISTER_DATA);
 
-		dev->info[i * 2] = (data >> 8);
-		dev->info[i * 2 + 1] = data & 0xFF;
+		info[i * 2] = (data >> 8);
+		info[i * 2 + 1] = data & 0xFF;
 	}
 
-	memcpy(dev->serial, &dev->info[ATA_IDENTIFY_SERIAL], 20);
-	dev->serial[19] = '\0';
-
-	memcpy(dev->model, &dev->info[ATA_IDENTIFY_MODEL], 40);
-	dev->model[39] = '\0';
+	ata_info_extract_str(info, dev->serial, ATA_IDENTIFY_SERIAL, 20);
+	ata_info_extract_str(info, dev->model, ATA_IDENTIFY_MODEL, 40);
+	ata_info_extract_str(info, dev->firmware_revision, ATA_IDENTIFY_FIRMWARE_REVISION, 8);
 
 	ata_device_print(dev, "ready");
 
 	dev->ready = true;
 
-	return 1;
+	dd_dev_t dd_dev;
+	dd_dev.type = DD_DEV_TYPE_HDD;
+	dd_dev.bus_type = DD_BUS_TYPE_ATA;
+	dd_dev.driver_data = (void *) dev;
+	dd_dev_add(dd_dev);
+}
+
+void ata_detect()
+{
+	ata_init(true, true);
+	ata_init(true, false);
+	ata_init(false, true);
+	ata_init(false, false);
 }
