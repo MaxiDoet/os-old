@@ -21,20 +21,20 @@ echo $fs_code
 echo w # Write changes
 ) | fdisk $output_file
 
-losetup -P /dev/loop19 $output_file
+losetup -P /dev/loop20 $output_file
 
 # Create ext2 filesystem
 if [ $fs_type = "ext2" ]; then
-	mkfs.ext2 -b 1024 -I 128 /dev/loop19p1
+	mkfs.ext2 -b 1024 -I 128 /dev/loop20p1
 fi
 
 # Mount loop device
 mkdir /mnt/hdd
-mount /dev/loop19p1 /mnt/hdd
+mount /dev/loop20p1 /mnt/hdd
 
 # Copy files
 cp hdd/* /mnt/hdd
 
 # Clean up
 umount /mnt/hdd
-losetup -d /dev/loop19
+losetup -d /dev/loop20

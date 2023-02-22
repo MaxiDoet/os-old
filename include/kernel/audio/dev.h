@@ -11,12 +11,12 @@ typedef struct audio_dev_t {
     enum audio_dev_type type;
 
     /* Driver */
-    void (*driver_play) (void *data, uint32_t size);
+    void (*driver_play) (uint8_t *data, uint32_t size);
 } audio_dev_t;
 
 void audio_init();
 void audio_dev_add(audio_dev_t dev);
 void audio_dev_select(uint16_t id);
-void audio_dev_play(void *data, uint32_t size);
+void audio_dev_play(uint8_t *data, uint32_t size);
 
 #endif

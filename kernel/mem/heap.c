@@ -5,7 +5,10 @@
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/mem/heap.h"
 
+#define HEAP_MAGIC 0xABCD
+
 typedef struct heap_chunk_t {
+	uint16_t magic;
 	struct heap_chunk_t *next_chunk;
 	struct heap_chunk_t *previous_chunk;
 	bool allocated;
@@ -37,13 +40,14 @@ void* malloc(uint32_t size)
 	heap_chunk_t *result = 0;
 
 	#ifdef HEAP_DEBUG
-	kdebug("[heap] request %d bytes\r\n", size);
+	if (size != 1024) kdebug("[heap] request %d bytes\r\n", size);
 	#endif
 
 	while (!result) {
 		#ifdef HEAP_DEBUG
-		kdebug("[heap] current: %x | next: %x | allocated: %s | dirty: %s | size: %d\r\n",
+		if (size != 1024) kdebug("[heap] current: %x | data: %x | next: %x | allocated: %s | dirty: %s | size: %d\r\n",
 			(uint32_t) current,
+			(uint32_t) (current + sizeof(heap_chunk_t)),
 			(uint32_t) current->next_chunk,
 			current->allocated ? "Yes" : "No",
 			current->dirty ? "Yes" : "No",
@@ -57,7 +61,9 @@ void* malloc(uint32_t size)
 			continue;
 		}
 
+		// Last link in the chain
 		if (!current->dirty) {
+			current->magic = HEAP_MAGIC;
 			current->size = size;
 			current->dirty = true;
 			current->next_chunk = (heap_chunk_t *) ((uint32_t) current + sizeof(heap_chunk_t) + current->size);
@@ -73,7 +79,7 @@ void* malloc(uint32_t size)
 		}
 
 		#ifdef HEAP_DEBUG
-		kdebug("[heap] found unallocated chunk %x | size: %d\r\n", (uint32_t) current, current->size);
+		if (size != 1024) kdebug("[heap] found unallocated chunk %x | size: %d\r\n", (uint32_t) current, current->size);
 		#endif
 
 		current->allocated = true;
@@ -88,7 +94,7 @@ void free(void* ptr)
 	heap_chunk_t *chunk = (heap_chunk_t *) ((uint32_t) ptr - sizeof(heap_chunk_t));
 
 	#ifdef HEAP_DEBUG
-	kdebug("[heap] free | chunk: %x | next: %x | allocated: %s | size: %d\r\n",
+	if (chunk->size != 1024) kdebug("[heap] free | chunk: %x | next: %x | allocated: %s | size: %d\r\n",
 		(uint32_t) chunk,
 		(uint32_t) chunk->next_chunk,
 		chunk->allocated ? "Yes" : "No",
@@ -96,6 +102,11 @@ void free(void* ptr)
 		);
 	#endif
 
-	chunk->allocated = false;
+	// Check if this points to a valid chunk
+	if (chunk->magic == HEAP_MAGIC) {
+		chunk->allocated = false;
+	} else {
+		kdebug("[heap] Tried to free invalid chunk\r\n");
+	}
 }
 

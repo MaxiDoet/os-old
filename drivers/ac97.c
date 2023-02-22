@@ -80,7 +80,6 @@ static pci_dev_t dev;
 struct buf_desc buf_descriptors[32];
 static uint8_t buf_descriptors_rp;
 static uint8_t buf_descriptors_wp;
-uint8_t *sound_buf;
 
 /*
 typedef struct ac97_dev_t {
@@ -175,11 +174,13 @@ void ac97_write_single_buffer(uint8_t *data, uint16_t size)
 	buf_descriptors_wp = (buf_descriptors_wp + 1) % LAST_VALID_INDEX;
 }
 
-void ac97_play(void *data, uint32_t size)
+void ac97_write(uint8_t *data, uint16_t size)
 {
-	sound_buf = (uint8_t *) malloc(size);
-	memcpy(sound_buf, data, size);
+	
+}
 
+void ac97_play(uint8_t *data, uint32_t size)
+{
 	uint32_t available = size;
 	uint32_t offset = 0;
 	uint8_t last = 0;
@@ -192,12 +193,12 @@ void ac97_play(void *data, uint32_t size)
 			// Refill buffers
 			for (int i=0; i < LAST_VALID_INDEX; i++) {
 				if (available >= 0x20000) {
-					ac97_write_single_buffer(&sound_buf[offset], 0xFFFE);
+					ac97_write_single_buffer(&data[offset], 0xFFFE);
 					available -= 0x20000;
 					offset += 0x20000;
 					last = 32;
 				} else {
-					ac97_write_single_buffer(&sound_buf[offset], available >> 1);
+					ac97_write_single_buffer(&data[offset], available >> 1);
 					last = i;
 					available = 0;
 					break;
@@ -216,8 +217,6 @@ void ac97_play(void *data, uint32_t size)
 			outb(dev.bars[1].io_base + PO + CR, RPBM | IOCE | LVBIE | FEIE); // Start DMA; Enable IOC interrupt; Enable Last Buffer Entry interrupt
 		}
 	}
-
-	free(sound_buf);
 }
 
 void ac97_init(pci_dev_t pci_dev)

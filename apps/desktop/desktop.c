@@ -7,6 +7,7 @@
 
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/mem/heap.h"
+#include "../include/kernel/audio/dev.h"
 #include "../libc/include/string.h"
 
 #include "../include/drivers/ac97.h"
@@ -164,10 +165,10 @@ void desktop_init(multiboot_info_t *mbi, fs_t *root_fs)
 	cursor_x = screen->width / 2;
 	cursor_y = screen->height / 2;
 
+
 	/* Load background image */
 	fs_file_t background_file = fs_open(root_fs, "/background.bmp");
 	uint32_t background_size = fs_size(background_file);
-
 	uint8_t *background_bmp_buf = (uint8_t *) malloc(background_size);
 	fs_read(background_file, background_bmp_buf);
 
@@ -182,6 +183,15 @@ void desktop_init(multiboot_info_t *mbi, fs_t *root_fs)
 	background_bitmap->bpp = 24;
 	background_bitmap->data = background_buf;
 	bitmap_flip_h(background_bitmap);
+
+	/*
+	fs_file_t audio_file = fs_open(root_fs, "/audio.wav");
+	uint32_t audio_size = fs_size(audio_file);
+	uint8_t *audio_buf = (uint8_t *) malloc(audio_size);
+	fs_read(audio_file, audio_buf);
+	audio_dev_play(audio_buf, audio_size);
+	free(audio_buf);
+	*/
 
 	window_t test;
 	test.x = 70;

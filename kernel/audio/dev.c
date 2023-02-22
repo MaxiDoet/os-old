@@ -36,6 +36,8 @@ void audio_init()
 		hda_init(list[i]);
 	}
 
+	free(list);
+
     audio_dev_select(0);
 }
 
@@ -54,8 +56,8 @@ void audio_dev_select(uint16_t id)
     kdebug("[audio] Select %s (%d)\r\n", dev->name, id);
 }
 
-void audio_dev_play(void *data, uint32_t size)
+void audio_dev_play(uint8_t *data, uint32_t size)
 {
-    audio_dev_t *dev = &audio_dev_list[audio_dev_current];
-    (*dev->driver_play)(data, size);
+	audio_dev_t *dev = &audio_dev_list[audio_dev_current];
+	(*dev->driver_play)(data, size);
 }

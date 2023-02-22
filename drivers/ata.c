@@ -148,7 +148,6 @@ uint8_t ata_pio_wait_bsy(ata_dev_t *dev)
 		asm volatile ("nop");
 		asm volatile ("nop");
 
-		/* This produces the error messages */
 		if (ata_pio_wait_err(dev) != ATA_RETURN_SUCCESS) {
 			return ATA_RETURN_ERROR;
 		}

@@ -31,6 +31,7 @@
 #include "../include/drivers/pit.h"
 #include "../include/drivers/ata.h"
 #include "../include/drivers/rtl8139.h"
+#include "../include/drivers/ac97.h"
 
 #include "../apps/desktop/desktop.h"
 
@@ -115,7 +116,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	kdebug("[kernel] ATA init\r\n");
 	ata_detect();
 	root_dev = dd_dev_get(0);
-	
+
 	if (root_dev) {
 		kdebug("[kernel] Probe for root filesystem\r\n");
 		probe_root_fs(root_dev);
@@ -133,16 +134,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	keyboard_init();
 	mouse_init();
-
-	/*
-	uint8_t *test_buf = (uint8_t *) malloc(25548514);
-	memset(test_buf, 0x00, 25548514);
-
-	if (fs_read(&root_fs, "/audio.wav", test_buf)) {
-		audio_dev_play(test_buf, 25548514);
-	}
-	free(test_buf);
-	*/
 
 	//tasking_init();
 
