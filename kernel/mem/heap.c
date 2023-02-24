@@ -40,12 +40,12 @@ void* malloc(uint32_t size)
 	heap_chunk_t *result = 0;
 
 	#ifdef HEAP_DEBUG
-	if (size != 1024) kdebug("[heap] request %d bytes\r\n", size);
+	kdebug("[heap] request %d bytes\r\n", size);
 	#endif
 
 	while (!result) {
 		#ifdef HEAP_DEBUG
-		if (size != 1024) kdebug("[heap] current: %x | data: %x | next: %x | allocated: %s | dirty: %s | size: %d\r\n",
+		kdebug("[heap] current: %x | data: %x | next: %x | allocated: %s | dirty: %s | size: %d\r\n",
 			(uint32_t) current,
 			(uint32_t) (current + sizeof(heap_chunk_t)),
 			(uint32_t) current->next_chunk,
@@ -94,7 +94,7 @@ void free(void* ptr)
 	heap_chunk_t *chunk = (heap_chunk_t *) ((uint32_t) ptr - sizeof(heap_chunk_t));
 
 	#ifdef HEAP_DEBUG
-	if (chunk->size != 1024) kdebug("[heap] free | chunk: %x | next: %x | allocated: %s | size: %d\r\n",
+	kdebug("[heap] free | chunk: %x | next: %x | allocated: %s | size: %d\r\n",
 		(uint32_t) chunk,
 		(uint32_t) chunk->next_chunk,
 		chunk->allocated ? "Yes" : "No",

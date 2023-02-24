@@ -128,7 +128,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	kdebug("[kernel] Net init\r\n");
 	net_init();
-	
+
 	kdebug("[kernel] Audio init\r\n");
 	audio_init();
 

@@ -159,7 +159,7 @@ uint8_t ata_pio_wait_bsy(ata_dev_t *dev)
 }
 
 uint8_t ata_pio_wait_drq(ata_dev_t *dev)
-{	
+{
 	uint8_t status = inb(dev->io_base + ATA_REGISTER_STATUS);
 
 	while (!(status & ATA_STATUS_DRQ)) {
