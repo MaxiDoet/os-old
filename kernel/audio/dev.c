@@ -56,8 +56,12 @@ void audio_dev_select(uint16_t id)
     kdebug("[audio] Select %s (%d)\r\n", dev->name, id);
 }
 
-void audio_dev_play(uint8_t *data, uint32_t size)
+audio_return_t audio_dev_play(uint8_t *data, uint32_t size)
 {
+	if (audio_dev_list_index == 0) {
+		return AUDIO_RETURN_DEVICE_NOT_FOUND;
+	}
+
 	audio_dev_t *dev = &audio_dev_list[audio_dev_current];
 	(*dev->driver_play)(data, size);
 }

@@ -184,12 +184,14 @@ void desktop_init(multiboot_info_t *mbi, fs_t *root_fs)
 	background_bitmap->data = background_buf;
 	bitmap_flip_h(background_bitmap);
 
+	/*
 	fs_file_t audio_file = fs_open(root_fs, "/audio.wav");
 	uint32_t audio_size = fs_size(audio_file);
 	uint8_t *audio_buf = (uint8_t *) malloc(audio_size);
 	fs_read(audio_file, audio_buf);
-	audio_dev_play(audio_buf, audio_size);
+	audio_return_t status = audio_dev_play(audio_buf, audio_size);
 	free(audio_buf);
+	*/
 
 	window_t test;
 	test.x = 70;

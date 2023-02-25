@@ -77,24 +77,13 @@ typedef struct buf_desc {
 } __attribute__((packed)) buf_desc;
 
 static pci_dev_t dev;
-struct buf_desc buf_descriptors[32];
+static struct buf_desc buf_descriptors[32];
 static uint8_t buf_descriptors_rp;
 static uint8_t buf_descriptors_wp;
 
 uint8_t *audio_buf;
 uint32_t audio_offset;
 uint32_t audio_available;
-
-/*
-typedef struct ac97_dev_t {
-	pci_dev_t pci_dev;
-
-	uint8_t *sound_buf;
-	buf_desc buf_descriptors[32];
-	uint8_t buf_descriptors_rp;
-	uint8_t buf_descriptors_wp;
-} ac97_dev_t;
-*/
 
 void ac97_write_single_buffer(uint8_t *data, uint16_t size)
 {
@@ -191,29 +180,29 @@ void ac97_irq_handler()
 	outw(dev.bars[1].io_base + PO + SR, 0x1C);
 }
 
-void ac97_reset(pci_dev_t pci_dev)
+void ac97_reset()
 {
 	// Enable interrupts
 	irq_install_handler(dev.irq, ac97_irq_handler);
 	
 	// Cold reset		
-	outl(pci_dev.bars[1].io_base + GLOB_CNT, COLD_RESET);
+	outl(dev.bars[1].io_base + GLOB_CNT, COLD_RESET);
 
 	// Enable interrupts
-	outl(pci_dev.bars[1].io_base + GLOB_CNT, GIE);
+	outl(dev.bars[1].io_base + GLOB_CNT, GIE);
 
 	// Reset mixer
-	outw(pci_dev.bars[0].io_base + NAM_RESET, 1);
+	outw(dev.bars[0].io_base + NAM_RESET, 1);
 
 	// Reset output channel registers
-	outb(pci_dev.bars[1].io_base + PO + CR, RR);
-	while(inb(pci_dev.bars[1].io_base + PO + CR) & RR) {
+	outb(dev.bars[1].io_base + PO + CR, RR);
+	while(inb(dev.bars[1].io_base + PO + CR) & RR) {
 	}
 
 	kdebug("[ac97] reset done\r\n");
 }
 
-void ac97_play(uint8_t *data, uint32_t size)
+audio_return_t ac97_play(uint8_t *data, uint32_t size)
 {
 	// Alloc space and copy the buffer into the driver internal buffer
 	audio_buf = (uint8_t *) malloc(size);
@@ -238,6 +227,7 @@ void ac97_play(uint8_t *data, uint32_t size)
 				ac97_write_single_buffer(&audio_buf[audio_offset], audio_available >> 1);
 				last = i;
 				audio_available = 0;
+
 				break;
 			}
 		}
@@ -253,6 +243,8 @@ void ac97_play(uint8_t *data, uint32_t size)
 		// Start playback
 		outb(dev.bars[1].io_base + PO + CR, RPBM | IOCE | LVBIE | FEIE); // Start DMA; Enable IOC interrupt; Enable Last Buffer Entry interrupt
 	}
+
+	return AUDIO_RETURN_SUCCESS;
 }
 
 void ac97_init(pci_dev_t pci_dev)
@@ -264,7 +256,7 @@ void ac97_init(pci_dev_t pci_dev)
 	command |= PCI_COMMAND_BUSMASTER;
 	pci_write_word(dev.bus, dev.device, dev.function, PCI_REGISTER_COMMAND, command);
 
-	ac97_reset(pci_dev);
+	ac97_reset();
 
 	// Set master volume
 	outw(pci_dev.bars[0].io_base + NAM_MASTER_VOL, 0x0000);
