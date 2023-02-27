@@ -15,7 +15,11 @@ void dd_dev_add(dd_dev_t dev)
 
 dd_dev_t *dd_dev_get(uint16_t id)
 {
-    return &dd_dev_list[id];
+    if (dd_dev_list_index == id + 1) {
+        return &dd_dev_list[id];
+    } else {
+        return 0;
+    }
 }
 
 dd_return_t dd_dev_read(dd_dev_t *dev, uint32_t addr, uint32_t size, void *buffer)

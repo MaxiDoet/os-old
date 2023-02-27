@@ -7,7 +7,7 @@
 #include "../include/kernel/gdt.h"
 #include "../include/kernel/irq.h"
 #include "../include/kernel/idt.h"
-#include "../include/kernel/task.h"
+#include "../include/kernel/scheduler.h"
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/mem/pmm.h"
@@ -88,6 +88,11 @@ void pci_dump()
 	free(list);
 }
 
+void kernel_task()
+{
+	kdebug("Hey\r\n");
+}
+
 void kmain(unsigned long magic, unsigned long mbi_addr)
 {
 	multiboot_info_t *mbi;
@@ -120,6 +125,8 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	if (root_dev) {
 		kdebug("[kernel] Probe for root filesystem\r\n");
 		probe_root_fs(root_dev);
+	} else {
+		kpanic("No root device");
 	}
 
 	kdebug("[kernel] PCI detect\r\n");
@@ -135,7 +142,9 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	keyboard_init();
 	mouse_init();
 
-	//tasking_init();
+	/* Init multitasking and kernel task */
+	scheduler_init();
+	scheduler_task_create((uint32_t) &kernel_task, "kernel");
 
-	desktop_init(mbi, &root_fs);
+	//desktop_init(mbi, &root_fs);
 }

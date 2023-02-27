@@ -37,8 +37,6 @@ void audio_init()
 	}
 
 	free(list);
-
-    audio_dev_select(0);
 }
 
 void audio_dev_add(audio_dev_t dev)

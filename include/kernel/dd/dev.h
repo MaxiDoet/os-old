@@ -3,7 +3,8 @@
 
 typedef enum dd_return_t {
     DD_RETURN_SUCCESS   = 1,
-    DD_RETURN_ERROR     = 2
+    DD_RETURN_ERROR     = 2,
+    DD_RETURN_DEVICE_NOT_FOUND = 3
 } dd_return_t;
 
 typedef enum dd_dev_type_t {
