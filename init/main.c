@@ -4,9 +4,9 @@
 
 #include "../config.h"
 #include "../include/kernel/kernel.h"
-#include "../include/kernel/gdt.h"
+#include "../include/kernel/cpu/gdt.h"
 #include "../include/kernel/irq.h"
-#include "../include/kernel/idt.h"
+#include "../include/kernel/cpu/idt.h"
 #include "../include/kernel/scheduler.h"
 #include "../include/kernel/multiboot.h"
 #include "../include/kernel/kernel.h"
@@ -88,9 +88,18 @@ void pci_dump()
 	free(list);
 }
 
-void kernel_task()
+static void kernel_task()
 {
-	kdebug("Hey\r\n");
+	while(true) {
+		kdebug("Hey\r\n");
+	}
+}
+
+void kernel_task_2()
+{
+	while(true) {
+		kdebug("Hey2\r\n");
+	}
 }
 
 void kmain(unsigned long magic, unsigned long mbi_addr)
@@ -142,9 +151,10 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	keyboard_init();
 	mouse_init();
 
-	/* Init multitasking and kernel task */
-	scheduler_init();
-	scheduler_task_create((uint32_t) &kernel_task, "kernel");
+	/* Init scheduler and start kernel task */
+	scheduler_init(&kernel_task);
+
+	scheduler_task_create((uint32_t) &kernel_task_2, "kernel2\0");
 
 	//desktop_init(mbi, &root_fs);
 }

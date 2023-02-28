@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "../include/kernel/gdt.h"
+#include "../include/kernel/cpu/gdt.h"
 
 struct gdt_entry gdt[GDT_ENTRIES];
 struct gdt_description gdt_desc;

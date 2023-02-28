@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "../include/kernel/irq.h"
-#include "../include/kernel/idt.h"
+#include "../include/kernel/cpu/idt.h"
 #include "../include/kernel/io/io.h"
 #include "../include/kernel/kernel.h"
 #include "../config.h"

@@ -2,7 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../include/kernel/idt.h"
+#include "../include/kernel/cpu/idt.h"
+#include "../include/kernel/cpu/cpu.h"
 #include "../include/lib/print.h"
 #include "../include/kernel/io/io.h"
 #include "../include/drivers/pic.h"
