@@ -265,70 +265,70 @@ cpu_state_t *int_handler(cpu_state_t *state)
         kdebug("[kernel] Exception: ");
 
         switch(state->intr) {
-            case 0x00:
+            case 0:
                 kpanic("Division by Null");
                 break;
-            case 0x01:
+            case 1:
                 kpanic("Debug");
  	            break;
-            case 0x02:
+            case 2:
                 kpanic("NMI");
                 break;
-            case 0x03:
+            case 3:
                 kpanic("Breakpoint");
                 break;
-            case 0x04:
+            case 4:
                 kpanic("Overflow");
                 break;
-        	case 0x05:
+        	case 5:
                 kpanic("Bounds Check");
                 break;
-            case 0x06:
+            case 6:
                 kpanic("Invalid Opcode");
                 break;
-            case 0x07:
+            case 7:
                 kpanic("NPX Not Avaiable");
                break;
-            case 0x08:
+            case 8:
                 kpanic("Double Fault");
             	break;
-            case 0x09:
+            case 9:
                 kpanic("NPX Segment Overrun");
                 break;
-            case 0x10:
+            case 10:
                 kpanic("Invalid Task State Segment(TSS)");
                 break;
-            case 0x11:
+            case 11:
                 kpanic("Segment Not Preset");
                 break;
-            case 0x12:
+            case 12:
                 kpanic("Stack Fault");
 				break;
-			case 0x13:
+			case 13:
                 kpanic("General Protection");
                 break;
-            case 0x14:
+            case 14:
                 kpanic("Page Fault");
                 break;
-        	case 0x15:
+        	case 15:
                 // Note: Add some more details here
                 kpanic("Intel Reserved");
                 break;
-            case 0x16:
+            case 16:
                 kpanic("Floating Point");
                 break;
-            case 0x17:
+            case 17:
                 kpanic("Alignment Check");
                 break;
-            case 0x18:
+            case 18:
                 kpanic("Machine Check");
                 break;
-            case 0x19:
+            case 19:
                 kpanic("SIMD Floating Point");
                 break;
 
             default:
-                kdebug("%d", state->intr);
+                kdebug("eeedf %d", state->intr);
                 break;
 		}
 

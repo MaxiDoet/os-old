@@ -6,7 +6,7 @@
 typedef struct task_t {
     char *name;
 
-    cpu_state_t *state;
+    cpu_state_t state;
     uint8_t stack[4096];
 } task_t;
 

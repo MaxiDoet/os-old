@@ -125,7 +125,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	pit_init();
 
 	kdebug("[kernel] Platform init\r\n");
-	platform_init();
+	//platform_init();
 
 	kdebug("[kernel] ATA init\r\n");
 	ata_detect();
@@ -153,8 +153,6 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 
 	/* Init scheduler and start kernel task */
 	scheduler_init(&kernel_task);
-
-	scheduler_task_create((uint32_t) &kernel_task_2, "kernel2\0");
 
 	//desktop_init(mbi, &root_fs);
 }
