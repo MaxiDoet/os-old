@@ -88,17 +88,10 @@ void pci_dump()
 	free(list);
 }
 
-static void kernel_task()
+void kernel_task()
 {
 	while(true) {
 		kdebug("Hey\r\n");
-	}
-}
-
-void kernel_task_2()
-{
-	while(true) {
-		kdebug("Hey2\r\n");
 	}
 }
 
@@ -125,7 +118,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	pit_init();
 
 	kdebug("[kernel] Platform init\r\n");
-	//platform_init();
+	platform_init();
 
 	kdebug("[kernel] ATA init\r\n");
 	ata_detect();
@@ -152,7 +145,7 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	mouse_init();
 
 	/* Init scheduler and start kernel task */
-	scheduler_init(&kernel_task);
+	//scheduler_init(&kernel_task);
 
-	//desktop_init(mbi, &root_fs);
+	desktop_init(mbi, &root_fs);
 }

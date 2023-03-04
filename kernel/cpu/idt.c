@@ -261,9 +261,9 @@ cpu_state_t *int_handler(cpu_state_t *state)
 {
 	// Here we receive the cpu state
 	if (state->intr < 20) {
-		// Kernel Exception
-        kdebug("[kernel] Exception: ");
+        //kdebug("REGDUMP | EAX: %x EBX: %x ECX: %x EDX: %x ESI: %x EDI: %x EBP: %x ERROR: %x EIP: %x CS: %x EFLAGS: %x ESP: %x\r\n", state->eax, state->ebx, state->ecx, state->edx, state->esi, state->edi, state->ebp, state->error, state->eip, state->cs, state->eflags, state->esp);
 
+		// Kernel Exception
         switch(state->intr) {
             case 0:
                 kpanic("Division by Null");
@@ -326,15 +326,9 @@ cpu_state_t *int_handler(cpu_state_t *state)
             case 19:
                 kpanic("SIMD Floating Point");
                 break;
-
-            default:
-                kdebug("eeedf %d", state->intr);
-                break;
 		}
 
 		kdebug("\r\n");
-
-        kdebug("Regdump | EAX: %x EBX: %x ECX: %x EDX: %x ESI: %x EDI: %x EBP: %x EIP: %x ESP: %x\r\n", state->eax, state->ebx, state->ecx, state->edx, state->esi, state->edi, state->ebp, state->eip, state->esp);
 	} else if (state->intr > 31){
 		// IRQ
 		irq_handler(state->intr - 32);
