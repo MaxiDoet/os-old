@@ -266,65 +266,65 @@ cpu_state_t *int_handler(cpu_state_t *state)
 		// Kernel Exception
         switch(state->intr) {
             case 0:
-                kpanic("Division by Null");
+                kpanic("CPU Exception: Division by Null");
                 break;
             case 1:
-                kpanic("Debug");
+                kpanic("CPU Exception: Debug");
  	            break;
             case 2:
-                kpanic("NMI");
+                kpanic("CPU Exception: NMI");
                 break;
             case 3:
-                kpanic("Breakpoint");
+                kpanic("CPU Exception: Breakpoint");
                 break;
             case 4:
-                kpanic("Overflow");
+                kpanic("CPU Exception: Overflow");
                 break;
         	case 5:
-                kpanic("Bounds Check");
+                kpanic("CPU Exception: Bounds Check");
                 break;
             case 6:
-                kpanic("Invalid Opcode");
+                kpanic("CPU Exception: Invalid Opcode");
                 break;
             case 7:
-                kpanic("NPX Not Avaiable");
+                kpanic("CPU Exception: NPX Not Avaiable");
                break;
             case 8:
-                kpanic("Double Fault");
+                kpanic("CPU Exception: Double Fault");
             	break;
             case 9:
-                kpanic("NPX Segment Overrun");
+                kpanic("CPU Exception: NPX Segment Overrun");
                 break;
             case 10:
-                kpanic("Invalid Task State Segment(TSS)");
+                kpanic("CPU Exception: Invalid Task State Segment(TSS)");
                 break;
             case 11:
-                kpanic("Segment Not Preset");
+                kpanic("CPU Exception: Segment Not Preset");
                 break;
             case 12:
-                kpanic("Stack Fault");
+                kpanic("CPU Exception: Stack Fault");
 				break;
 			case 13:
-                kpanic("General Protection");
+                kpanic("CPU Exception: General Protection");
                 break;
             case 14:
-                kpanic("Page Fault");
+                kpanic("CPU Exception: Page Fault");
                 break;
         	case 15:
                 // Note: Add some more details here
-                kpanic("Intel Reserved");
+                kpanic("CPU Exception: Intel Reserved");
                 break;
             case 16:
-                kpanic("Floating Point");
+                kpanic("CPU Exception: Floating Point");
                 break;
             case 17:
-                kpanic("Alignment Check");
+                kpanic("CPU Exception: Alignment Check");
                 break;
             case 18:
-                kpanic("Machine Check");
+                kpanic("CPU Exception: Machine Check");
                 break;
             case 19:
-                kpanic("SIMD Floating Point");
+                kpanic("CPU Exception: SIMD Floating Point");
                 break;
 		}
 
