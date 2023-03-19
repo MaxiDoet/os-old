@@ -4,25 +4,39 @@
 
 #include "../include/kernel/kernel.h"
 #include "../libc/include/string.h"
+#include "../include/kernel/net/utils.h"
 #include "../include/kernel/net/ip.h"
 #include "../include/kernel/net/udp.h"
+#include "../include/kernel/net/dhcp.h"
 #include "../include/kernel/mem/heap.h"
 
-void udp_handle_packet(uint8_t *packet, uint32_t size)
+#define UDP_DST_PORT_DHCP 68
+
+void udp_handle_packet(uint8_t *data, uint32_t size)
 {
-    kdebug("udp handle packet\r\n");
+    udp_packet_header *packet = (udp_packet_header *) data;
+
+    packet->src_port = net_swap_word(packet->src_port);
+    packet->dst_port = net_swap_word(packet->dst_port);
+    packet->length = net_swap_word(packet->length);
+
+    switch(packet->dst_port) {
+        case UDP_DST_PORT_DHCP:
+            dhcp_handle_packet((uint8_t *) packet + sizeof(udp_packet_header), packet->length);
+            break;
+    }
 }
 
 void udp_send_packet(uint8_t *dst_ip, uint16_t src_port, uint16_t dst_port, uint8_t *data, uint32_t size)
 {
-    udp_packet_header *packet = (udp_packet_header *) malloc(sizeof(udp_packet_header)) + size;
+    udp_packet_header *packet = (udp_packet_header *) malloc(sizeof(udp_packet_header) + size);
 
-    packet->length = sizeof(udp_packet_header) + size;
-    packet->src_port = src_port;
-    packet->dst_port = dst_port;
+    packet->length = net_swap_word(sizeof(udp_packet_header) + size);
+    packet->src_port = net_swap_word(src_port);
+    packet->dst_port = net_swap_word(dst_port);
     packet->checksum = 0;
 
-    memcpy(packet + sizeof(packet), data, size);
+    memcpy((uint8_t *) packet + sizeof(udp_packet_header), data, size);
 
     ip_send_packet(dst_ip, (uint8_t *) packet, sizeof(udp_packet_header) + size);
 }
