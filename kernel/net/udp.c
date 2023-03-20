@@ -8,9 +8,13 @@
 #include "../include/kernel/net/ip.h"
 #include "../include/kernel/net/udp.h"
 #include "../include/kernel/net/dhcp.h"
+#include "../include/kernel/net/dns.h"
 #include "../include/kernel/mem/heap.h"
 
-#define UDP_DST_PORT_DHCP 68
+#include "../include/kernel/audio/dev.h"
+
+#define UDP_SRC_PORT_DHCP   67
+#define UDP_SRC_PORT_DNS    53
 
 void udp_handle_packet(uint8_t *data, uint32_t size)
 {
@@ -20,9 +24,13 @@ void udp_handle_packet(uint8_t *data, uint32_t size)
     packet->dst_port = net_swap_word(packet->dst_port);
     packet->length = net_swap_word(packet->length);
 
-    switch(packet->dst_port) {
-        case UDP_DST_PORT_DHCP:
+    switch(packet->src_port) {
+        case UDP_SRC_PORT_DHCP:
             dhcp_handle_packet((uint8_t *) packet + sizeof(udp_packet_header), packet->length);
+            break;
+
+        case UDP_SRC_PORT_DNS:
+            dns_handle_packet((uint8_t *) packet + sizeof(udp_packet_header), packet->length);
             break;
     }
 }

@@ -30,17 +30,6 @@ void ethernet_handle_frame(uint8_t *buffer, uint32_t size)
 {
 	etherframe_header *frame_header = (etherframe_header *) buffer;
 	frame_header->ether_type = net_swap_word(frame_header->ether_type);
-
-	kdebug("[net] ether_type: %x dst_mac: ", frame_header->ether_type);
-
-	for (int i=0; i < 6; i++) {
-		kdebug("%x%s", frame_header->dst_mac[i], ((i < 5) ? ":" : " src_mac: "));
-	}
-
-	for (int i=0; i < 6; i++) {
-		kdebug("%x%s", frame_header->src_mac[i], ((i < 5) ? ":" : "\r\n"));
-	}
-
 	uint8_t *packet = (uint8_t *) ((uint32_t) frame_header + sizeof(etherframe_header));
 
 	switch(frame_header->ether_type) {

@@ -45,26 +45,34 @@ void arp_set_ip(uint8_t addr[4])
 
 void arp_handle_packet(arp_packet *packet)
 {
+	#ifdef NET_DEBUG_ARP
+	kdebug("[net] ARP | ");
+	#endif
+
 	switch(packet->operation_type) {
 		case 0x0100:
 			// Request
-			kdebug("[arp] request from: ");
+			#ifdef NET_DEBUG_ARP
+			kdebug("Request from ");
 			print_mac(packet->src_mac);
 			kdebug(" to: ");
 			print_ip(packet->dst_ip);
 			kdebug("\r\n");
+			#endif
 
 			arp_reply(packet);
 			break;
 		case 0x0200:
 			// Reply
-			kdebug("[arp] reply from: ");
+			#ifdef NET_DEBUG_ARP
+			kdebug("Reply from: ");
 			print_ip(packet->src_ip);
 			kdebug(" (");
 			print_mac(packet->src_mac);
 			kdebug(") to: ");
 			print_ip(ip);
 			kdebug("\r\n");
+			#endif
 
 			memcpy(&mac_cache[cache_index], packet->src_mac, 6);
 			memcpy(&ip_cache[cache_index], packet->src_ip, 4);
@@ -75,6 +83,12 @@ void arp_handle_packet(arp_packet *packet)
 
 void arp_request_mac(uint8_t addr[4])
 {
+	#ifdef NET_DEBUG_ARP
+	kdebug("[net] ARP | Requesting ");
+	print_ip(addr);
+	kdebug("\r\n");
+	#endif
+
 	arp_packet *packet = (arp_packet *) malloc(sizeof(arp_packet));
 
 	packet->hardwareaddress_type = 0x0100;
@@ -127,21 +141,21 @@ void arp_broadcast_mac(uint8_t addr[4])
 	ethernet_send_frame(mac, arp_resolve_mac(addr), ETHERTYPE_ARP, (uint8_t *) packet, sizeof(arp_packet));
 }
 
-uint8_t *arp_resolve_mac(uint8_t addr[4])
+uint8_t *arp_resolve_mac(uint8_t *ip)
 {
 	for (int i=0; i < cache_index; i++) {
-		if (ip_cache[i] == addr) {
+		if (ip_cache[i] == ip) {
 			return mac_cache[i];
 		}
 	}
 
-	arp_request_mac(addr);
+	arp_request_mac(ip);
 
 	uint8_t result[6];
 	while (result == 0) {
 		for (int i=0; i < cache_index; i++) {
 			for (int ip_index=0; ip_index < 4; ip_index++) {
-				if (ip_cache[cache_index][ip_index] != addr[ip_index]) {
+				if (ip_cache[cache_index][ip_index] != ip[ip_index]) {
 					break;
 				}
 

@@ -7,7 +7,11 @@
 #define DEBUG_PCI
 #define DEBUG_ATA
 //#define DEBUG_EXT2
-#define DEBUG_NET_ARP
+
+#define NET_DEBUG
+#define NET_DEBUG_ARP
+#define NET_DEBUG_DHCP
+#define NET_DEBUG_DNS
 
 #define PAGE_SIZE 4096
 #define HEAP_SIZE 10485760

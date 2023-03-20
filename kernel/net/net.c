@@ -6,6 +6,7 @@
 #include "../include/kernel/net/net.h"
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/net/dhcp.h"
+#include "../include/kernel/net/dns.h"
 #include "../include/drivers/rtl8139.h"
 
 void net_init()
@@ -17,10 +18,13 @@ void net_init()
 		rtl8139_init(list[i]);
 	}
 
-	// Default qemu gateway
 	uint8_t gateway_ip[4] = {10, 0, 2, 2};
+	uint8_t dns_server_ip[4] = {10, 0, 2, 3};
+
 	arp_request_mac(gateway_ip);
 	//arp_broadcast_mac(gateway_ip);
 
 	dhcp_discover();
+
+	dns_request(dns_server_ip, "google.de");
 }
