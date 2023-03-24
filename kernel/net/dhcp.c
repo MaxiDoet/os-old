@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../include/kernel/net/net.h"
 #include "../include/kernel/net/dhcp.h"
 #include "../include/kernel/net/ip.h"
 #include "../include/kernel/net/udp.h"
@@ -58,16 +59,6 @@ typedef struct dhcp_option_t {
     uint8_t length;
 } __attribute__((packed)) dhcp_option_t;
 
-typedef struct dhcp_config_t {
-    uint8_t ip[4];
-    uint8_t subnet_mask[4];
-    uint8_t dns[4];
-    uint8_t router[4];
-    uint8_t dhcp_server[4];
-} dhcp_config_t;
-
-dhcp_config_t dhcp_config;
-
 uint8_t *dhcp_read_option(dhcp_option_t *options, uint8_t type)
 {
     dhcp_option_t *option = options;
@@ -95,8 +86,18 @@ uint8_t *dhcp_create_option(dhcp_option_t *options, uint32_t *offset, uint8_t ty
     return ((uint8_t *) option + sizeof(dhcp_option_t));
 }
 
-void dhcp_request(uint8_t *dhcp_ip, uint8_t *ip)
+void dhcp_request(uint8_t *ip)
 {
+    dhcp_config_t *dhcp_config = net_get_dhcp_config();
+
+    #ifdef NET_DEBUG_DHCP
+    kdebug("[net] DHCP | Sending request of ");
+    net_print_ip(ip);
+    kdebug(" to ");
+    net_print_ip(dhcp_config->dhcp_server);
+    kdebug("\r\n");
+    #endif
+
     dhcp_packet *packet = (dhcp_packet *) malloc(sizeof(dhcp_packet) + 100);
     memset(packet, 0x00, sizeof(dhcp_packet));
 
@@ -122,10 +123,14 @@ void dhcp_request(uint8_t *dhcp_ip, uint8_t *ip)
     uint8_t *requested_ip = dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_REQUESTED_IP, 4);
     memcpy(requested_ip, ip, 4);
 
+    /* DHCP Server */
+    uint8_t *dhcp_server = dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_DHCP_SERVER, 4);
+    memcpy(dhcp_server, dhcp_config->dhcp_server, 4);
+
     /* End */
     dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_END, 1);
 
-    udp_send_packet(ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
+    udp_send_packet(dhcp_config->dhcp_server, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
 }
 
 void dhcp_discover()
@@ -133,7 +138,7 @@ void dhcp_discover()
     uint8_t dst_ip[4];
     memset(dst_ip, 0xFF, 4);
 
-    dhcp_packet *packet = (dhcp_packet *) malloc(sizeof(dhcp_packet));
+    dhcp_packet *packet = (dhcp_packet *) malloc(sizeof(dhcp_packet) + 100);
     memset(packet, 0x00, sizeof(dhcp_packet));
 
     packet->op = DHCP_PACKET_OP_REQUEST;
@@ -148,19 +153,32 @@ void dhcp_discover()
 
     memcpy(packet->chaddr, arp_get_mac(), 6);
 
-    udp_send_packet(dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet));
+    dhcp_option_t *options = (dhcp_option_t *) packet->options;
+    uint32_t offset = 0;
+
+    /* Message type: Request */
+    uint8_t *message_type = dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_MESSAGE_TYPE, 1);
+    *message_type = DHCP_OPTIONS_MESSAGE_TYPE_DISCOVER;
+
+    /* End */
+    dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_END, 1);
+
+    udp_send_packet(dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
 }
 
 void dhcp_handle_packet(uint8_t *data, uint32_t size)
 {
     dhcp_packet *packet = (dhcp_packet *) data;
+    dhcp_config_t *dhcp_config = net_get_dhcp_config();
 
     #ifdef NET_DEBUG_DHCP
     kdebug("[net] DHCP | ");
     #endif
 
     if (packet->op == DHCP_PACKET_OP_REQUEST) {
+        #ifdef NET_DEBUG_DHCP
         kdebug("Request\r\n");
+        #endif
     } else if (packet->op == DHCP_PACKET_OP_REPLY) {
         uint8_t message_type = 0;
 
@@ -174,6 +192,30 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
                     #ifdef NET_DEBUG_DHCP
                     kdebug("OFFER\r\n");
                     #endif
+
+                    /* Subnet Mask */
+                    uint8_t *subnet_mask;
+                    subnet_mask = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_SUBNET_MASK);
+                    memcpy(dhcp_config->subnet_mask, subnet_mask, 4);
+
+                    /* Router */
+                    uint8_t *router;
+                    router = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_ROUTER);
+                    memcpy(dhcp_config->router, router, 4);
+
+                    /* DNS */
+                    uint8_t *dns;
+                    dns = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_DNS);
+                    memcpy(dhcp_config->dns, dns, 4);
+
+                    /* DHCP Server */
+                    uint8_t *dhcp_server = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_DHCP_SERVER);
+                    memcpy(dhcp_config->dhcp_server, dhcp_server, 4);
+
+                    /* IP */
+                    memcpy(dhcp_config->ip, &packet->yiaddr, 4);
+
+                    //dhcp_request(dhcp_config->ip);
                     
                     break;
 
@@ -187,62 +229,39 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
                 case DHCP_OPTIONS_MESSAGE_TYPE_ACK:
                     #ifdef NET_DEBUG_DHCP
                     kdebug("ACK | ");
-                    #endif
-
-                    /* Subnet Mask */
-                    uint8_t *subnet_mask;
-                    subnet_mask = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_SUBNET_MASK);
-                    memcpy(&dhcp_config.subnet_mask, subnet_mask, 4);
-
-                    /* Router */
-                    uint8_t *router;
-                    router = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_ROUTER);
-                    memcpy(&dhcp_config.router, router, 4);
-
-                    /* DNS */
-                    uint8_t *dns;
-                    dns = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_DNS);
-                    memcpy(&dhcp_config.dns, dns, 4);
-
-                    /* DHCP Server */
-                    uint8_t *dhcp_server;
-                    dhcp_server = dhcp_read_option((dhcp_option_t *) packet->options, DHCP_OPTIONS_CODE_DHCP_SERVER);
-                    memcpy(&dhcp_config.dhcp_server, dhcp_server, 4);
-
-                    /* IP */
-                    memcpy(&dhcp_config.ip, &packet->yiaddr, 4);
 
                     kdebug("IP: ");
                     for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config.ip[i]);
+                        kdebug("%d.", dhcp_config->ip[i]);
                     }
-                    kdebug("%d | ", dhcp_config.ip[3]);
+                    kdebug("%d | ", dhcp_config->ip[3]);
 
                     kdebug("Subnet Mask: ");
                     for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config.subnet_mask[i]);
+                        kdebug("%d.", dhcp_config->subnet_mask[i]);
                     }
-                    kdebug("%d | ", dhcp_config.subnet_mask[3]);
+                    kdebug("%d | ", dhcp_config->subnet_mask[3]);
 
                     kdebug("DNS: ");
                     for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config.dns[i]);
+                        kdebug("%d.", dhcp_config->dns[i]);
                     }
-                    kdebug("%d | ", dhcp_config.dns[3]);
+                    kdebug("%d | ", dhcp_config->dns[3]);
 
                     kdebug("Router: ");
                     for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config.router[i]);
+                        kdebug("%d.", dhcp_config->router[i]);
                     }
-                    kdebug("%d | ", dhcp_config.router[3]);
+                    kdebug("%d | ", dhcp_config->router[3]);
 
                     kdebug("DHCP: ");
                     for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config.dhcp_server[i]);
+                        kdebug("%d.", dhcp_config->dhcp_server[i]);
                     }
-                    kdebug("%d\r\n", dhcp_config.dhcp_server[3]);
+                    kdebug("%d\r\n", dhcp_config->dhcp_server[3]);
+                    #endif
 
-                    dhcp_request(dhcp_config.dhcp_server, dhcp_config.ip);
+                    dhcp_config->ack = true;
 
                     break;
             }

@@ -79,6 +79,7 @@ uint8_t tx_buffer_current;
 
 void rtl8139_handle_rx();
 bool init_done = false;
+bool tx_ready = false;
 
 void rtl8139_irq_handler()
 {
@@ -100,6 +101,7 @@ void rtl8139_irq_handler()
 
 	if (tok) {
 		// Handle tx
+		tx_ready = true;
 	}
 }
 
@@ -116,6 +118,8 @@ void rtl8139_handle_rx()
 
 void rtl8139_send(uint8_t *data, uint32_t len)
 {
+	tx_ready = false;
+
 	// Copy data to current tx buffer
 	memcpy(tx_buffers[tx_buffer_current], data, len); 
 
@@ -188,6 +192,7 @@ void rtl8139_init(pci_dev_t pci_dev)
 	}
 
 	init_done = true;
+	tx_ready = true;
 
 	// Set static ip and mac
 	uint8_t static_ip[4] = {10, 0, 2, 15};

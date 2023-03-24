@@ -97,9 +97,7 @@ void arp_request_mac(uint8_t addr[4])
 	packet->networkaddress_length = 4;
 	packet->operation_type = 0x0100;
 
-	memcpy(packet->src_mac, &mac, 6);
-	memcpy(packet->src_ip, &ip, 4);
-	memset(packet->dst_mac, 0xFF, 6);
+	memset(packet->dst_mac, 0x00, 6);
 	memcpy(packet->dst_ip, addr, 4);
 
 	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint8_t *) packet, sizeof(arp_packet));
@@ -144,8 +142,20 @@ void arp_broadcast_mac(uint8_t addr[4])
 uint8_t *arp_resolve_mac(uint8_t *ip)
 {
 	for (int i=0; i < cache_index; i++) {
-		if (ip_cache[i] == ip) {
-			return mac_cache[i];
+		for (int ip_index=0; ip_index < 4; ip_index++) {
+			if (ip_cache[cache_index][ip_index] != ip[ip_index]) {
+				break;
+			}
+
+			if (ip_index == 3) {
+				#ifdef NET_DEBUG_ARP
+				kdebug("[net] ARP | Resolved ");
+				print_mac(mac_cache[i]);
+				kdebug("from cache\r\n");
+				#endif
+
+				return mac_cache[cache_index];
+			}
 		}
 	}
 
@@ -159,7 +169,7 @@ uint8_t *arp_resolve_mac(uint8_t *ip)
 					break;
 				}
 
-				if (cache_index == 4) {
+				if (ip_index == 3) {
 					return mac_cache[cache_index];
 				}
 			}

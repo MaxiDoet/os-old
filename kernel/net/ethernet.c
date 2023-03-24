@@ -23,6 +23,13 @@ void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type,
 
 	memcpy(buf + sizeof(etherframe_header), data, size);
 
+	/*
+	kdebug("tx: ");
+	for (uint32_t i=0; i < size; i++) {
+		kdebug("%x ", data[i]);
+	}
+	*/
+
 	rtl8139_send(buf, sizeof(etherframe_header) + size);
 }
 
