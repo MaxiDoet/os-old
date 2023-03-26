@@ -207,7 +207,7 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
             switch(message_type) {
                 case DHCP_OPTIONS_MESSAGE_TYPE_OFFER:
                     #ifdef NET_DEBUG_DHCP
-                    kdebug("OFFER\r\n");
+                    kdebug("OFFER | ");
                     #endif
 
                     /* Subnet Mask */
@@ -232,8 +232,32 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
                     /* IP */
                     memcpy(dhcp_config->ip, &packet->yiaddr, 4);
 
+                    #ifdef NET_DEBUG_DHCP
+                    kdebug("IP: ");
+                    net_print_ip(dhcp_config->ip);
+                    kdebug(" ");
+
+                    kdebug("Subnet Mask: ");
+                    net_print_ip(dhcp_config->subnet_mask);
+                    kdebug(" ");
+
+                    kdebug("DNS: ");
+                    net_print_ip(dhcp_config->dns);
+                    kdebug(" ");
+
+                    kdebug("Router: ");
+                    net_print_ip(dhcp_config->router);
+                    kdebug(" ");
+
+                    kdebug("DHCP: ");
+                    net_print_ip(dhcp_config->dhcp_server);
+
+                    kdebug("\r\n");
+                    #endif
+
                     dhcp_request(dhcp_config->ip);
-                    
+                    dhcp_config->ack = true;
+
                     break;
 
                 case DHCP_OPTIONS_MESSAGE_TYPE_DECLINE:
@@ -245,40 +269,8 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
 
                 case DHCP_OPTIONS_MESSAGE_TYPE_ACK:
                     #ifdef NET_DEBUG_DHCP
-                    kdebug("ACK | ");
-
-                    kdebug("IP: ");
-                    for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config->ip[i]);
-                    }
-                    kdebug("%d | ", dhcp_config->ip[3]);
-
-                    kdebug("Subnet Mask: ");
-                    for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config->subnet_mask[i]);
-                    }
-                    kdebug("%d | ", dhcp_config->subnet_mask[3]);
-
-                    kdebug("DNS: ");
-                    for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config->dns[i]);
-                    }
-                    kdebug("%d | ", dhcp_config->dns[3]);
-
-                    kdebug("Router: ");
-                    for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config->router[i]);
-                    }
-                    kdebug("%d | ", dhcp_config->router[3]);
-
-                    kdebug("DHCP: ");
-                    for (uint8_t i=0; i < 3; i++) {
-                        kdebug("%d.", dhcp_config->dhcp_server[i]);
-                    }
-                    kdebug("%d\r\n", dhcp_config->dhcp_server[3]);
+                    kdebug("ACK\r\n");
                     #endif
-
-                    dhcp_config->ack = true;
 
                     break;
             }

@@ -147,5 +147,12 @@ void kmain(unsigned long magic, unsigned long mbi_addr)
 	/* Init scheduler and start kernel task */
 	//scheduler_init(&kernel_task);
 
+	fs_file_t audio_file = fs_open(&root_fs, "/audio.wav");
+	uint32_t audio_size = fs_size(audio_file);
+	uint8_t *audio_buf = (uint8_t *) malloc(audio_size);
+	fs_read(audio_file, audio_buf);
+	audio_return_t status = audio_dev_play(audio_buf, audio_size);
+	free(audio_buf);
+
 	desktop_init(mbi, &root_fs);
 }

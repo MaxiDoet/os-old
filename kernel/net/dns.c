@@ -107,7 +107,6 @@ void dns_request(uint8_t *dns_server_ip, char *cname)
 
     header->qdcount = net_swap_word(1);
 
-
     uint8_t *name = (char *) ((uint8_t *) header + sizeof(dns_header_t));
     dns_convert_name(name, cname);
 
@@ -119,5 +118,9 @@ void dns_request(uint8_t *dns_server_ip, char *cname)
     uint8_t src_ip[4];
     memcpy(src_ip, dhcp_config->ip, 4);
 
-    udp_send_packet(src_ip, dns_server_ip, 21321, 53, (uint8_t *) header, sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
+    udp_socket_t *socket = udp_create();
+    udp_bind(socket, dns_server_ip, 53);
+    udp_send(socket, (uint8_t *) header, sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
+
+    //udp_send_packet(src_ip, dns_server_ip, 21321, 53, (uint8_t *) header, sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
 }

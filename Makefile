@@ -10,7 +10,7 @@ QEMU = ../qemu/build/qemu-system-i386
 
 #QEMUFLAGS = -boot d
 #QEMUFLAGS = -boot d -hda hdd.img -device rtl8139,netdev=net0 -netdev user,id=net0,hostfwd=tcp::5555-:22
-QEMUFLAGS = -boot d -hda hdd.img -device AC97 -netdev user,id=u1,hostfwd=udp:127.0.0.1:5000-:23 -device rtl8139,netdev=u1 -object filter-dump,id=f1,netdev=u1,file=dump.dat
+QEMUFLAGS = -boot d -hda hdd.img -device AC97 -netdev user,id=u1,hostfwd=udp:127.0.0.1:5000-:12 -device rtl8139,netdev=u1 -object filter-dump,id=f1,netdev=u1,file=dump.dat
 #QEMUFLAGS = -boot d -hda hdd.img -device AC97
 #QEMUFLAGS = -boot d -hda hdd.img -device ich9-intel-hda -device hda-micro -trace enable=hda_audio_running
 

@@ -6,6 +6,7 @@
 #include "../include/kernel/mem/heap.h"
 #include "../include/kernel/net/net.h"
 #include "../include/kernel/net/arp.h"
+#include "../include/kernel/net/udp.h"
 #include "../include/kernel/net/dhcp.h"
 #include "../include/kernel/net/dns.h"
 #include "../include/drivers/rtl8139.h"
@@ -17,6 +18,11 @@ dhcp_config_t *net_get_dhcp_config()
 	return &dhcp_config;
 }
 
+void test(uint8_t *data, uint32_t size)
+{
+	kdebug("Test: %s\r\n", (char *) data);
+}
+
 void net_init()
 {
     /* Init NIC */
@@ -26,9 +32,12 @@ void net_init()
 		rtl8139_init(list[i]);
 	}
 
-	uint8_t dns_server_ip[4] = {10, 0, 2, 3};
-
 	dhcp_discover();
 
-	dns_request(dns_server_ip, "nvidia.com");
+	/* Wait until DHCP is ready */
+	while (!dhcp_config.ack) {
+
+	}
+
+	dns_request(dhcp_config.dns, "nvidia.com");
 }

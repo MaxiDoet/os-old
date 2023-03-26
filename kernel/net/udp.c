@@ -9,12 +9,23 @@
 #include "../include/kernel/net/udp.h"
 #include "../include/kernel/net/dhcp.h"
 #include "../include/kernel/net/dns.h"
+#include "../include/kernel/net/net.h"
 #include "../include/kernel/mem/heap.h"
 
 #include "../include/kernel/audio/dev.h"
 
 #define UDP_SRC_PORT_DHCP   67
 #define UDP_SRC_PORT_DNS    53
+
+udp_socket_t sockets[1024];
+uint16_t socket_count = 0;
+
+typedef struct udp_packet_header {
+	uint16_t src_port;
+	uint16_t dst_port;
+	uint16_t length;
+	uint16_t checksum;
+} __attribute__((packed)) udp_packet_header;
 
 void udp_handle_packet(uint8_t *data, uint32_t size)
 {
@@ -33,6 +44,16 @@ void udp_handle_packet(uint8_t *data, uint32_t size)
             dns_handle_packet((uint8_t *) packet + sizeof(udp_packet_header), packet->length);
             break;
     }
+
+    for (uint16_t i=0; i < socket_count; i++) {
+        udp_socket_t *socket = &sockets[i];
+
+        if (socket->listening && socket->port == packet->dst_port) {
+            uint8_t *data = (uint8_t *) packet + sizeof(udp_packet_header);
+
+            (*socket->listener)(data, size);
+        }
+    }
 }
 
 void udp_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint16_t src_port, uint16_t dst_port, uint8_t *data, uint32_t size)
@@ -47,4 +68,33 @@ void udp_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint16_t src_port, uint16
     memcpy((uint8_t *) packet + sizeof(udp_packet_header), data, size);
 
     ip_send_packet(src_ip, dst_ip, (uint8_t *) packet, sizeof(udp_packet_header) + size);
+}
+
+udp_socket_t *udp_create()
+{
+    udp_socket_t *socket = &sockets[socket_count];
+    socket->id = socket_count;
+
+    socket_count++;
+
+    return socket;
+}
+
+void udp_bind(udp_socket_t *socket, uint8_t ip[4], uint16_t port)
+{
+    memcpy(socket->ip, ip, 4);
+    socket->port = port;
+}
+
+void udp_send(udp_socket_t *socket, uint8_t *data, uint32_t size)
+{
+    dhcp_config_t *dhcp_config = net_get_dhcp_config();
+
+    udp_send_packet(dhcp_config->ip, socket->ip, socket->id, socket->port, data, size);
+}
+
+void udp_listen(udp_socket_t *socket, void (*listener) (uint8_t *data, uint32_t size))
+{
+    socket->listener = listener;
+    socket->listening = true;
 }
