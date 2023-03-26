@@ -22,13 +22,15 @@
 
 #define DHCP_PACKET_FLAG_BROADCAST (1 << 15)
 
-#define DHCP_OPTIONS_CODE_SUBNET_MASK   1
-#define DHCP_OPTIONS_CODE_ROUTER        3
-#define DHCP_OPTIONS_CODE_DNS           6
-#define DHCP_OPTIONS_CODE_REQUESTED_IP  50
-#define DHCP_OPTIONS_CODE_MESSAGE_TYPE  53
-#define DHCP_OPTIONS_CODE_DHCP_SERVER   54
-#define DHCP_OPTIONS_CODE_END           255
+#define DHCP_OPTIONS_CODE_SUBNET_MASK               1
+#define DHCP_OPTIONS_CODE_ROUTER                    3
+#define DHCP_OPTIONS_CODE_DNS                       6
+#define DHCP_OPTIONS_CODE_HOSTNAME                  12
+#define DHCP_OPTIONS_CODE_REQUESTED_IP              50
+#define DHCP_OPTIONS_CODE_MESSAGE_TYPE              53
+#define DHCP_OPTIONS_CODE_DHCP_SERVER               54
+#define DHCP_OPTIONS_CODE_PARAMETER_REQUEST_LIST    55
+#define DHCP_OPTIONS_CODE_END                       255
 
 #define DHCP_OPTIONS_MESSAGE_TYPE_DISCOVER  1
 #define DHCP_OPTIONS_MESSAGE_TYPE_OFFER     2
@@ -103,7 +105,7 @@ void dhcp_request(uint8_t *ip)
 
     packet->op = DHCP_PACKET_OP_REQUEST;
     packet->htype = DHCP_PACKET_HTYPE_ETHERNET;
-    packet->hlen = 6; // MAC
+    packet->hlen = 6; // MAC	//memcpy(header->src_ip, arp_get_ip(), 4);
     packet->hops = 0;
     packet->xid = 0x21274A1D;
     packet->secs = 0;
@@ -127,16 +129,28 @@ void dhcp_request(uint8_t *ip)
     uint8_t *dhcp_server = dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_DHCP_SERVER, 4);
     memcpy(dhcp_server, dhcp_config->dhcp_server, 4);
 
+    /* Parameter Request List */
+    uint8_t *parameter_request_list = dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_PARAMETER_REQUEST_LIST, 4);
+    *parameter_request_list++ = DHCP_OPTIONS_CODE_SUBNET_MASK;
+    *parameter_request_list++ = DHCP_OPTIONS_CODE_ROUTER;
+    *parameter_request_list++ = DHCP_OPTIONS_CODE_DNS;
+    *parameter_request_list = DHCP_OPTIONS_CODE_HOSTNAME;
+
     /* End */
     dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_END, 1);
 
-    udp_send_packet(dhcp_config->dhcp_server, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
+    uint8_t src_ip[4] = {0x00, 0x00, 0x00, 0x00};
+    uint8_t dst_ip[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+    memcpy(dst_ip, dhcp_config->dhcp_server, 4);
+
+    udp_send_packet(src_ip, dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
 }
 
 void dhcp_discover()
 {
-    uint8_t dst_ip[4];
-    memset(dst_ip, 0xFF, 4);
+    #ifdef NET_DEBUG_DHCP
+    kdebug("[net] DHCP | Discovery\r\n");
+    #endif
 
     dhcp_packet *packet = (dhcp_packet *) malloc(sizeof(dhcp_packet) + 100);
     memset(packet, 0x00, sizeof(dhcp_packet));
@@ -147,7 +161,7 @@ void dhcp_discover()
     packet->hops = 0;
     packet->xid = 0x21274A1D;
     packet->secs = 0;
-    packet->flags = DHCP_PACKET_FLAG_BROADCAST;
+    packet->flags = net_swap_word(DHCP_PACKET_FLAG_BROADCAST);
 
     packet->magic_cookie = net_swap_dword(DHCP_PACKET_MAGIC_COOKIE);
 
@@ -163,7 +177,10 @@ void dhcp_discover()
     /* End */
     dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_END, 1);
 
-    udp_send_packet(dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
+    uint8_t src_ip[4] = {0x00, 0x00, 0x00, 0x00};
+    uint8_t dst_ip[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+
+    udp_send_packet(src_ip, dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
 }
 
 void dhcp_handle_packet(uint8_t *data, uint32_t size)
@@ -215,7 +232,7 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
                     /* IP */
                     memcpy(dhcp_config->ip, &packet->yiaddr, 4);
 
-                    //dhcp_request(dhcp_config->ip);
+                    dhcp_request(dhcp_config->ip);
                     
                     break;
 

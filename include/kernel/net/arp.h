@@ -13,6 +13,7 @@ typedef struct arp_packet {
 	uint8_t dst_ip[4];
 } __attribute__((packed)) arp_packet;
 
+void arp_dump();
 void arp_set_mac(uint8_t addr[6]);
 void arp_set_ip(uint8_t addr[4]);
 void arp_handle_packet(arp_packet *packet);

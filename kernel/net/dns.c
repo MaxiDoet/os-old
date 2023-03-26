@@ -3,6 +3,7 @@
 
 #include "../include/kernel/net/dns.h"
 #include "../include/kernel/net/udp.h"
+#include "../include/kernel/net/net.h"
 #include "../include/kernel/net/utils.h"
 #include "../include/kernel/mem/heap.h"
 #include "../include/kernel/kernel.h"
@@ -10,6 +11,7 @@
 #include "../config.h"
 
 #define DNS_FLAGS_QR (1 << 0)
+#define DNS_FLAGS_RD (1 << 8)
 
 #define DNS_FLAGS_RCODE_NE              0
 #define DNS_FLAGS_RCODE_FORMAT          1
@@ -51,12 +53,41 @@ void dns_handle_packet(uint8_t *data, uint32_t size)
     header->flags = net_swap_word(header->flags);
 
     uint8_t rcode = (header->flags & 0x000F);
-    if (!rcode) return;
-
-    kdebug("[net] DNS | Reply | %s\r\n", dns_flags_rcode_names[rcode]);
+    
+    if (rcode) {
+        kdebug("[net] DNS | Reply | %s\r\n", dns_flags_rcode_names[rcode]);
+        return;
+    }
 
     if (header->ancount) {
         
+    }
+}
+
+void dns_convert_name(uint8_t *ptr, char *cname)
+{
+    uint8_t *ptr_tmp = ptr;
+    char *cname_tmp = cname;
+    int left = strlen(cname);
+    int label_index = 0;
+    
+    while(left >= 0) {
+        if (cname_tmp[label_index] == '.' || left == 0) {
+            char *label_tmp = (char *) malloc(label_index + 1);
+            memcpy(label_tmp, cname_tmp, label_index + 1);
+            
+            *ptr_tmp = label_index;
+            ptr_tmp++;
+            memcpy(ptr_tmp, label_tmp, label_index);
+            ptr_tmp += label_index;
+            
+            cname_tmp+=label_index + 1;
+            label_index=0;
+        } else {
+            label_index++;
+        }
+        
+        left--;
     }
 }
 
@@ -70,18 +101,23 @@ void dns_request(uint8_t *dns_server_ip, char *cname)
 
     dns_header_t *header = (dns_header_t *) malloc(sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
 
+    header->id = 0x3413;
+    header->flags = DNS_FLAGS_RD;
+    header->flags = net_swap_word(header->flags);
+
     header->qdcount = net_swap_word(1);
 
-    uint8_t *name_length = ((uint8_t *) header + sizeof(dns_header_t));
-    *name_length = strlen(cname);
 
-    char *name = (char *) ((uint8_t *) header + sizeof(dns_header_t) + 1);
-    memcpy(name, cname, strlen(cname));
-    name[strlen(cname)] = 0x00;
+    uint8_t *name = (char *) ((uint8_t *) header + sizeof(dns_header_t));
+    dns_convert_name(name, cname);
 
     dns_question_t *question = (dns_question_t *) ((uint8_t *) header + sizeof(dns_header_t) + 2 + strlen(cname));
     question->type = net_swap_word(DNS_TYPE_A);
     question->class = net_swap_word(DNS_CLASS_IN);
 
-    udp_send_packet(dns_server_ip, 0, 53, (uint8_t *) header, sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
+    dhcp_config_t *dhcp_config = net_get_dhcp_config();
+    uint8_t src_ip[4];
+    memcpy(src_ip, dhcp_config->ip, 4);
+
+    udp_send_packet(src_ip, dns_server_ip, 21321, 53, (uint8_t *) header, sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
 }

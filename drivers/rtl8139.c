@@ -56,6 +56,10 @@
 #define IMR_RER (1 << 1)
 #define IMR_ROK (1 << 0)
 
+// Interrupt status register masks
+#define ISR_ROK (1 << 0)
+#define ISR_TOK (1 << 2)
+
 // Command register
 #define CR_RST (1 << 4)
 #define CR_RE (1 << 3)
@@ -79,7 +83,6 @@ uint8_t tx_buffer_current;
 
 void rtl8139_handle_rx();
 bool init_done = false;
-bool tx_ready = false;
 
 void rtl8139_irq_handler()
 {
@@ -87,22 +90,22 @@ void rtl8139_irq_handler()
 		return;
 	}
 
-	uint16_t int_mask = inw(dev.bars[0].io_base + REG_IMR);
-	uint16_t int_status = inw(dev.bars[0].io_base + REG_ISR);
-	bool tok = inw(dev.bars[0].io_base + REG_ISR) & (1 << 2); // Transmit ok
-	bool rok = inw(dev.bars[0].io_base + REG_ISR) & (1 << 0); // Receive ok
+	uint16_t imr = inw(dev.bars[0].io_base + REG_IMR);
+	uint16_t isr = inw(dev.bars[0].io_base + REG_ISR);
 
-	// Clear isr
-	outw(dev.bars[0].io_base + REG_ISR, (1 << 0) | (1 << 2));
+	uint16_t isr_clear = 0;
 
-	if (rok) {
+	if (isr & ISR_ROK) {
 		rtl8139_handle_rx(dev);
+		isr_clear |= ISR_ROK;
 	}
 
-	if (tok) {
+	if (isr & ISR_TOK) {
 		// Handle tx
-		tx_ready = true;
+		isr_clear |= ISR_TOK;
 	}
+
+	outw(dev.bars[0].io_base + REG_ISR, isr_clear);
 }
 
 void rtl8139_handle_rx()
@@ -118,19 +121,18 @@ void rtl8139_handle_rx()
 
 void rtl8139_send(uint8_t *data, uint32_t len)
 {
-	tx_ready = false;
+	uint8_t tx_buffer_current_tmp = tx_buffer_current;
+	tx_buffer_current++;
+	tx_buffer_current %= 4;
 
 	// Copy data to current tx buffer
-	memcpy(tx_buffers[tx_buffer_current], data, len); 
+	memcpy(tx_buffers[tx_buffer_current_tmp], data, len); 
 
 	// Send tx buffer address
-	outl(dev.bars[0].io_base + 0x20 + (tx_buffer_current * 4), (uint32_t) tx_buffers[tx_buffer_current]);
+	outl(dev.bars[0].io_base + 0x20 + (tx_buffer_current_tmp * 4), (uint32_t) tx_buffers[tx_buffer_current_tmp]);
 
 	// Send size
-	outl(dev.bars[0].io_base + 0x10 + (tx_buffer_current * 4), len);
-
-	tx_buffer_current++;
-	if (tx_buffer_current > 3) tx_buffer_current = 0;
+	outl(dev.bars[0].io_base + 0x10 + (tx_buffer_current_tmp * 4), len);
 }
 
 void rtl8139_init(pci_dev_t pci_dev)
@@ -192,7 +194,6 @@ void rtl8139_init(pci_dev_t pci_dev)
 	}
 
 	init_done = true;
-	tx_ready = true;
 
 	// Set static ip and mac
 	uint8_t static_ip[4] = {10, 0, 2, 15};

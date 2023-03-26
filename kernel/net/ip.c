@@ -3,6 +3,7 @@
 
 #include "../libc/include/string.h"
 #include "../include/kernel/mem/heap.h"
+#include "../include/kernel/net/net.h"
 #include "../include/kernel/net/ethernet.h"
 #include "../include/kernel/net/ip.h"
 #include "../include/kernel/net/arp.h"
@@ -72,7 +73,7 @@ void ip_handle_packet(uint8_t *buffer)
 	}
 }
 
-void ip_send_packet(uint8_t *dst_ip, uint8_t *data, uint32_t size) {
+void ip_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint8_t *data, uint32_t size) {
 	uint8_t *packet = (uint8_t *) malloc(sizeof(ip_packet_header) + size);
 	ip_packet_header *header = (ip_packet_header *) packet;
 
@@ -85,7 +86,7 @@ void ip_send_packet(uint8_t *dst_ip, uint8_t *data, uint32_t size) {
 	header->ttl = 64;
 	header->protocol = 17;
 
-	memcpy(header->src_ip, arp_get_ip(), 4);
+	memcpy(header->src_ip, src_ip, 4);
 	memcpy(header->dst_ip, dst_ip, 4);
 
 	// Copy data

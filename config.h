@@ -9,6 +9,7 @@
 //#define DEBUG_EXT2
 
 #define NET_DEBUG
+#define NET_DEBUG_ETHERNET
 #define NET_DEBUG_ARP
 #define NET_DEBUG_DHCP
 #define NET_DEBUG_DNS

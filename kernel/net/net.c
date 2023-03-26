@@ -30,5 +30,5 @@ void net_init()
 
 	dhcp_discover();
 
-	dns_request(dns_server_ip, "google.de");
+	dns_request(dns_server_ip, "nvidia.com");
 }

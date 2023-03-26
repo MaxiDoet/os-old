@@ -1,11 +1,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../config.h"
 #include "../include/kernel/kernel.h"
 #include "../libc/include/string.h"
 #include "../include/kernel/mem/heap.h"
 #include "../include/kernel/net/ethernet.h"
 #include "../include/drivers/rtl8139.h"
+#include "../include/kernel/net/net.h"
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/net/ip.h"
 #include "../include/kernel/net/utils.h"
@@ -28,6 +30,7 @@ void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type,
 	for (uint32_t i=0; i < size; i++) {
 		kdebug("%x ", data[i]);
 	}
+	kdebug("\r\n");
 	*/
 
 	rtl8139_send(buf, sizeof(etherframe_header) + size);

@@ -35,7 +35,7 @@ void udp_handle_packet(uint8_t *data, uint32_t size)
     }
 }
 
-void udp_send_packet(uint8_t *dst_ip, uint16_t src_port, uint16_t dst_port, uint8_t *data, uint32_t size)
+void udp_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint16_t src_port, uint16_t dst_port, uint8_t *data, uint32_t size)
 {
     udp_packet_header *packet = (udp_packet_header *) malloc(sizeof(udp_packet_header) + size);
 
@@ -46,5 +46,5 @@ void udp_send_packet(uint8_t *dst_ip, uint16_t src_port, uint16_t dst_port, uint
 
     memcpy((uint8_t *) packet + sizeof(udp_packet_header), data, size);
 
-    ip_send_packet(dst_ip, (uint8_t *) packet, sizeof(udp_packet_header) + size);
+    ip_send_packet(src_ip, dst_ip, (uint8_t *) packet, sizeof(udp_packet_header) + size);
 }

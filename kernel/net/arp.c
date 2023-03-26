@@ -33,6 +33,18 @@ void print_ip(uint8_t addr[4])
 	}
 }
 
+void arp_dump()
+{
+	kdebug("ARP Table:\r\n");
+	
+	for (int i=0; i < cache_index; i++) {
+		print_ip(ip_cache[i]);
+		kdebug(" - ");
+		print_mac(mac_cache[i]);
+		kdebug("\r\n");
+	}
+}
+
 void arp_set_mac(uint8_t addr[6])
 {
 	memcpy(&mac, addr, 6);
@@ -97,7 +109,6 @@ void arp_request_mac(uint8_t addr[4])
 	packet->networkaddress_length = 4;
 	packet->operation_type = 0x0100;
 
-	memset(packet->dst_mac, 0x00, 6);
 	memcpy(packet->dst_ip, addr, 4);
 
 	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint8_t *) packet, sizeof(arp_packet));
@@ -141,6 +152,12 @@ void arp_broadcast_mac(uint8_t addr[4])
 
 uint8_t *arp_resolve_mac(uint8_t *ip)
 {
+	#ifdef NET_DEBUG_ARP
+	kdebug("[net] ARP | Resolving ");
+	print_ip(ip);
+	kdebug("\r\n");
+	#endif
+
 	for (int i=0; i < cache_index; i++) {
 		for (int ip_index=0; ip_index < 4; ip_index++) {
 			if (ip_cache[cache_index][ip_index] != ip[ip_index]) {

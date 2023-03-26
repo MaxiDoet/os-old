@@ -18,7 +18,7 @@ void net_print_mac(uint8_t *mac)
     for (uint8_t i=0; i < 5; i++) {
         kdebug("%x:", mac[i]);
     }
-    kdebug("%d", mac[5]);
+    kdebug("%x", mac[5]);
 }
 
 uint8_t net_swap_byte(uint8_t byte) {
