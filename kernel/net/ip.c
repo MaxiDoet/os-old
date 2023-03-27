@@ -107,4 +107,6 @@ void ip_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint8_t *data, uint32_t si
 
 	// Send packet
 	ethernet_send_frame(arp_get_mac(), dst_mac, ETHERTYPE_IPV4, packet, sizeof(ip_packet_header) + size);
+
+	//free(packet);
 }

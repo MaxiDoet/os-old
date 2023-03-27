@@ -68,6 +68,8 @@ void udp_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint16_t src_port, uint16
     memcpy((uint8_t *) packet + sizeof(udp_packet_header), data, size);
 
     ip_send_packet(src_ip, dst_ip, (uint8_t *) packet, sizeof(udp_packet_header) + size);
+
+    //free(packet);
 }
 
 udp_socket_t *udp_create()

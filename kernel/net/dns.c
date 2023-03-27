@@ -122,5 +122,5 @@ void dns_request(uint8_t *dns_server_ip, char *cname)
     udp_bind(socket, dns_server_ip, 53);
     udp_send(socket, (uint8_t *) header, sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
 
-    //udp_send_packet(src_ip, dns_server_ip, 21321, 53, (uint8_t *) header, sizeof(dns_header_t) + 2 + strlen(cname) + sizeof(dns_question_t));
+    //free(header);
 }

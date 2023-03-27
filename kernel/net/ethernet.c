@@ -34,6 +34,8 @@ void ethernet_send_frame(uint8_t src_mac[6], uint8_t dst_mac[6], ethertype type,
 	*/
 
 	rtl8139_send(buf, sizeof(etherframe_header) + size);
+
+	//free(buf);
 }
 
 void ethernet_handle_frame(uint8_t *buffer, uint32_t size)

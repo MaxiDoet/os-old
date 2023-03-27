@@ -95,12 +95,6 @@ void arp_handle_packet(arp_packet *packet)
 
 void arp_request_mac(uint8_t addr[4])
 {
-	#ifdef NET_DEBUG_ARP
-	kdebug("[net] ARP | Requesting ");
-	print_ip(addr);
-	kdebug("\r\n");
-	#endif
-
 	arp_packet *packet = (arp_packet *) malloc(sizeof(arp_packet));
 
 	packet->hardwareaddress_type = 0x0100;
@@ -112,6 +106,8 @@ void arp_request_mac(uint8_t addr[4])
 	memcpy(packet->dst_ip, addr, 4);
 
 	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint8_t *) packet, sizeof(arp_packet));
+
+	//free(packet);
 }
 
 void arp_reply(arp_packet *packet)
@@ -130,6 +126,8 @@ void arp_reply(arp_packet *packet)
 	memcpy(reply_packet->dst_ip, packet->src_ip, 4);
 
 	ethernet_send_frame(mac, broadcast_mac, ETHERTYPE_ARP, (uint8_t *) reply_packet, sizeof(arp_packet));
+
+	//free(reply_packet);
 }
 
 void arp_broadcast_mac(uint8_t addr[4])
@@ -148,6 +146,8 @@ void arp_broadcast_mac(uint8_t addr[4])
 	memcpy(packet->dst_ip, addr, 4);
 
 	ethernet_send_frame(mac, arp_resolve_mac(addr), ETHERTYPE_ARP, (uint8_t *) packet, sizeof(arp_packet));
+
+	//free(packet);
 }
 
 uint8_t *arp_resolve_mac(uint8_t *ip)
@@ -178,8 +178,9 @@ uint8_t *arp_resolve_mac(uint8_t *ip)
 
 	arp_request_mac(ip);
 
-	uint8_t result[6];
-	while (result == 0) {
+	/* Wait until we got an ARP reply */
+	bool result;
+	while (!result) {
 		for (int i=0; i < cache_index; i++) {
 			for (int ip_index=0; ip_index < 4; ip_index++) {
 				if (ip_cache[cache_index][ip_index] != ip[ip_index]) {
@@ -187,6 +188,7 @@ uint8_t *arp_resolve_mac(uint8_t *ip)
 				}
 
 				if (ip_index == 3) {
+					result = true;
 					return mac_cache[cache_index];
 				}
 			}

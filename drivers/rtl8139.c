@@ -13,6 +13,8 @@
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/net/ip.h"
 
+#define RTL8139_DEBUG
+
 // Registers
 #define REG_CR 0x37
 #define REG_CAPR 0x38
@@ -58,7 +60,10 @@
 
 // Interrupt status register masks
 #define ISR_ROK (1 << 0)
+#define ISR_RER (1 << 1)
 #define ISR_TOK (1 << 2)
+#define ISR_TER	(1 << 3)
+#define ISR_RBO (1 << 4)
 
 // Command register
 #define CR_RST (1 << 4)
@@ -78,11 +83,11 @@
 pci_dev_t dev;
 uint8_t *rx_buffer;
 uint32_t rx_buffer_offset;
-uint8_t *tx_buffers[4];
+uint8_t *tx_buffer;
 uint8_t tx_buffer_current;
+bool init_done = false;
 
 void rtl8139_handle_rx();
-bool init_done = false;
 
 void rtl8139_irq_handler()
 {
@@ -94,6 +99,18 @@ void rtl8139_irq_handler()
 	uint16_t isr = inw(dev.bars[0].io_base + REG_ISR);
 
 	uint16_t isr_clear = 0;
+
+	if (isr & ISR_RER) {
+		kdebug("rx error\r\n");
+	}
+
+	if (isr & ISR_TER) {
+		kdebug("tx error\r\n");
+	}
+
+	if (isr & ISR_RBO) {
+		kdebug("rx buffer overflow\r\n");
+	}
 
 	if (isr & ISR_ROK) {
 		rtl8139_handle_rx(dev);
@@ -110,29 +127,50 @@ void rtl8139_irq_handler()
 
 void rtl8139_handle_rx()
 {
+	uint8_t cr = inb(dev.bars[0].io_base + REG_CR);
+
+	kdebug("rx\r\n");
+
+	if (cr & CR_BUFE) {
+		#ifdef RTL8139_DEBUG
+		kdebug("[rtl8139] empty rx ring buffer\r\n");
+		#endif
+
+		return;
+	}
+
 	uint8_t *buffer = (uint8_t *) (rx_buffer + rx_buffer_offset);
-	uint16_t length = *((uint16_t *) (buffer + 2));
+	uint16_t size = *((uint16_t *) (buffer + 2));
 
-	rx_buffer_offset = (rx_buffer_offset + length + 4 + 3) & ~0x3;
+	uint8_t *packet = (uint8_t *) malloc(size);
+	memcpy(packet, buffer, size);
+
+	ethernet_handle_frame(packet + 4, size);
+
+	rx_buffer_offset = (rx_buffer_offset + size + 4 + 3) & ~0x3;
 	outw(dev.bars[0].io_base + REG_CAPR, rx_buffer_offset - 0x10);
-
-	ethernet_handle_frame(buffer + 4, length);
 }
 
-void rtl8139_send(uint8_t *data, uint32_t len)
+void rtl8139_send(uint8_t *data, uint32_t size)
 {
+	// Copy data to current tx buffer
+	memcpy(tx_buffer, data, size); 
+
+	// If size is less than 60 we need to fill the rest with zeros
+	if (size < 60) {
+		memset((uint8_t *) tx_buffer + size, 0x00, 60 - size);
+		size = 60;
+	}
+
 	uint8_t tx_buffer_current_tmp = tx_buffer_current;
 	tx_buffer_current++;
 	tx_buffer_current %= 4;
 
-	// Copy data to current tx buffer
-	memcpy(tx_buffers[tx_buffer_current_tmp], data, len); 
-
 	// Send tx buffer address
-	outl(dev.bars[0].io_base + 0x20 + (tx_buffer_current_tmp * 4), (uint32_t) tx_buffers[tx_buffer_current_tmp]);
+	outl(dev.bars[0].io_base + 0x20 + (tx_buffer_current_tmp * 4), (uint32_t) tx_buffer);
 
 	// Send size
-	outl(dev.bars[0].io_base + 0x10 + (tx_buffer_current_tmp * 4), len);
+	outl(dev.bars[0].io_base + 0x10 + (tx_buffer_current_tmp * 4), size);
 }
 
 void rtl8139_init(pci_dev_t pci_dev)
@@ -177,10 +215,7 @@ void rtl8139_init(pci_dev_t pci_dev)
 	outw(dev.bars[0].io_base + REG_IMR, 0xFFFF);
 
 	// Init TX buffers
-	tx_buffers[0] = malloc(1792);
-	tx_buffers[1] = malloc(1792);
-	tx_buffers[2] = malloc(1792);
-	tx_buffers[3] = malloc(1792);
+	tx_buffer = malloc(1792);
 
 	// Install irq handler
     irq_install_handler(dev.irq, rtl8139_irq_handler);

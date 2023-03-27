@@ -11,7 +11,7 @@
 #include "../include/kernel/irq.h"
 #include "../include/kernel/audio/dev.h"
 
-//#define AC97_DEBUG
+#define AC97_DEBUG
 
 /* NAM Registers */
 #define NAM_RESET 0x00

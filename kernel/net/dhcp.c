@@ -144,16 +144,17 @@ void dhcp_request(uint8_t *ip)
     memcpy(dst_ip, dhcp_config->dhcp_server, 4);
 
     udp_send_packet(src_ip, dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
+
+    //free(packet);
 }
 
 void dhcp_discover()
 {
     #ifdef NET_DEBUG_DHCP
-    kdebug("[net] DHCP | Discovery\r\n");
+    kdebug("[net] DHCP | Discover\r\n");
     #endif
 
     dhcp_packet *packet = (dhcp_packet *) malloc(sizeof(dhcp_packet) + 100);
-    memset(packet, 0x00, sizeof(dhcp_packet));
 
     packet->op = DHCP_PACKET_OP_REQUEST;
     packet->htype = DHCP_PACKET_HTYPE_ETHERNET;
@@ -181,6 +182,9 @@ void dhcp_discover()
     uint8_t dst_ip[4] = {0xFF, 0xFF, 0xFF, 0xFF};
 
     udp_send_packet(src_ip, dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
+
+    /* If i free this packet the dns gets a malformed packet */    
+    //free(packet);
 }
 
 void dhcp_handle_packet(uint8_t *data, uint32_t size)

@@ -5,6 +5,8 @@
 #include "../include/kernel/kernel.h"
 #include "../include/kernel/mem/heap.h"
 
+//#define HEAP_DEBUG
+
 #define HEAP_MAGIC 0xABCD
 
 typedef struct heap_chunk_t {
@@ -79,7 +81,7 @@ void* malloc(uint32_t size)
 		}
 
 		#ifdef HEAP_DEBUG
-		if (size != 1024) kdebug("[heap] found unallocated chunk %x | size: %d\r\n", (uint32_t) current, current->size);
+		kdebug("[heap] found unallocated chunk %x | size: %d\r\n", (uint32_t) current, current->size);
 		#endif
 
 		current->allocated = true;

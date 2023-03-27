@@ -18,9 +18,9 @@ dhcp_config_t *net_get_dhcp_config()
 	return &dhcp_config;
 }
 
-void test(uint8_t *data, uint32_t size)
+void udp_test(uint8_t *data, uint32_t size)
 {
-	kdebug("Test: %s\r\n", (char *) data);
+	kdebug("udp_test | data: %x\r\n", *data);
 }
 
 void net_init()
@@ -31,6 +31,11 @@ void net_init()
 	for (uint16_t i=0; i < list_length; i++) {
 		rtl8139_init(list[i]);
 	}
+	free(list);
+
+	udp_socket_t *socket = udp_create();
+	udp_bind(socket, 0, 12);
+	udp_listen(socket, udp_test);
 
 	dhcp_discover();
 

@@ -15,6 +15,7 @@ void platform_init()
 	if (entry_point && entry_point->major_version) {
 		kdebug("[platform] SMBIOS Version: %d.%d\r\n", entry_point->major_version, entry_point->minor_version);
 
+		/*
 		size_t offset = entry_point->structure_table_address;
 
 		for (uint16_t i=0; i < entry_point->structure_table_entries; i++) {
@@ -43,6 +44,7 @@ void platform_init()
 					break;
 			}
 		}
+		*/
 	}
 }
 
