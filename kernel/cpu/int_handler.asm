@@ -30,6 +30,7 @@ int_common_handler:
 	add esp, 8
 
 	; Return
+	sti
 	iret
 
 global int_handler_0

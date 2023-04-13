@@ -179,6 +179,7 @@ uint8_t *arp_resolve_mac(uint8_t *ip)
 	arp_request_mac(ip);
 
 	/* Wait until we got an ARP reply */
+	/*
 	bool result;
 	while (!result) {
 		for (int i=0; i < cache_index; i++) {
@@ -194,6 +195,7 @@ uint8_t *arp_resolve_mac(uint8_t *ip)
 			}
 		}
 	}
+	*/
 }
 
 uint8_t *arp_get_ip() {

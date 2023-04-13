@@ -66,8 +66,8 @@ void draw_window(window_t *win)
 
 static void mouse_handler(mouse_event_t event)
 {
-	int movement_x = event.x * 2;
-	int movement_y = event.y * 2;
+	int movement_x = event.x;
+	int movement_y = event.y;
 
 	if (!grabbing) {
 		cursor_x += movement_x;

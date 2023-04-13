@@ -34,3 +34,27 @@ uint32_t net_swap_dword(uint32_t dword)
 {
     return ((dword & 0xFF000000) >> 24) | ((dword & 0x00FF0000) >> 8) | ((dword & 0x0000FF00) << 8) | ((dword & 0x000000FF) << 24);
 }
+
+uint16_t net_calculate_checksum(uint8_t *data, uint32_t size)
+{
+    uint16_t *p = (uint16_t *)data;
+    uint32_t sum = 0;
+
+    while (size > 1)
+    {
+        sum += *p++;
+        size -= 2;
+    }
+
+    if (size)
+    {
+        sum += *(uint8_t *)p;
+    }
+
+    sum = (sum & 0xffff) + (sum >> 16);
+    sum += (sum >> 16);
+
+    uint16_t temp = ~sum;
+
+    return temp;
+}

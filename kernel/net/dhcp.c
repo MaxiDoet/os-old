@@ -139,11 +139,10 @@ void dhcp_request(uint8_t *ip)
     /* End */
     dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_END, 1);
 
-    uint8_t src_ip[4] = {0x00, 0x00, 0x00, 0x00};
     uint8_t dst_ip[4] = {0xFF, 0xFF, 0xFF, 0xFF};
     memcpy(dst_ip, dhcp_config->dhcp_server, 4);
 
-    udp_send_packet(src_ip, dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
+    udp_send_packet(dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
 
     //free(packet);
 }
@@ -178,10 +177,9 @@ void dhcp_discover()
     /* End */
     dhcp_create_option(options, &offset, DHCP_OPTIONS_CODE_END, 1);
 
-    uint8_t src_ip[4] = {0x00, 0x00, 0x00, 0x00};
     uint8_t dst_ip[4] = {0xFF, 0xFF, 0xFF, 0xFF};
 
-    udp_send_packet(src_ip, dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
+    udp_send_packet(dst_ip, 68, 67, (uint8_t *) packet, sizeof(dhcp_packet) + offset);
 
     /* If i free this packet the dns gets a malformed packet */    
     //free(packet);
@@ -260,7 +258,6 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
                     #endif
 
                     dhcp_request(dhcp_config->ip);
-                    dhcp_config->ack = true;
 
                     break;
 
@@ -275,6 +272,8 @@ void dhcp_handle_packet(uint8_t *data, uint32_t size)
                     #ifdef NET_DEBUG_DHCP
                     kdebug("ACK\r\n");
                     #endif
+
+                    dhcp_config->ack = true;
 
                     break;
             }

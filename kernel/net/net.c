@@ -33,9 +33,7 @@ void net_init()
 	}
 	free(list);
 
-	udp_socket_t *socket = udp_create();
-	udp_bind(socket, 0, 12);
-	udp_listen(socket, udp_test);
+	if (list_length == 0) return;
 
 	dhcp_discover();
 
@@ -43,6 +41,10 @@ void net_init()
 	while (!dhcp_config.ack) {
 
 	}
+
+	udp_socket_t *socket = udp_create();
+	udp_bind(socket, 0, 12);
+	udp_listen(socket, udp_test);
 
 	dns_request(dhcp_config.dns, "nvidia.com");
 }

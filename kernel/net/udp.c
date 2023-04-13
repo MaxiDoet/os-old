@@ -56,8 +56,10 @@ void udp_handle_packet(uint8_t *data, uint32_t size)
     }
 }
 
-void udp_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint16_t src_port, uint16_t dst_port, uint8_t *data, uint32_t size)
+void udp_send_packet(uint8_t *dst_ip, uint16_t src_port, uint16_t dst_port, uint8_t *data, uint32_t size)
 {
+    dhcp_config_t *dhcp_config = net_get_dhcp_config();
+
     udp_packet_header *packet = (udp_packet_header *) malloc(sizeof(udp_packet_header) + size);
 
     packet->length = net_swap_word(sizeof(udp_packet_header) + size);
@@ -67,7 +69,7 @@ void udp_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint16_t src_port, uint16
 
     memcpy((uint8_t *) packet + sizeof(udp_packet_header), data, size);
 
-    ip_send_packet(src_ip, dst_ip, (uint8_t *) packet, sizeof(udp_packet_header) + size);
+    ip_send_packet(dhcp_config->ip, dst_ip, IP_PROTOCOL_UDP, (uint8_t *) packet, sizeof(udp_packet_header) + size);
 
     //free(packet);
 }
@@ -92,7 +94,7 @@ void udp_send(udp_socket_t *socket, uint8_t *data, uint32_t size)
 {
     dhcp_config_t *dhcp_config = net_get_dhcp_config();
 
-    udp_send_packet(dhcp_config->ip, socket->ip, socket->id, socket->port, data, size);
+    udp_send_packet(socket->ip, socket->id, socket->port, data, size);
 }
 
 void udp_listen(udp_socket_t *socket, void (*listener) (uint8_t *data, uint32_t size))

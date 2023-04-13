@@ -8,6 +8,7 @@
 #include "../include/kernel/net/ip.h"
 #include "../include/kernel/net/arp.h"
 #include "../include/kernel/net/udp.h"
+#include "../include/kernel/net/tcp.h"
 #include "../include/kernel/net/utils.h"
 #include "../include/kernel/kernel.h"
 
@@ -65,6 +66,7 @@ void ip_handle_packet(uint8_t *buffer)
 
 	switch(header->protocol) {
 		case IP_PACKET_HEADER_PROTOCOL_TCP:
+			tcp_handle_packet(header->src_ip, buffer + (header->ihl * 4), packet_size);
 			break;
 
 		case IP_PACKET_HEADER_PROTOCOL_UDP:
@@ -73,7 +75,7 @@ void ip_handle_packet(uint8_t *buffer)
 	}
 }
 
-void ip_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint8_t *data, uint32_t size) {
+void ip_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint8_t protocol, uint8_t *data, uint32_t size) {
 	uint8_t *packet = (uint8_t *) malloc(sizeof(ip_packet_header) + size);
 	ip_packet_header *header = (ip_packet_header *) packet;
 
@@ -84,7 +86,7 @@ void ip_send_packet(uint8_t *src_ip, uint8_t *dst_ip, uint8_t *data, uint32_t si
 	header->id = 0;
 	header->flags = 0;
 	header->ttl = 64;
-	header->protocol = 17;
+	header->protocol = protocol;
 
 	memcpy(header->src_ip, src_ip, 4);
 	memcpy(header->dst_ip, dst_ip, 4);
